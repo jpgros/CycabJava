@@ -1,0 +1,17 @@
+Level of battery :100
+Level of battery :95
+Level of battery :90
+Level of battery :85
+Level of battery :80
+Level of battery :75
+Level of battery :70
+Level of battery :65
+Level of battery :60
+Level of battery :55
+Level of battery :50
+Level of battery :45
+Entering Wifi area
+Level of battery :40
+Level of battery :35
+Level of battery :30
+Signal mode activated : WIFI
