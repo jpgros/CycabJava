@@ -88,8 +88,8 @@ public class Controller {
 		}
 		return batteryMode;
 	}
-	public Zone updateZone(Zone zone) throws IOException {
-		if (Math.random() +0.1 > 1.0) {
+	public Zone updateZone(Zone zone, double flipCoin, double changeZone) throws IOException {
+		if (Math.random() +changeZone > 1.0) {
 			if(zone == Zone.TUNNEL) {
 				setZone(Zone.NONE);
 				System.out.println("Exiting tunnel");
@@ -101,7 +101,7 @@ public class Controller {
 				writer.write("Exiting Wifi area"); writer.write("\n");
 			}
 			else if(zone == Zone.NONE) {
-				if(Math.random()>0.5) {
+				if(Math.random()>flipCoin) {
 					setZone(Zone.TUNNEL);
 					System.out.println("Entering tunnel");
 					writer.write("Entering tunnel"); writer.write("\n");

@@ -13,10 +13,11 @@ public class CycabMain {
 		Controller controller= new Controller(100, SignalMode.BOTH, BatteryMode.USING, Zone.NONE);
 		controller.initFile(baseDir);
 		int cpt=0;
-		while(controller.getBattery()> 0 && controller.getBattery()<= 100 && cpt<15) {
+		double flipCoin = 0.5, changeZone=0.1;
+		while(controller.getBattery()> 0 && controller.getBattery()<= 100 && cpt<40) {
 			controller.updateBattery(controller.getBatteryMode(), controller.getSignal(), controller.getBattery());
 			controller.updateBatteryMode(controller.getBatteryMode(), controller.getSignal(), controller.getBattery());
-			controller.updateZone(controller.getZone());
+			controller.updateZone(controller.getZone(),flipCoin, changeZone);
 			controller.updateSignal(controller.getSignal(), controller.getBattery(), controller.getZone());
 			try {
 				Thread.sleep(500);
