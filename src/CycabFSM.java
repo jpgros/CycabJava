@@ -7,6 +7,8 @@
 
 import nz.ac.waikato.modeljunit.*;
 
+import java.io.IOException;
+
 public class CycabFSM implements FsmModel {
 
     /**
