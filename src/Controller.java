@@ -15,18 +15,18 @@ public class Controller {
 //	components.add("GPS");
 	int battery = 100;
 	//Writer writer;
-	SignalMode signal = SignalMode.BOTH;
-	BatteryMode batteryMode = BatteryMode.USING;
-	Zone zone = Zone.NONE;
+	SignalMode signal = SignalMode.GPS;
+	BatteryLevel batteryLevel = BatteryLevel.HIGH;
+	Zone zone = Zone.WIFIGPS;
 	public Controller(String basedir) {
 			
 	}
-	public Controller( int battery, SignalMode signal, BatteryMode batteryMode,
+	public Controller( int battery, SignalMode signal, BatteryLevel batteryLevel,
 			Zone zone) {
 		super();
 		this.battery = battery;
 		this.signal = signal;
-		this.batteryMode = batteryMode;
+		this.batteryLevel = batteryLevel;
 		this.zone = zone;
 	}
 	public void initFile(String baseDir) /*throws IOException*/ {
@@ -34,117 +34,322 @@ public class Controller {
 	      	//boolean b = file.createNewFile();
 			// this.writer = new FileWriter(baseDir+"/logs/logs.txt");
 	}
-	public  int updateBattery(BatteryMode batteryMode,SignalMode signal, int battery) /* throws IOException */ {
-		switch(batteryMode) {
-		case USING:
-			switch(signal) {
-				case BOTH: setBattery(battery - 5);
-				System.out.println("Level of battery :"+battery);
-				//writer.write("Level of battery :"+battery); writer.write("\n");
-				//shouldn't be <0
-				break;
-				case WIFI: setBattery(battery - 2);
-				System.out.println("Level of battery :"+battery);
-				//writer.write("Level of battery :"+battery); writer.write("\n");
-				//shouldn't be <0
-				break;
-				case GPS: setBattery(battery - 3);
-				System.out.println("Level of battery :"+battery);
-				//writer.write("Level of battery :"+battery); writer.write("\n");
-				//shouldn't be <0
-				break;
-			}
-		break;
-		case REFILING: setBattery(battery + 10);
-		System.out.println("Level of battery :"+battery);
-		//writer.write("Level of battery :"+battery); writer.write("\n");
-		//shouldn't be >100
-		break;
-		default: System.out.println("error");
-		break;
+	public  int updateBattery(BatteryLevel batteryMode,SignalMode signal, int battery) /* throws IOException */ {
+//		switch(batteryMode) {
+//		case USING:
+		switch(signal) {
+			case ALL: setBattery(battery - 3); // total should be -2 but -3 is better for the tests
+			System.out.println("Level of battery :"+battery);
+			//writer.write("Level of battery :"+battery); writer.write("\n");
+			//shouldn't be <0
+			break;
+			case WIFI: setBattery(battery + 1);
+			System.out.println("Level of battery :"+battery);
+			//writer.write("Level of battery :"+battery); writer.write("\n");
+			//shouldn't be <0
+			break;
+			case GPS: setBattery(battery + 0);
+			System.out.println("Level of battery :"+battery);
+			//writer.write("Level of battery :"+battery); writer.write("\n");
+			//shouldn't be <0
+			break;
+			case RADIO: setBattery(battery + 2);
+			System.out.println("Level of battery :"+battery);
+			break;
+			case WIFInGPS: setBattery(battery - 2);
+			System.out.println("Level of battery :"+battery);
+			break;
+			case WIFInRADIO: setBattery(battery - 1);
+			System.out.println("Level of battery :"+battery);
+			break;
+			case GPSnRADIO: setBattery(battery - 1);
+			System.out.println("Level of battery :"+battery);
+			break;
+			case NONE: setBattery(battery +3);
+			break;
 		}
+//		break;
+//		case REFILING: setBattery(battery + 10);
+//		System.out.println("Level of battery :"+battery);
+//		//writer.write("Level of battery :"+battery); writer.write("\n");
+//		//shouldn't be >100
+//		break;
+//		default: System.out.println("error");
+//		break;
+//		}
 		return battery;
 	}
-	public BatteryMode updateBatteryMode(BatteryMode batteryMode, SignalMode signal, int battery) /*throws IOException*/ {
-		if(battery < 10 && batteryMode != BatteryMode.REFILING) {
-			setBatteryMode(BatteryMode.REFILING);
-			System.out.println("Battery mode in charge");
+	public BatteryLevel updateBatteryLevel(BatteryLevel batteryLevel, SignalMode signal, int battery) /*throws IOException*/ {
+		//somewhere between low and verylow changes too often
+		if(battery < 20 && batteryLevel != BatteryLevel.VERYLOW) {
+			setBatteryLevel(BatteryLevel.VERYLOW);
 			//writer.write("Battery mode in charge"); writer.write("\n");
 		}
-		else if(battery <20 && signal==SignalMode.BOTH && batteryMode != BatteryMode.REFILING) {
-			setBatteryMode(BatteryMode.REFILING);
-			System.out.println("Battery mode in charge");
+		else if (battery <30 && battery >20) {
+			if(Math.random()>(1.0-(30.0-battery)/10.0) && batteryLevel== BatteryLevel.VERYLOW) {
+				setBatteryLevel(BatteryLevel.LOW);
+				System.out.println("Battery level : LOW");
+			}
+			else if (Math.random()<(1.0-(30.0-battery)/10.0) && batteryLevel== BatteryLevel.LOW) {
+				setBatteryLevel(BatteryLevel.VERYLOW);
+				System.out.println("Battery level : VERYLOW");				
+			}
+		}
+		else if(battery <45 && battery>30 && batteryLevel != BatteryLevel.LOW) {
+			setBatteryLevel(BatteryLevel.LOW);
+			System.out.println("Battery level : LOW");
 			//writer.write("Battery mode in charge"); writer.write("\n");
 		}
-		else if(battery > 80 && signal != signal.BOTH && batteryMode != BatteryMode.USING) {
-			setBatteryMode(BatteryMode.USING);
-			System.out.println("Battery mode in use");
+		else if (battery <55 && battery >45) {
+			if(Math.random()>(1.0-(55.0-battery)/10.0) && batteryLevel== BatteryLevel.LOW) {
+				setBatteryLevel(BatteryLevel.MEDIUM);
+				System.out.println("Battery level : MEDIUM");
+			}
+			else if (Math.random()<(1.0-(55.0-battery)/10.0) && batteryLevel== BatteryLevel.MEDIUM) {
+				setBatteryLevel(BatteryLevel.LOW);
+				System.out.println("Battery level : LOW");	
+			}
+		}
+		else if(battery > 55 && battery < 70 && batteryLevel != BatteryLevel.MEDIUM) {
+			setBatteryLevel(BatteryLevel.MEDIUM);
+			System.out.println("Battery level : MEDIUM");
 			//writer.write("Battery mode in use"); writer.write("\n");
 		}
-		else if(battery > 90 && batteryMode != BatteryMode.USING) {
-			setBatteryMode(BatteryMode.USING);
-			System.out.println("Battery mode in use");
+		else if (battery <80 && battery >70) {
+			if(Math.random()>(1.0-(70.0-battery)/10.0) && batteryLevel== BatteryLevel.MEDIUM) {
+				setBatteryLevel(BatteryLevel.HIGH);
+				System.out.println("Battery level : HIGH");
+			}
+			else if (Math.random()<(1.0-(70.0-battery)/10.0) && batteryLevel== BatteryLevel.HIGH) {
+				setBatteryLevel(BatteryLevel.MEDIUM);
+				System.out.println("Battery level : MEDIUM");			
+			}
+		}
+		else if(battery > 80 && batteryLevel != BatteryLevel.HIGH) {
+			setBatteryLevel(BatteryLevel.HIGH);
+			System.out.println("Battery level : HIGH");
 			//writer.write("Battery mode in use"); writer.write("\n");
 		}
-		return batteryMode;
+		return batteryLevel;
 	}
-	public Zone updateZone(Zone zone, double flipCoin, double changeZone) /*throws IOException*/ {
+	
+	public Zone updateZone(Zone zone, double flipCoin, double changeZone) /*throws IOException*/ { 
 		if (Math.random() +changeZone > 1.0) {
-			if(zone == Zone.TUNNEL) {
-				setZone(Zone.NONE);
-				System.out.println("Exiting tunnel");
-				//writer.write("Exiting tunnel"); writer.write("\n");
-			}
-			else if (zone == Zone.WIFI){
-				setZone(Zone.NONE);
-				System.out.println("Exiting Wifi area");
-				//writer.write("Exiting Wifi area"); writer.write("\n");
-			}
-			else if(zone == Zone.NONE) {
+			if(zone == Zone.WIFIGPS) {
 				if(Math.random()>flipCoin) {
-					setZone(Zone.TUNNEL);
-					System.out.println("Entering tunnel");
+					setZone(Zone.noWIFIGPS);
+					System.out.println("Receiving GPS but no WIFI");
 					//writer.write("Entering tunnel"); writer.write("\n");
 				}
 				else {
-					setZone(Zone.WIFI);
-					System.out.println("Entering Wifi area");
+					setZone(Zone.WIFInoGPS);
+					System.out.println("Receiving Wifi but no GPS");
+					//writer.write("Entering Wifi area"); writer.write("\n");
+				}
+			}
+			else if (zone == Zone.noWIFIGPS){
+				if(Math.random()>flipCoin) {
+					setZone(Zone.WIFIGPS);
+					System.out.println("Receiving WIFI and GPS");
+					//writer.write("Entering tunnel"); writer.write("\n");
+				}
+				else {
+					setZone(Zone.noWIFInoGPS);
+					System.out.println("Receiving neither WIFI nor GPS");
+					//writer.write("Entering Wifi area"); writer.write("\n");
+				}
+			}
+			else if(zone == Zone.WIFInoGPS) {
+				if(Math.random()>flipCoin) {
+					setZone(Zone.noWIFInoGPS);
+					System.out.println("Receiving neither WIFI nor GPS");
+					//writer.write("Entering tunnel"); writer.write("\n");
+				}
+				else {
+					setZone(Zone.WIFIGPS);
+					System.out.println("Receiving both WIFI and GPS");
+					//writer.write("Entering Wifi area"); writer.write("\n");
+				}
+			}
+			else if(zone == Zone.noWIFInoGPS) {
+				if(Math.random()>flipCoin) {
+					setZone(Zone.WIFInoGPS);
+					System.out.println("Receiving GPS but no WIFI");
+					//writer.write("Entering tunnel"); writer.write("\n");
+				}
+				else {
+					setZone(Zone.WIFInoGPS);
+					System.out.println("Receiving WIFI but no GPS");
 					//writer.write("Entering Wifi area"); writer.write("\n");
 				}
 			}
 		}
 		return zone;
 	}
-	public SignalMode updateSignal(SignalMode signal, int battery, Zone zone) /*throws IOException*/ {
+	public SignalMode updateSignal(SignalMode signal, BatteryLevel batteryLevel, Zone zone) /*throws IOException*/ {
 		switch(zone) {
-			case NONE:
-				if(battery > 80 && signal != SignalMode.BOTH) {
-					setSignal(SignalMode.BOTH);
-					System.out.println("Signal mode activated : BOTH");
+			case noWIFIGPS:
+				if(batteryLevel == BatteryLevel.HIGH && signal != SignalMode.ALL) {
+					addGPS(signal);
+					addWifi(signal);
+					addRadio(signal);
 					//writer.write("Signal mode activated : BOTH"); writer.write("\n");
 				}
-				else if (battery < 30 && signal != SignalMode.GPS) {
+				else if (batteryLevel==BatteryLevel.VERYLOW && signal != SignalMode.GPS) {
 					setSignal(SignalMode.GPS);
 					System.out.println("Signal mode activated : GPS");
 					//writer.write("Signal mode activated : GPS"); writer.write("\n");
 				}
 				break;
-			case TUNNEL: 
-				if(battery < 70 && signal != SignalMode.WIFI) {
+			case WIFInoGPS: 
+				if(batteryLevel != BatteryLevel.HIGH && signal != SignalMode.WIFI && signal !=SignalMode.WIFInRADIO ) {
+					addWifi(signal);
+					removeGPS(signal);
+					//writer.write("Signal mode activated : WIFI"); writer.write("\n");
+				}
+				break;
+			case WIFIGPS:
+				if(batteryLevel == BatteryLevel.VERYLOW && signal != SignalMode.WIFI) {
 					setSignal(SignalMode.WIFI);
 					System.out.println("Signal mode activated : WIFI");
 					//writer.write("Signal mode activated : WIFI"); writer.write("\n");
 				}
-				break;
-			case WIFI:
-				if(battery < 30 && signal != SignalMode.WIFI) {
-					setSignal(SignalMode.WIFI);
-					System.out.println("Signal mode activated : WIFI");
+				else if (batteryLevel == BatteryLevel.MEDIUM && (signal == SignalMode.WIFInGPS || signal == SignalMode.ALL)) {
+					removeGPS(signal);
+					//writer.write("Signal mode activated : WIFI"); writer.write("\n");
+				}
+				else if(batteryLevel == BatteryLevel.VERYLOW && signal == SignalMode.WIFInRADIO) {
+					removeRadio(signal);
 					//writer.write("Signal mode activated : WIFI"); writer.write("\n");
 				}
 				break;
+			case noWIFInoGPS:
+				if(batteryLevel == BatteryLevel.VERYLOW || batteryLevel == BatteryLevel.LOW  ) {
+					removeGPS(signal);
+					removeWifi(signal);
+				break;
+				}
+				else if(batteryLevel == BatteryLevel.MEDIUM || batteryLevel == BatteryLevel.HIGH ) { //goes here evertime
+					removeGPS(signal);
+					addRadio(signal);
+				break;
+				}
+				
 		}
 		return signal;
+	}
+	
+	public void removeWifi(SignalMode signal) {
+		if(signal == SignalMode.ALL) {
+			setSignal(SignalMode.GPSnRADIO);
+			System.out.println("Signal mode desactivated : WIFI");
+		}
+		else if(signal == SignalMode.WIFInGPS) {
+			setSignal(SignalMode.GPS);
+			System.out.println("Signal mode desactivated : WIFI");
+		}
+		else if(signal == SignalMode.WIFInRADIO) {
+			setSignal(SignalMode.RADIO);
+			System.out.println("Signal mode desactivated : WIFI");
+		}
+		else if(signal == SignalMode.WIFI) { 
+ 			setSignal(SignalMode.NONE);
+			System.out.println("Signal mode desactivated : WIFI");
+		}
+	}
+	public void removeGPS(SignalMode signal) {
+		if(signal == SignalMode.ALL) {
+			setSignal(SignalMode.WIFInRADIO);
+			System.out.println("Signal mode desactivated : GPS");
+		}
+		else if(signal == SignalMode.WIFInGPS) {
+			setSignal(SignalMode.WIFI);
+			System.out.println("Signal mode desactivated : GPS");
+		}
+		else if(signal == SignalMode.GPSnRADIO) {
+			setSignal(SignalMode.RADIO);
+			System.out.println("Signal mode desactivated : GPS");
+		}
+		else if(signal == SignalMode.GPS) { 
+ 			setSignal(SignalMode.NONE);
+			System.out.println("Signal mode desactivated : GPS");
+		}
+	}
+	
+	public void removeRadio(SignalMode signal) {
+		if(signal == SignalMode.ALL) {
+			setSignal(SignalMode.WIFInGPS);
+			System.out.println("Signal mode desactivated : Radio");
+		}
+		else if(signal == SignalMode.GPSnRADIO) {
+			setSignal(SignalMode.GPS);
+			System.out.println("Signal mode desactivated : Radio");
+		}
+		else if(signal == SignalMode.WIFInRADIO) {
+			setSignal(SignalMode.WIFI);
+			System.out.println("Signal mode desactivated : Radio");
+		}
+		else if(signal == SignalMode.RADIO) {
+ 			setSignal(SignalMode.NONE);
+			System.out.println("Signal mode desactivated : Radio");
+		}
+	}
+	
+	public void addWifi(SignalMode signal) {
+		if(signal == SignalMode.RADIO) {
+			setSignal(SignalMode.WIFInRADIO);
+			System.out.println("Signal mode activated : WIFI");
+		}
+		if(signal == SignalMode.GPS) {
+			setSignal(SignalMode.WIFInGPS);
+			System.out.println("Signal mode activated : WIFI");
+		}
+		if(signal == SignalMode.GPSnRADIO) {
+			setSignal(SignalMode.ALL);
+			System.out.println("Signal mode activated : WIFI");
+		}
+		if(signal == SignalMode.NONE) {
+			setSignal(SignalMode.WIFI);
+			System.out.println("Signal mode activated : WIFI");
+		}
+	}
+	
+	public void addGPS(SignalMode signal) {
+		if(signal == SignalMode.RADIO) {
+			setSignal(SignalMode.GPSnRADIO);
+			System.out.println("Signal mode activated : GPS");
+		}
+		if(signal == SignalMode.WIFI) {
+			setSignal(SignalMode.WIFInGPS);
+			System.out.println("Signal mode activated : GPS");
+		}
+		if(signal == SignalMode.WIFInRADIO) {
+			setSignal(SignalMode.ALL);
+			System.out.println("Signal mode activated : GPS");
+		}
+		if(signal == SignalMode.NONE) {
+			setSignal(SignalMode.GPS);
+			System.out.println("Signal mode activated : GPS");
+		}
+	}
+	
+	public void addRadio(SignalMode signal) {
+		if(signal == SignalMode.WIFI) {
+			setSignal(SignalMode.WIFInRADIO);
+			System.out.println("Signal mode activated : Radio");
+		}
+		if(signal == SignalMode.GPS) {
+			setSignal(SignalMode.GPSnRADIO);
+			System.out.println("Signal mode activated : Radio");
+		}
+		if(signal == SignalMode.WIFInGPS) {
+			setSignal(SignalMode.ALL);
+			System.out.println("Signal mode activated : Radio");
+		}
+		if(signal == SignalMode.NONE) {
+			setSignal(SignalMode.RADIO);
+			System.out.println("Signal mode activated : Radio");
+		}
 	}
 	public void closeFile() throws IOException {
 		// writer.close();
@@ -161,11 +366,11 @@ public class Controller {
 	public void setSignal(SignalMode signal) {
 		this.signal = signal;
 	}
-	public BatteryMode getBatteryMode() {
-		return batteryMode;
+	public BatteryLevel getBatteryLevel() {
+		return batteryLevel;
 	}
-	public void setBatteryMode(BatteryMode batteryMode) {
-		this.batteryMode = batteryMode;
+	public void setBatteryLevel(BatteryLevel batteryLevel) {
+		this.batteryLevel = batteryLevel;
 	}
 	public Zone getZone() {
 		return zone;

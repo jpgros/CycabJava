@@ -20,7 +20,7 @@ public class CycabGenetic {
 
     public static void main(String[] args) throws IOException {
 
-        Controller controller = new Controller(100, SignalMode.BOTH, BatteryMode.USING, Zone.NONE);
+        Controller controller = new Controller(100, SignalMode.BOTH, BatteryLevel.USING, Zone.NONE);
 
         CycabFSM fsm = new CycabFSM();
 

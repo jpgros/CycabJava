@@ -21,7 +21,7 @@ public class CycabFSM implements FsmModel {
     
     
     public CycabFSM() {
-        sut = new Controller(100, SignalMode.GPS, BatteryMode.USING, Zone.NONE);
+        sut = new Controller(100, SignalMode.GPS, BatteryLevel.USING, Zone.NONE);
         inWifi = inTunnel = false;
     }
 
@@ -34,7 +34,7 @@ public class CycabFSM implements FsmModel {
     }
     
     public void reset(boolean testing) {
-        sut = new Controller(100, SignalMode.GPS, BatteryMode.USING, Zone.NONE);
+        sut = new Controller(100, SignalMode.GPS, BatteryLevel.USING, Zone.NONE);
         inWifi = inTunnel = false;
     }
 
@@ -45,7 +45,7 @@ public class CycabFSM implements FsmModel {
     @Action
     public void tick() {
         sut.updateBattery(sut.getBatteryMode(), sut.getSignal(), sut.getBattery());
-        sut.updateBatteryMode(sut.getBatteryMode(), sut.getSignal(), sut.getBattery());
+        sut.updateBatteryLevel(sut.getBatteryMode(), sut.getSignal(), sut.getBattery());
         sut.updateSignal(sut.getSignal(), sut.getBattery(), sut.getZone());
     }
 

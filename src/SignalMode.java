@@ -2,5 +2,11 @@
 public enum SignalMode {
 GPS,
 WIFI,
-BOTH;
+RADIO,
+WIFInGPS,
+WIFInRADIO,
+GPSnRADIO,
+NONE,
+ALL;
+	
 }

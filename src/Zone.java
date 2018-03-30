@@ -1,6 +1,7 @@
 
 public enum Zone {
-WIFI,
-TUNNEL,
-NONE;
+WIFIGPS,
+WIFInoGPS,
+noWIFInoGPS,
+noWIFIGPS;
 }
