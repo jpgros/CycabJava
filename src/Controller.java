@@ -14,7 +14,9 @@ public class Controller {
 //	components.add("Wifi");
 //	components.add("GPS");
 	int battery = 100;
+	ThresholdPolicy threshold = ThresholdPolicy.NORMAL;
 	//Writer writer;
+	double[] policyArray=new double[3];
 	SignalMode signal = SignalMode.GPS;
 	BatteryLevel batteryLevel = BatteryLevel.HIGH;
 	Zone zone = Zone.WIFIGPS;
@@ -22,12 +24,34 @@ public class Controller {
 			
 	}
 	public Controller( int battery, SignalMode signal, BatteryLevel batteryLevel,
-			Zone zone) {
+			Zone zone, ThresholdPolicy policy) {
 		super();
 		this.battery = battery;
 		this.signal = signal;
 		this.batteryLevel = batteryLevel;
 		this.zone = zone;
+		this.threshold = policy;
+		this.initThresholdPolicy(this.threshold, this.policyArray);
+	}
+	
+	public void initThresholdPolicy(ThresholdPolicy threshold, double[] policyArray) {
+		switch(threshold) {
+		case LIGHT :
+			policyArray[0] = 2.0*Math.random()/3.0; //1 * 2/3 = 0.6 
+			policyArray[1] = 2.0*Math.random()/3.0 +0.4; // between 0.4 and 1.0
+			policyArray[2] = Math.random()/5.0 +0.8; //between 0.8 and 1.0
+			break;
+		case NORMAL :
+			policyArray[0] = 2.0*Math.random()/5.0; //1 * 2/5 = 0.4 
+			policyArray[1] = 2.0*Math.random()/3.0 +0.2; // between 0.2 and 0.8
+			policyArray[2] = 2.0*Math.random()/5.0 +0.6; //between 0.6 and 1.0
+			break;
+		case HARD:
+			policyArray[0] = 1.0*Math.random()/5.0; //1 * 1/5 = 0.2 
+			policyArray[1] = 2.0*Math.random()/3.0 ; // between 0.0 and 0.6
+			policyArray[2] = 2.0*Math.random()/3.0 +0.4; //between 0.4 and 1.0
+			break;
+		}
 	}
 	public void initFile(String baseDir) /*throws IOException*/ {
 	      	//File file = new File(baseDir+"/logs/logs.txt");
@@ -190,89 +214,90 @@ public class Controller {
 		switch(zone) {
 			case noWIFIGPS:
 				if(batteryLevel == BatteryLevel.HIGH && (!isGPSActivated(signal))) {
-					addGPS(signal);
-					if( !isRadioActivated(signal)) addRadio(signal);
+					addGPS(signal, policyArray[2]);
+					if( !isRadioActivated(signal)) addRadio(signal,policyArray[1]);
 					//writer.write("Signal mode activated : BOTH"); writer.write("\n");
 				}
 				else if(batteryLevel == BatteryLevel.MEDIUM && (isWifiActivated(signal))){
-					removeWifi(signal);
+					removeWifi(signal,policyArray[1]);
 					//writer.write("Signal mode activated : BOTH"); writer.write("\n");
 				}
 				else if(batteryLevel == BatteryLevel.LOW && isWifiActivated(signal) ) {
-					removeWifi(signal);
-					if(isRadioActivated(signal)) removeRadio(signal);
+					removeWifi(signal,policyArray[2]);
+					if(isRadioActivated(signal)) removeRadio(signal,policyArray[2]);
 				}
 				else if (batteryLevel==BatteryLevel.VERYLOW && signal != SignalMode.GPS) {
-					setSignal(SignalMode.GPS);
+					setSignal(SignalMode.GPS); //CAREFUL
 					System.out.println("Signal mode activated : GPS");
 					//writer.write("Signal mode activated : GPS"); writer.write("\n");
 				}
 				break;
 			case WIFInoGPS: 
 				if(batteryLevel == BatteryLevel.HIGH && (!isWifiActivated(signal))) {
-					addWifi(signal);
-					if( !isRadioActivated(signal)) addRadio(signal);
+					addWifi(signal,policyArray[2]);
+					if( !isRadioActivated(signal)) addRadio(signal,policyArray[1]);
 					//writer.write("Signal mode activated : BOTH"); writer.write("\n");
 				}
 				else if(batteryLevel == BatteryLevel.MEDIUM && (isGPSActivated(signal))){
-					removeGPS(signal);
+					removeGPS(signal,policyArray[1]);
 					//writer.write("Signal mode activated : BOTH"); writer.write("\n");
 				}
 				else if(batteryLevel == BatteryLevel.LOW && isGPSActivated(signal) ) {
-					removeGPS(signal);
-					if(isRadioActivated(signal)) removeRadio(signal);
+					removeGPS(signal,policyArray[2]);
+					if(isRadioActivated(signal)) removeRadio(signal,policyArray[2]);
 				}
 				else if (batteryLevel==BatteryLevel.VERYLOW && signal != SignalMode.WIFI) {
-					setSignal(SignalMode.WIFI);
+					setSignal(SignalMode.WIFI); //CAREFUL
 					System.out.println("Signal mode activated : WIFI");
 					//writer.write("Signal mode activated : GPS"); writer.write("\n");
 				}
 				break;
 			case WIFIGPS:
 				if(batteryLevel == BatteryLevel.HIGH && (!isGPSActivated(signal))) {
-					addGPS(signal);
-					if( !isRadioActivated(signal)) addRadio(signal);
+					addGPS(signal,policyArray[2]);
+					if( !isRadioActivated(signal)) addRadio(signal,policyArray[1]);
 					//writer.write("Signal mode activated : BOTH"); writer.write("\n");
 				}
 				if(batteryLevel == BatteryLevel.HIGH && (!isWifiActivated(signal))) {
-					addWifi(signal);
-					if( !isRadioActivated(signal)) addRadio(signal);
+					addWifi(signal,policyArray[2]);
+					if( !isRadioActivated(signal)) addRadio(signal,policyArray[1]);
 					//writer.write("Signal mode activated : BOTH"); writer.write("\n");
 				}
 				else if(batteryLevel == BatteryLevel.MEDIUM && (!isGPSActivated(signal))) {
-					addGPS(signal);
+					addGPS(signal,policyArray[1]);
 				}
 				if(batteryLevel == BatteryLevel.MEDIUM && (!isWifiActivated(signal))) {
-					addWifi(signal);
+					addWifi(signal,policyArray[1]);
 				}
 				else if(batteryLevel == BatteryLevel.LOW && isGPSActivated(signal) ) { 
-					removeGPS(signal); //GPS consumes more energy than wifi
-					if(isRadioActivated(signal)) removeRadio(signal);
+					removeGPS(signal,policyArray[1]); //GPS consumes more energy than wifi
+					if(isRadioActivated(signal)) removeRadio(signal,policyArray[2]);
 				}
 				else if (batteryLevel==BatteryLevel.VERYLOW && signal != SignalMode.WIFI) {
-					setSignal(SignalMode.WIFI);
+					setSignal(SignalMode.WIFI); //CAREFUL
 					System.out.println("Signal mode activated : WIFI");
 					//writer.write("Signal mode activated : GPS"); writer.write("\n");
 				}
 				break;
 			case noWIFInoGPS:
 				if(batteryLevel == BatteryLevel.HIGH || batteryLevel == BatteryLevel.MEDIUM && (!isRadioActivated(signal))) {
-					addRadio(signal);
+					addRadio(signal,policyArray[2]);
 				}
 				else if(batteryLevel == BatteryLevel.MEDIUM && (isWifiActivated(signal))){
-					removeWifi(signal);
+					removeWifi(signal,policyArray[1]);
+					if(isRadioActivated(signal)) removeRadio(signal,policyArray[0]);
 					//writer.write("Signal mode activated : BOTH"); writer.write("\n");
 				}
 				if(batteryLevel == BatteryLevel.LOW && isGPSActivated(signal) ) { 
-					removeGPS(signal);
-					if(isRadioActivated(signal)) removeRadio(signal);
+					removeGPS(signal,policyArray[2]);
+					if(isRadioActivated(signal)) removeRadio(signal,policyArray[1]);
 				}
 				if(batteryLevel == BatteryLevel.LOW && isWifiActivated(signal) ) { 
-					removeWifi(signal);
-					if(isRadioActivated(signal)) removeRadio(signal);
+					removeWifi(signal,policyArray[2]);
+					if(isRadioActivated(signal)) removeRadio(signal,policyArray[2]);
 				}
 				else if (batteryLevel==BatteryLevel.VERYLOW && signal != SignalMode.NONE) {
-					setSignal(SignalMode.NONE);
+					setSignal(SignalMode.NONE); //CAREFUL
 					System.out.println("Signal mode activated : None");
 					//writer.write("Signal mode activated : GPS"); writer.write("\n");
 				}
@@ -281,118 +306,165 @@ public class Controller {
 		return signal;
 	}
 	
-	public void removeWifi(SignalMode signal) {
-		if(signal == SignalMode.ALL) {
-			setSignal(SignalMode.GPSnRADIO);
-			System.out.println("Signal mode desactivated : WIFI");
-		}
-		else if(signal == SignalMode.WIFInGPS) {
-			setSignal(SignalMode.GPS);
-			System.out.println("Signal mode desactivated : WIFI");
-		}
-		else if(signal == SignalMode.WIFInRADIO) {
-			setSignal(SignalMode.RADIO);
-			System.out.println("Signal mode desactivated : WIFI");
-		}
-		else if(signal == SignalMode.WIFI) { 
- 			setSignal(SignalMode.NONE);
-			System.out.println("Signal mode desactivated : WIFI");
-		}
-	}
-	public void removeGPS(SignalMode signal) {
-		if(signal == SignalMode.ALL) {
-			setSignal(SignalMode.WIFInRADIO);
-			System.out.println("Signal mode desactivated : GPS");
-		}
-		else if(signal == SignalMode.WIFInGPS) {
-			setSignal(SignalMode.WIFI);
-			System.out.println("Signal mode desactivated : GPS");
-		}
-		else if(signal == SignalMode.GPSnRADIO) {
-			setSignal(SignalMode.RADIO);
-			System.out.println("Signal mode desactivated : GPS");
-		}
-		else if(signal == SignalMode.GPS) { 
- 			setSignal(SignalMode.NONE);
-			System.out.println("Signal mode desactivated : GPS");
+	public void removeWifi(SignalMode signal, double proba) {
+		double rand = Math.random();
+		System.out.println("proba = " +proba + "and rand = " + rand);
+		if(rand < proba) {
+			if(signal == SignalMode.ALL) {
+				setSignal(SignalMode.GPSnRADIO);
+				System.out.println("Signal mode desactivated : WIFI");
+			}
+			else if(signal == SignalMode.WIFInGPS) {
+				setSignal(SignalMode.GPS);
+				System.out.println("Signal mode desactivated : WIFI");
+			}
+			else if(signal == SignalMode.WIFInRADIO) {
+				setSignal(SignalMode.RADIO);
+				System.out.println("Signal mode desactivated : WIFI");
+			}
+			else if(signal == SignalMode.WIFI) { 
+	 			setSignal(SignalMode.NONE);
+				System.out.println("Signal mode desactivated : WIFI");
+			}
 		}
 	}
-	
-	public void removeRadio(SignalMode signal) {
-		if(signal == SignalMode.ALL) {
-			setSignal(SignalMode.WIFInGPS);
-			System.out.println("Signal mode desactivated : Radio");
-		}
-		else if(signal == SignalMode.GPSnRADIO) {
-			setSignal(SignalMode.GPS);
-			System.out.println("Signal mode desactivated : Radio");
-		}
-		else if(signal == SignalMode.WIFInRADIO) {
-			setSignal(SignalMode.WIFI);
-			System.out.println("Signal mode desactivated : Radio");
-		}
-		else if(signal == SignalMode.RADIO) {
- 			setSignal(SignalMode.NONE);
-			System.out.println("Signal mode desactivated : Radio");
-		}
-	}
-	
-	public void addWifi(SignalMode signal) {
-		if(signal == SignalMode.RADIO) {
-			setSignal(SignalMode.WIFInRADIO);
-			System.out.println("Signal mode activated : WIFI");
-		}
-		if(signal == SignalMode.GPS) {
-			setSignal(SignalMode.WIFInGPS);
-			System.out.println("Signal mode activated : WIFI");
-		}
-		if(signal == SignalMode.GPSnRADIO) {
-			setSignal(SignalMode.ALL);
-			System.out.println("Signal mode activated : WIFI");
-		}
-		if(signal == SignalMode.NONE) {
-			setSignal(SignalMode.WIFI);
-			System.out.println("Signal mode activated : WIFI");
+//	public void removeWifi(SignalMode signal, String priority) {
+//
+//		if(signal == SignalMode.ALL) {
+//			setSignal(SignalMode.GPSnRADIO);
+//			System.out.println("Signal mode desactivated : WIFI");
+//		}
+//		else if(signal == SignalMode.WIFInGPS) {
+//			setSignal(SignalMode.GPS);
+//			System.out.println("Signal mode desactivated : WIFI");
+//		}
+//		else if(signal == SignalMode.WIFInRADIO) {
+//			setSignal(SignalMode.RADIO);
+//			System.out.println("Signal mode desactivated : WIFI");
+//		}
+//		else if(signal == SignalMode.WIFI) { 
+// 			setSignal(SignalMode.NONE);
+//			System.out.println("Signal mode desactivated : WIFI");
+//		}
+//	}
+	public void removeGPS(SignalMode signal, double proba) {
+		double rand = Math.random();
+		System.out.println("proba = " +proba + "and rand = " + rand);
+		if(rand < proba) {
+			if(signal == SignalMode.ALL) {
+				setSignal(SignalMode.WIFInRADIO);
+				System.out.println("Signal mode desactivated : GPS");
+			}
+			else if(signal == SignalMode.WIFInGPS) {
+				setSignal(SignalMode.WIFI);
+				System.out.println("Signal mode desactivated : GPS");
+			}
+			else if(signal == SignalMode.GPSnRADIO) {
+				setSignal(SignalMode.RADIO);
+				System.out.println("Signal mode desactivated : GPS");
+			}
+			else if(signal == SignalMode.GPS) { 
+	 			setSignal(SignalMode.NONE);
+				System.out.println("Signal mode desactivated : GPS");
+			}
 		}
 	}
 	
-	public void addGPS(SignalMode signal) {
-		if(signal == SignalMode.RADIO) {
-			setSignal(SignalMode.GPSnRADIO);
-			System.out.println("Signal mode activated : GPS");
-		}
-		if(signal == SignalMode.WIFI) {
-			setSignal(SignalMode.WIFInGPS);
-			System.out.println("Signal mode activated : GPS");
-		}
-		if(signal == SignalMode.WIFInRADIO) {
-			setSignal(SignalMode.ALL);
-			System.out.println("Signal mode activated : GPS");
-		}
-		if(signal == SignalMode.NONE) {
-			setSignal(SignalMode.GPS);
-			System.out.println("Signal mode activated : GPS");
+	public void removeRadio(SignalMode signal, double proba) {
+		double rand = Math.random();
+		System.out.println("proba = " +proba + "and rand = " + rand);
+		if(rand < proba) {
+			if(signal == SignalMode.ALL) {
+				setSignal(SignalMode.WIFInGPS);
+				System.out.println("Signal mode desactivated : Radio");
+			}
+			else if(signal == SignalMode.GPSnRADIO) {
+				setSignal(SignalMode.GPS);
+				System.out.println("Signal mode desactivated : Radio");
+			}
+			else if(signal == SignalMode.WIFInRADIO) {
+				setSignal(SignalMode.WIFI);
+				System.out.println("Signal mode desactivated : Radio");
+			}
+			else if(signal == SignalMode.RADIO) {
+	 			setSignal(SignalMode.NONE);
+				System.out.println("Signal mode desactivated : Radio");
+			}
 		}
 	}
 	
-	public void addRadio(SignalMode signal) {
-		if(signal == SignalMode.WIFI) {
-			setSignal(SignalMode.WIFInRADIO);
-			System.out.println("Signal mode activated : Radio");
-		}
-		if(signal == SignalMode.GPS) {
-			setSignal(SignalMode.GPSnRADIO);
-			System.out.println("Signal mode activated : Radio");
-		}
-		if(signal == SignalMode.WIFInGPS) {
-			setSignal(SignalMode.ALL);
-			System.out.println("Signal mode activated : Radio");
-		}
-		if(signal == SignalMode.NONE) {
-			setSignal(SignalMode.RADIO);
-			System.out.println("Signal mode activated : Radio");
+	public void addWifi(SignalMode signal, double proba) {
+		double rand = Math.random();
+		System.out.println("proba = " +proba + "and rand = " + rand);
+		if(rand < proba) {
+			if(signal == SignalMode.RADIO) {
+				setSignal(SignalMode.WIFInRADIO);
+				System.out.println("Signal mode activated : WIFI");
+			}
+			if(signal == SignalMode.GPS) {
+				setSignal(SignalMode.WIFInGPS);
+				System.out.println("Signal mode activated : WIFI");
+			}
+			if(signal == SignalMode.GPSnRADIO) {
+				setSignal(SignalMode.ALL);
+				System.out.println("Signal mode activated : WIFI");
+			}
+			if(signal == SignalMode.NONE) {
+				setSignal(SignalMode.WIFI);
+				System.out.println("Signal mode activated : WIFI");
+			}
 		}
 	}
+	
+	public void addGPS(SignalMode signal, double proba) {
+		double rand = Math.random();
+		System.out.println("proba = " +proba + "and rand = " + rand);
+		if(rand < proba) {
+			if(signal == SignalMode.RADIO) {
+				setSignal(SignalMode.GPSnRADIO);
+				System.out.println("Signal mode activated : GPS");
+			}
+			if(signal == SignalMode.WIFI) {
+				setSignal(SignalMode.WIFInGPS);
+				System.out.println("Signal mode activated : GPS");
+			}
+			if(signal == SignalMode.WIFInRADIO) {
+				setSignal(SignalMode.ALL);
+				System.out.println("Signal mode activated : GPS");
+			}
+			if(signal == SignalMode.NONE) {
+				setSignal(SignalMode.GPS);
+				System.out.println("Signal mode activated : GPS");
+			}
+		}
+	}
+	
+	public void addRadio(SignalMode signal,double proba) {
+		double rand = Math.random();
+		System.out.println("proba = " +proba + "and rand = " + rand);
+		if(rand < proba) {
+			if(signal == SignalMode.WIFI) {
+				setSignal(SignalMode.WIFInRADIO);
+				System.out.println("Signal mode activated : Radio");
+			}
+			if(signal == SignalMode.GPS) {
+				setSignal(SignalMode.GPSnRADIO);
+				System.out.println("Signal mode activated : Radio");
+			}
+			if(signal == SignalMode.WIFInGPS) {
+				setSignal(SignalMode.ALL);
+				System.out.println("Signal mode activated : Radio");
+			}
+			if(signal == SignalMode.NONE) {
+				setSignal(SignalMode.RADIO);
+				System.out.println("Signal mode activated : Radio");
+			}
+		}
+	}
+	
+//	public boolean probabilistic(double proba) { // given a probability between 0 and 1
+//		return Math.random() < proba;
+//	}
 	
 	public boolean isRadioActivated(SignalMode signal) {
 		return (signal == SignalMode.ALL || signal == SignalMode.GPSnRADIO || signal == SignalMode.WIFInRADIO || signal == SignalMode.RADIO);
