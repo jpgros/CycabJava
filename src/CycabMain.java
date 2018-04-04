@@ -10,7 +10,7 @@ public class CycabMain {
 	public static void main(String[] args) throws IOException {
 	
 		String baseDir=System.getProperty("user.dir");
-		Controller controller= new Controller(100, SignalMode.ALL, BatteryLevel.HIGH, Zone.WIFIGPS, ThresholdPolicy.NORMAL);
+		Controller controller= new Controller(100, SignalMode.ALL, BatteryLevel.HIGH, Zone.noWIFInoGPS, ThresholdPolicy.NORMAL);
 		controller.initFile(baseDir);
 		int cpt=0;
 		double flipCoin = 0.5, changeZone=0.1;

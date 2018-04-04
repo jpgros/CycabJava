@@ -43,6 +43,7 @@ public class Controller {
 			break;
 		case NORMAL :
 			policyArray[0] = 2.0*Math.random()/5.0; //1 * 2/5 = 0.4 
+			System.out.println("policy ="+ policyArray[0]);
 			policyArray[1] = 2.0*Math.random()/3.0 +0.2; // between 0.2 and 0.8
 			policyArray[2] = 2.0*Math.random()/5.0 +0.6; //between 0.6 and 1.0
 			break;
@@ -308,7 +309,6 @@ public class Controller {
 	
 	public void removeWifi(SignalMode signal, double proba) {
 		double rand = Math.random();
-		System.out.println("proba = " +proba + "and rand = " + rand);
 		if(rand < proba) {
 			if(signal == SignalMode.ALL) {
 				setSignal(SignalMode.GPSnRADIO);
@@ -349,7 +349,6 @@ public class Controller {
 //	}
 	public void removeGPS(SignalMode signal, double proba) {
 		double rand = Math.random();
-		System.out.println("proba = " +proba + "and rand = " + rand);
 		if(rand < proba) {
 			if(signal == SignalMode.ALL) {
 				setSignal(SignalMode.WIFInRADIO);
@@ -372,7 +371,6 @@ public class Controller {
 	
 	public void removeRadio(SignalMode signal, double proba) {
 		double rand = Math.random();
-		System.out.println("proba = " +proba + "and rand = " + rand);
 		if(rand < proba) {
 			if(signal == SignalMode.ALL) {
 				setSignal(SignalMode.WIFInGPS);
@@ -395,7 +393,6 @@ public class Controller {
 	
 	public void addWifi(SignalMode signal, double proba) {
 		double rand = Math.random();
-		System.out.println("proba = " +proba + "and rand = " + rand);
 		if(rand < proba) {
 			if(signal == SignalMode.RADIO) {
 				setSignal(SignalMode.WIFInRADIO);
@@ -418,7 +415,6 @@ public class Controller {
 	
 	public void addGPS(SignalMode signal, double proba) {
 		double rand = Math.random();
-		System.out.println("proba = " +proba + "and rand = " + rand);
 		if(rand < proba) {
 			if(signal == SignalMode.RADIO) {
 				setSignal(SignalMode.GPSnRADIO);
@@ -441,7 +437,6 @@ public class Controller {
 	
 	public void addRadio(SignalMode signal,double proba) {
 		double rand = Math.random();
-		System.out.println("proba = " +proba + "and rand = " + rand);
 		if(rand < proba) {
 			if(signal == SignalMode.WIFI) {
 				setSignal(SignalMode.WIFInRADIO);

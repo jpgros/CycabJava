@@ -21,7 +21,7 @@ public class CycabFSM implements FsmModel {
     
     
     public CycabFSM() {
-        sut = new Controller(100, SignalMode.GPS, BatteryLevel.USING, Zone.NONE);
+    	sut = new Controller(100, SignalMode.GPS, BatteryLevel.HIGH, Zone.noWIFIGPS, ThresholdPolicy.NORMAL);
         inWifi = inTunnel = false;
     }
 
@@ -34,7 +34,7 @@ public class CycabFSM implements FsmModel {
     }
     
     public void reset(boolean testing) {
-        sut = new Controller(100, SignalMode.GPS, BatteryLevel.USING, Zone.NONE);
+    	sut = new Controller(100, SignalMode.GPS, BatteryLevel.HIGH, Zone.noWIFIGPS, ThresholdPolicy.NORMAL);
         inWifi = inTunnel = false;
     }
 
@@ -44,9 +44,9 @@ public class CycabFSM implements FsmModel {
     public double tickProba() { return 0.98; }
     @Action
     public void tick() {
-        sut.updateBattery(sut.getBatteryMode(), sut.getSignal(), sut.getBattery());
-        sut.updateBatteryLevel(sut.getBatteryMode(), sut.getSignal(), sut.getBattery());
-        sut.updateSignal(sut.getSignal(), sut.getBattery(), sut.getZone());
+        sut.updateBattery(sut.getBatteryLevel(), sut.getSignal(), sut.getBattery());
+        sut.updateBatteryLevel(sut.getBatteryLevel(), sut.getSignal(), sut.getBattery());
+        sut.updateSignal(sut.getSignal(), sut.getBatteryLevel(), sut.getZone());
     }
 
 
@@ -58,7 +58,7 @@ public class CycabFSM implements FsmModel {
     @Action
     public void enterWifi() {
         inWifi = true;
-        sut.setZone(Zone.WIFI);
+        sut.setZone(Zone.WIFInoGPS);
     }
 
     /** Sortie WIFI **/
@@ -69,7 +69,7 @@ public class CycabFSM implements FsmModel {
     @Action
     public void exitWifi() {
         inWifi = false;
-        sut.setZone(Zone.NONE);
+        sut.setZone(Zone.noWIFIGPS);
     }
 
 
@@ -81,7 +81,7 @@ public class CycabFSM implements FsmModel {
     @Action
     public void enterTunnel() {
         inTunnel = true;
-        sut.setZone(Zone.TUNNEL);
+        sut.setZone(Zone.WIFInoGPS);
     }
 
     /** Sortie WIFI **/
@@ -92,7 +92,7 @@ public class CycabFSM implements FsmModel {
     @Action
     public void exitTunnel() {
         inTunnel = false;
-        sut.setZone(Zone.NONE);
+        sut.setZone(Zone.noWIFIGPS);
     }
     
 }
