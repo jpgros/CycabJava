@@ -34,6 +34,12 @@ public class Controller {
 		this.initThresholdPolicy(this.threshold, this.policyArray);
 	}
 	
+    /**
+     * Initialises the ThresholdPolicy according to the given parameters.
+     * @param threshold The threshold policy choosen can be HARD, NORMAL or LIGHT
+     * @param policyArray the array containing the probability to trigger an event or can be seen as a priority level
+     * case 0 of the array indicates a low priority while case 2 indicates a high priority 
+     */
 	public void initThresholdPolicy(ThresholdPolicy threshold, double[] policyArray) {
 		switch(threshold) {
 		case LIGHT :
@@ -59,7 +65,14 @@ public class Controller {
 	      	//boolean b = file.createNewFile();
 			// this.writer = new FileWriter(baseDir+"/logs/logs.txt");
 	}
-	public  int updateBattery(BatteryLevel batteryMode,SignalMode signal, int battery) /* throws IOException */ {
+	
+    /**
+     * Update the level of battery according to the components in use
+     * @param signal components in use
+     * @param battery level of battery
+     * @return the new level of battery
+     */
+	public  int updateBattery(SignalMode signal, int battery) /* throws IOException */ {
 //		switch(batteryMode) {
 //		case USING:
 		switch(signal) {
@@ -104,7 +117,14 @@ public class Controller {
 //		}
 		return battery;
 	}
-	public BatteryLevel updateBatteryLevel(BatteryLevel batteryLevel, SignalMode signal, int battery) /*throws IOException*/ {
+	
+    /**
+     * Updates the battery level (HIGH, MEDIUM, LOW, VERY LOW) according to the battery value
+     * @param batteryLevel is the battery level before the update
+     * @param battery is the battery value used to decide in which level abttery should be
+     * @return the updated batteryLevel (can be unchanged) 
+     */
+	public BatteryLevel updateBatteryLevel(BatteryLevel batteryLevel, int battery) /*throws IOException*/ {
 		//somewhere between low and verylow changes too often
 		if(battery < 20 && batteryLevel != BatteryLevel.VERYLOW) {
 			setBatteryLevel(BatteryLevel.VERYLOW);
@@ -328,25 +348,7 @@ public class Controller {
 			}
 		}
 	}
-//	public void removeWifi(SignalMode signal, String priority) {
-//
-//		if(signal == SignalMode.ALL) {
-//			setSignal(SignalMode.GPSnRADIO);
-//			System.out.println("Signal mode desactivated : WIFI");
-//		}
-//		else if(signal == SignalMode.WIFInGPS) {
-//			setSignal(SignalMode.GPS);
-//			System.out.println("Signal mode desactivated : WIFI");
-//		}
-//		else if(signal == SignalMode.WIFInRADIO) {
-//			setSignal(SignalMode.RADIO);
-//			System.out.println("Signal mode desactivated : WIFI");
-//		}
-//		else if(signal == SignalMode.WIFI) { 
-// 			setSignal(SignalMode.NONE);
-//			System.out.println("Signal mode desactivated : WIFI");
-//		}
-//	}
+	
 	public void removeGPS(SignalMode signal, double proba) {
 		double rand = Math.random();
 		if(rand < proba) {
@@ -481,7 +483,7 @@ public class Controller {
 		this.battery = battery;
 	}
 	public SignalMode getSignal() {
-		return signal;
+		return this.signal;
 	}
 	public void setSignal(SignalMode signal) {
 		this.signal = signal;
@@ -498,4 +500,5 @@ public class Controller {
 	public void setZone(Zone zone) {
 		this.zone = zone;
 	}
+
 }

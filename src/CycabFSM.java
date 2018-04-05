@@ -15,18 +15,18 @@ public class CycabFSM implements FsmModel {
      * Automaton describing the FSM of a Cycab
      */
     boolean inWifi = false;
-    boolean inTunnel = false;
+    boolean inGPS = false;
 
     Controller sut;
     
     
     public CycabFSM() {
     	sut = new Controller(100, SignalMode.GPS, BatteryLevel.HIGH, Zone.noWIFIGPS, ThresholdPolicy.NORMAL);
-        inWifi = inTunnel = false;
+        inWifi = inGPS = false;
     }
 
     public String getState() {
-        return "Wifi=" + inWifi + "-Tunnel=" + inTunnel;
+        return "Wifi=" + inWifi + "-GPS=" + inGPS;
     }
 
     public Controller getSUT() {
@@ -35,7 +35,7 @@ public class CycabFSM implements FsmModel {
     
     public void reset(boolean testing) {
     	sut = new Controller(100, SignalMode.GPS, BatteryLevel.HIGH, Zone.noWIFIGPS, ThresholdPolicy.NORMAL);
-        inWifi = inTunnel = false;
+        inWifi = inGPS = false;
     }
 
     public boolean tickGuard() {
@@ -44,8 +44,8 @@ public class CycabFSM implements FsmModel {
     public double tickProba() { return 0.98; }
     @Action
     public void tick() {
-        sut.updateBattery(sut.getBatteryLevel(), sut.getSignal(), sut.getBattery());
-        sut.updateBatteryLevel(sut.getBatteryLevel(), sut.getSignal(), sut.getBattery());
+        sut.updateBattery(sut.getSignal(), sut.getBattery());
+        sut.updateBatteryLevel(sut.getBatteryLevel(), sut.getBattery());
         sut.updateSignal(sut.getSignal(), sut.getBatteryLevel(), sut.getZone());
     }
 
@@ -58,7 +58,13 @@ public class CycabFSM implements FsmModel {
     @Action
     public void enterWifi() {
         inWifi = true;
-        sut.setZone(Zone.WIFInoGPS);
+        if(sut.getZone()== Zone.noWIFInoGPS) {
+        	sut.setZone(Zone.WIFInoGPS);
+        }
+        else if(sut.getZone()== Zone.noWIFIGPS) {
+            sut.setZone(Zone.WIFIGPS);
+        }
+        
     }
 
     /** Sortie WIFI **/
@@ -69,30 +75,45 @@ public class CycabFSM implements FsmModel {
     @Action
     public void exitWifi() {
         inWifi = false;
-        sut.setZone(Zone.noWIFIGPS);
+        if(sut.getZone()== Zone.WIFInoGPS) {
+        	sut.setZone(Zone.noWIFInoGPS);
+        }
+        else if(sut.getZone()== Zone.WIFIGPS) {
+            sut.setZone(Zone.noWIFIGPS);
+        }
     }
 
 
-    /** Entrée TUNNEL **/
-    public boolean enterTunnelGuard() {
-        return !inTunnel;
+    /** Entrée GPS **/
+    public boolean enterGPSGuard() {
+        return !inGPS;
     }
-    public double enterTunnelProba() { return 0.01; }
+    public double enterGPSProba() { return 0.01; }
     @Action
-    public void enterTunnel() {
-        inTunnel = true;
-        sut.setZone(Zone.WIFInoGPS);
+    public void enterGPS() {
+        inGPS = true;
+        if(sut.getZone()== Zone.noWIFInoGPS) {
+        	sut.setZone(Zone.noWIFIGPS);
+        }
+        else if(sut.getZone()== Zone.WIFInoGPS) {
+            sut.setZone(Zone.WIFIGPS);
+        }
     }
 
-    /** Sortie WIFI **/
-    public boolean exitTunnelGuard() {
-        return inTunnel;
+    /** Sortie GPS **/
+    public boolean exitGPSGuard() {
+        return inGPS;
     }
-    public double exitTunnelProba() { return 0.01; }
+    public double exitGPSProba() { return 0.01; }
     @Action
-    public void exitTunnel() {
-        inTunnel = false;
-        sut.setZone(Zone.noWIFIGPS);
+    public void exitGPS() {
+        inGPS = false;
+        if(sut.getZone()== Zone.noWIFIGPS) {
+        	sut.setZone(Zone.noWIFInoGPS);
+        }
+        else if(sut.getZone()== Zone.WIFIGPS) {
+            sut.setZone(Zone.WIFInoGPS);
+        }
     }
     
 }

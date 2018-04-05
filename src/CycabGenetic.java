@@ -35,7 +35,6 @@ public class CycabGenetic {
                 System.out.print(mt.getStepAt(i) + " (" + fits[i] + ")");
             }
             System.out.println("]");
-
         }
 
         // calculer la fitness de chaque individu
@@ -49,7 +48,7 @@ public class CycabGenetic {
             // remplacement
 
             // mutation
-
+        	
         }
     }
 
@@ -77,7 +76,5 @@ public class CycabGenetic {
             }
         }
         return min;
-    }
-
-    
+    }   
 }

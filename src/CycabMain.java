@@ -16,8 +16,8 @@ public class CycabMain {
 		double flipCoin = 0.5, changeZone=0.1;
 		double[] policyArray = new double[3];
 		while(controller.getBattery()> 0 && controller.getBattery()<= 100 && cpt<250) {
-			controller.updateBattery(controller.getBatteryLevel(), controller.getSignal(), controller.getBattery());
-			controller.updateBatteryLevel(controller.getBatteryLevel(), controller.getSignal(), controller.getBattery());
+			controller.updateBattery(controller.getSignal(), controller.getBattery());
+			controller.updateBatteryLevel(controller.getBatteryLevel(), controller.getBattery());
 			controller.updateZone(controller.getZone(),flipCoin, changeZone);
 			controller.updateSignal(controller.getSignal(), controller.getBatteryLevel(), controller.getZone());
 			try {
