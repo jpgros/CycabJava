@@ -36,20 +36,20 @@ class Property1 extends CyCabProperty {
     public double match(Controller sut) {
         switch (state) {
             case 0:
-                if (sut.signal != SignalMode.GPS) {
+                if (!sut.getCycabComponents().getComponentList().contains("GPS")) {
                     state = (sut.battery >= 33) ? 1 : 2;
                 }
                 break;
             case 1:
-                if (sut.signal != SignalMode.GPS && sut.battery < 33) {
+                if (!sut.getCycabComponents().getComponentList().contains("GPS") && sut.battery < 33) {
                     state = 2;
                 }
-                else if (sut.signal == SignalMode.GPS) {
+                else if (sut.getCycabComponents().getComponentList().contains("GPS")) {
                     state = 0;
                 }
                 break;
             case 2:
-                if (sut.signal == SignalMode.GPS) {
+                if (sut.getCycabComponents().getComponentList().contains("GPS")) {
                     state = 3;
                 }
                 break;
@@ -74,20 +74,20 @@ class Property2 extends CyCabProperty {
     public double match(Controller sut) {
         switch (state) {
             case 0:
-                if (sut.signal != SignalMode.WIFI) {
+                if (!sut.getCycabComponents().getComponentList().contains("Wifi")) {
                     state = (sut.battery >= 33) ? 1 : 2;
                 }
                 break;
             case 1:
-                if (sut.signal != SignalMode.WIFI && sut.battery < 33) {
+                if (!sut.getCycabComponents().getComponentList().contains("Wifi") && sut.battery < 33) {
                     state = 2;
                 }
-                else if (sut.signal == SignalMode.WIFI) {
+                else if (sut.getCycabComponents().getComponentList().contains("Wifi")) {
                     state = 0;
                 }
                 break;
             case 2:
-                if (sut.signal == SignalMode.WIFI) {
+                if (sut.getCycabComponents().getComponentList().contains("Wifi")) {
                     state = 3;
                 }
                 break;
@@ -112,20 +112,20 @@ class Property3 extends CyCabProperty {
     public double match(Controller sut) {
         switch (state) {
             case 0:
-                if (sut.signal == SignalMode.WIFI) {
+                if (sut.getCycabComponents().getComponentList().contains("Wifi")) {
                     state = (sut.battery <= 33) ? 1 : 2;
                 }
                 break;
             case 1:
-                if (sut.signal == SignalMode.WIFI && sut.battery > 33) {
+                if (sut.getCycabComponents().getComponentList().contains("Wifi") && sut.battery > 33) {
                     state = 2;
                 }
-                else if (sut.signal != SignalMode.WIFI) {
+                else if (!sut.getCycabComponents().getComponentList().contains("Wifi")) {
                     state = 0;
                 }
                 break;
             case 2:
-                if (sut.signal != SignalMode.WIFI) {
+                if (!sut.getCycabComponents().getComponentList().contains("Wifi")) {
                     state = 3;
                 }
                 break;

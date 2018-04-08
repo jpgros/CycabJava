@@ -12,21 +12,31 @@ public class CycabMain {
 		String baseDir=System.getProperty("user.dir");
 		Controller controller= new Controller(100, SignalMode.ALL, BatteryLevel.HIGH, Zone.noWIFInoGPS, ThresholdPolicy.NORMAL);
 		controller.initFile(baseDir);
-		int cpt=0;
+		int cpt=0, cycle=0;
+		controller.testList();
 		double flipCoin = 0.5, changeZone=0.1;
 		double[] policyArray = new double[3];
 		while(controller.getBattery()> 0 && controller.getBattery()<= 100 && cpt<250) {
-			controller.updateBattery(controller.getSignal(), controller.getBattery());
-			controller.updateBatteryLevel(controller.getBatteryLevel(), controller.getBattery());
-			controller.updateZone(controller.getZone(),flipCoin, changeZone);
-			controller.updateSignal(controller.getSignal(), controller.getBatteryLevel(), controller.getZone());
-			try {
-				Thread.sleep(750);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			for(int i=0; i<10; i++) {
+				controller.updateBattery(controller.getBattery());
+				controller.updateBatteryLevel(controller.getBatteryLevel(), controller.getBattery());
+				controller.updateZone(controller.getZone(),flipCoin, changeZone);
+				controller.updateSignal(controller.getBatteryLevel(), controller.getZone());
+				try {
+					Thread.sleep(750);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				cpt++;
 			}
-			cpt++;
+			if(!controller.getCycabComponents().getComponentList().contains("Communication")) {
+				controller.addCommunication();
+			}
+			else {
+				System.out.println("removing");
+				controller.removeCommunication();
+			}
 		}
 		controller.closeFile();
 	

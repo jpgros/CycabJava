@@ -44,9 +44,9 @@ public class CycabFSM implements FsmModel {
     public double tickProba() { return 0.98; }
     @Action
     public void tick() {
-        sut.updateBattery(sut.getSignal(), sut.getBattery());
+        sut.updateBattery(sut.getBattery());
         sut.updateBatteryLevel(sut.getBatteryLevel(), sut.getBattery());
-        sut.updateSignal(sut.getSignal(), sut.getBatteryLevel(), sut.getZone());
+        sut.updateSignal(sut.getBatteryLevel(), sut.getZone());
     }
 
 
