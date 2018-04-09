@@ -21,7 +21,9 @@ public class CycabFSM implements FsmModel {
     
     
     public CycabFSM() {
-    	sut = new Controller(100, SignalMode.GPS, BatteryLevel.HIGH, Zone.noWIFIGPS, ThresholdPolicy.NORMAL);
+    	CycabComponents components = new CycabComponents();
+		components.getComponentList().add("GPS");
+    	sut = new Controller(100, components, BatteryLevel.HIGH, Zone.noWIFIGPS, ThresholdPolicy.NORMAL);
         inWifi = inGPS = false;
     }
 
@@ -34,7 +36,9 @@ public class CycabFSM implements FsmModel {
     }
     
     public void reset(boolean testing) {
-    	sut = new Controller(100, SignalMode.GPS, BatteryLevel.HIGH, Zone.noWIFIGPS, ThresholdPolicy.NORMAL);
+    	CycabComponents components = new CycabComponents();
+		components.getComponentList().add("GPS");
+    	sut = new Controller(100, components, BatteryLevel.HIGH, Zone.noWIFIGPS, ThresholdPolicy.NORMAL);
         inWifi = inGPS = false;
     }
 
@@ -46,7 +50,7 @@ public class CycabFSM implements FsmModel {
     public void tick() {
         sut.updateBattery(sut.getBattery());
         sut.updateBatteryLevel(sut.getBatteryLevel(), sut.getBattery());
-        sut.updateSignal(sut.getBatteryLevel(), sut.getZone());
+        sut.updateComponents(sut.getBatteryLevel(), sut.getZone());
     }
 
 

@@ -8,16 +8,13 @@ import java.util.ArrayList;
 public class Controller {
 	
 	
-	//FileWriter outputLog = new FileWriter(baseDir+"/logs/logs.txt");
-	
+//FileWriter outputLog = new FileWriter(baseDir+"/logs/logs.txt");
 //	ArrayList components = new ArrayList();
-//	components.add("Wifi");
-//	components.add("GPS");
+
 	int battery = 100;
 	ThresholdPolicy threshold = ThresholdPolicy.NORMAL;
 	//Writer writer;
 	double[] policyArray=new double[3];
-	//SignalMode signal = SignalMode.GPS;
 	BatteryLevel batteryLevel = BatteryLevel.HIGH;
 	Zone zone = Zone.WIFIGPS;
 	CycabComponents cycabComponents = new CycabComponents();
@@ -25,30 +22,15 @@ public class Controller {
 	public Controller(String basedir) {
 			
 	}
-	public Controller( int battery, SignalMode signal, BatteryLevel batteryLevel,
+	public Controller( int battery, CycabComponents components, BatteryLevel batteryLevel,
 			Zone zone, ThresholdPolicy policy) {
 		super();
 		this.battery = battery;
-		this.cycabComponents=cycabComponents;
-		//this.signal = signal;
+		this.cycabComponents = components;
 		this.batteryLevel = batteryLevel;
 		this.zone = zone;
 		this.threshold = policy;
 		this.initThresholdPolicy(this.threshold, this.policyArray);
-	}
-	
-	public void testList() {
-		cycabComponents.getComponentList().add("Wifi");
-		if(cycabComponents.getComponentList().equals("[Wifi]")) {
-		System.out.println("the list now : "+cycabComponents.getComponentList());
-		}
-		cycabComponents.getComponentList().add("GPS");
-		if(cycabComponents.getComponentList().equals("Wifi")) {
-			System.out.println("error");
-		}
-		System.out.println("the list now : "+cycabComponents.getComponentList());
-		cycabComponents.getComponentList().remove("Wifi");
-		System.out.println("the list now : "+cycabComponents.getComponentList());
 	}
 	
     /**
@@ -164,6 +146,13 @@ public class Controller {
 		return batteryLevel;
 	}
 	
+    /**
+     * Updates the Zone based on probabilistic value
+     * @param zone is the zone before the method call 
+     * @param flipCoin is a probability of 50 percent, used to choose between two zones
+     * @param changeZone is a probability of changing zone
+     * @return the updated zone
+     */
 	public Zone updateZone(Zone zone, double flipCoin, double changeZone) /*throws IOException*/ { 
 		if (Math.random() +changeZone > 1.0) {
 			if(zone == Zone.WIFIGPS) {
@@ -217,7 +206,13 @@ public class Controller {
 		}
 		return zone;
 	}
-	public void updateSignal(BatteryLevel batteryLevel, Zone zone) /*throws IOException*/ {
+    /**
+     * Updates the usage of components according to several parameters (zone, battery level etc)
+     * @param batteryLevel is the battery level before the update
+     * @param zone that describes available signals
+     * @return the updated list of components 
+     */
+	public void updateComponents(BatteryLevel batteryLevel, Zone zone) /*throws IOException*/ {
 		ArrayList<String> componentList = cycabComponents.getComponentList();
 		ArrayList<String> tempList = new ArrayList<>();
 		switch(zone) {
@@ -318,62 +313,98 @@ public class Controller {
 		}
 	}
 	
+    /**
+     * Removes the Wifi component according to policy probabilities
+     * @param proba the probability to trigger the removing
+     */
 	public void removeWifi(double proba) {
 		double rand = Math.random();
 		if(rand < proba) {
 			cycabComponents.getComponentList().remove("Wifi");
+			System.out.println("Removing Wifi");
 			System.out.println(cycabComponents.getComponentList());
 		}
 	}
-	
+    /**
+     * Removes the GPS component according to policy probabilities
+     * @param proba the probability to trigger the removing
+     */	
 	public void removeGPS(double proba) {
 		double rand = Math.random();
 		if(rand < proba) {
 			cycabComponents.getComponentList().remove("GPS");
+			System.out.println("Removing GPS");
 			System.out.println(cycabComponents.getComponentList());
 		}
 	}
-	
+    /**
+     * Removes the Radio component according to policy probabilities
+     * @param proba the probability to trigger the removing
+     */
 	public void removeRadio(double proba) {
 		double rand = Math.random();
 		if(rand < proba) {
 			cycabComponents.getComponentList().remove("Radio");
+			System.out.println("Removing radio");
 			System.out.println(cycabComponents.getComponentList());
 		}
 	}
-	
+    /**
+     * Removes the Communication component according to policy probabilities
+     * @param proba the probability to trigger the removing
+     */
 	public void removeCommunication() {
 		cycabComponents.getComponentList().remove("Communication");
+		System.out.println("Removing communication");
 		System.out.println(cycabComponents.getComponentList());
 	}
+    /**
+     * Adds the Wifi component according to policy probabilities
+     * @param proba the probability to trigger the addition
+     */
 	public void addWifi(double proba) {
 		double rand = Math.random();
 		if(rand < proba) {
 			if(!cycabComponents.getComponentList().contains("Wifi")) {
 				cycabComponents.getComponentList().add("Wifi");
+				System.out.println("Adding Wifi");
 				System.out.println(cycabComponents.getComponentList());
 			}
 		}
 	}
 	
+    /**
+     * Adds the GPS component according to policy probabilities
+     * @param proba the probability to trigger the addition
+     */
 	public void addGPS(double proba) {
 
 		double rand = Math.random();
 		if(rand < proba) {
 			if(!cycabComponents.getComponentList().contains("GPS")) {
 				cycabComponents.getComponentList().add("GPS");
+				System.out.println("Adding GPS");
 				System.out.println(cycabComponents.getComponentList());
 			}
 		}
 	}
 	
+    /**
+     * Adds the Communication component according to policy probabilities
+     * @param proba the probability to trigger the addition
+     */
 	public void addCommunication() {
 		if(!cycabComponents.getComponentList().contains("Communication")) {
 			cycabComponents.getComponentList().add("Communication");
+			System.out.println("Adding Communication");
 			System.out.println(cycabComponents.getComponentList());
 		}
 	}
 	
+    /**
+     * Adds the Radio component according to policy probabilities
+     * @param proba the probability to trigger the addition
+     */
 	public void addRadio(double proba) {
 		double rand = Math.random();
 		ArrayList<String> tmpList = new ArrayList<String>();
@@ -381,6 +412,7 @@ public class Controller {
 		if(rand < proba) {
 			if(!cycabComponents.getComponentList().contains("Radio")) {
 				cycabComponents.getComponentList().add("Radio");
+				System.out.println("Adding radio");
 				System.out.println(cycabComponents.getComponentList());
 			}
 		}
@@ -389,6 +421,11 @@ public class Controller {
 	public void closeFile() throws IOException {
 		// writer.close();
 	}
+	
+	/**
+	 * Getters and setters
+	 */
+	
 	public int getBattery() {
 		return battery;
 	}

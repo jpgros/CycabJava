@@ -19,7 +19,10 @@ import java.util.ArrayList;
 public class CycabGenetic {
 
     public static void main(String[] args) throws IOException {
-        Controller controller = new Controller(100, SignalMode.ALL, BatteryLevel.HIGH, Zone.WIFIGPS, ThresholdPolicy.NORMAL);
+    	CycabComponents components = new CycabComponents();
+		components.getComponentList().add("Wifi");
+		components.getComponentList().add("GPS");
+        Controller controller = new Controller(100, components, BatteryLevel.HIGH, Zone.WIFIGPS, ThresholdPolicy.NORMAL);
 
         CycabFSM fsm = new CycabFSM();
 

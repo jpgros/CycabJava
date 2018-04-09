@@ -5,15 +5,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.LayoutStyle.ComponentPlacement;
+
 public class CycabMain {
 
 	public static void main(String[] args) throws IOException {
 	
 		String baseDir=System.getProperty("user.dir");
-		Controller controller= new Controller(100, SignalMode.ALL, BatteryLevel.HIGH, Zone.noWIFInoGPS, ThresholdPolicy.NORMAL);
+		CycabComponents components = new CycabComponents();
+		components.getComponentList().add("Wifi");
+		components.getComponentList().add("GPS");
+		Controller controller= new Controller(100, components, BatteryLevel.HIGH, Zone.noWIFInoGPS, ThresholdPolicy.NORMAL);
 		controller.initFile(baseDir);
 		int cpt=0, cycle=0;
-		controller.testList();
 		double flipCoin = 0.5, changeZone=0.1;
 		double[] policyArray = new double[3];
 		while(controller.getBattery()> 0 && controller.getBattery()<= 100 && cpt<250) {
@@ -21,7 +25,7 @@ public class CycabMain {
 				controller.updateBattery(controller.getBattery());
 				controller.updateBatteryLevel(controller.getBatteryLevel(), controller.getBattery());
 				controller.updateZone(controller.getZone(),flipCoin, changeZone);
-				controller.updateSignal(controller.getBatteryLevel(), controller.getZone());
+				controller.updateComponents(controller.getBatteryLevel(), controller.getZone());
 				try {
 					Thread.sleep(750);
 				} catch (InterruptedException e) {
