@@ -15,6 +15,9 @@ public class Platoon implements Runnable{
 		this.id = id;
 		this.vehicleLeader = vehicleLeader;
 	}
+	public Platoon() {
+		
+	}
 	public void addVehicle(Vehicle v){
 		vehiclesList.add(v);
 	}
@@ -82,6 +85,12 @@ public class Platoon implements Runnable{
 	}
 	public void setVehiclesList(ArrayList<Vehicle> vehiclesList) {
 		this.vehiclesList = vehiclesList;
+	}
+	public UUID getId() {
+		return id;
+	}
+	public void setId(UUID id) {
+		this.id = id;
 	}
 	public UUID getVehicleLeader() {
 		return vehicleLeader;
