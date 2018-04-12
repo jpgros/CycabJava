@@ -28,15 +28,17 @@ public class Vehicle extends Entity implements Runnable {
 	public void run() {
 		int cpt =0;
 		System.out.println("Vehicle id : " + id + " started");
-		while(distance >0 && autonomie>0) {
+		while(distance >0 && autonomie>10) {
 //			cpt++;
 //			if (cpt==9) {
 //				refill();
 //				cpt=0;
 //			}
 			tick();	
+			System.out.println("autonomy " + autonomie);
 			if(idPlatoon==null) {
 				int index = containsEntityOnBatteryLevel(33);
+				//System.out.println("this class = " + this.getClass() + ", list class = " + vehiclePlatoonList.get(index).getClass());
 				if(vehiclePlatoonList.get(index).getClass() == this.getClass()) { // not forget mutex on lists and attributes
 					Vehicle v = (Vehicle) vehiclePlatoonList.get(index);
 					UUID idCreated =UUID.randomUUID();
@@ -55,17 +57,24 @@ public class Vehicle extends Entity implements Runnable {
 					
 					//should launch a new platoon thread
 					//pool.execute(platoon);
+					System.out.println("two vehicules created a platoon");
 				}
 				else {
 					Platoon p = (Platoon) vehiclePlatoonList.get(index);
 					p.getVehiclesList().add(this);
 					vehiclePlatoonList.remove(this);
+					idPlatoon = p.getId(); 
+					System.out.println("a vehicule " + this.getId()+ " rejoined a platoon" + p.getId());
 				}
 			}
 		}
 		System.out.println("Vehicle id : " + id + " stopped");
+		quitPlatoon(idPlatoon);
 		if(distance == 0) System.out.println("destination reached");
-		else if (autonomie == 0 ) System.out.println("No energy left");
+		else if (autonomie > 0 && autonomie < 10 ) { 
+			System.out.println("No energy left");
+			//remove vehicle of platoon list
+		}
 		else System.out.println("error " + autonomie + " "  + distance);
 	}
 	//UUID uniqueKey = UUID.randomUUID();
@@ -116,6 +125,24 @@ public class Vehicle extends Entity implements Runnable {
 		if(index > vehiclePlatoonList.size()) return -1;
 		return index;
 	}
+	
+	public void quitPlatoon(UUID idPlatoon) {
+		if(idPlatoon != null) {
+			int index =0;
+			boolean notFounded = true;
+			Platoon p = new Platoon();
+			while(notFounded) {
+				if(vehiclePlatoonList.get(index).getClass() == p.getClass()) {
+					p = (Platoon) vehiclePlatoonList.get(index);
+					if(idPlatoon == p.getId()) {
+						p.getVehiclesList().remove(this);
+						idPlatoon=null;
+						System.out.println("vehicule quitted platoon");
+					}
+				}
+			}
+		}
+	}
 
 	public void join(Vehicle v) {
 		if (this.myPlatoon != null) return;
@@ -139,7 +166,6 @@ public class Vehicle extends Entity implements Runnable {
 	}
 
 	public void tick() {
-
 		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
 		this.distance -= 10;
 

@@ -17,6 +17,11 @@ public class Platoon extends Entity implements Runnable {
 		this.vehicleLeader = vehicleLeader;
 	}
 
+	public Platoon() {
+	    
+
+    }
+
 	public Platoon(Vehicle _leader, Vehicle... others) {
 	    leader = _leader;
 		id = UUID.randomUUID();
@@ -29,7 +34,6 @@ public class Platoon extends Entity implements Runnable {
 		}
 		System.out.println("Platoon created " + id);
 	}
-
 
 	public void addVehicle(Vehicle v){
 		vehiclesList.add(v);
@@ -99,6 +103,12 @@ public class Platoon extends Entity implements Runnable {
 	}
 	public void setVehiclesList(ArrayList<Vehicle> vehiclesList) {
 		this.vehiclesList = vehiclesList;
+	}
+	public UUID getId() {
+		return id;
+	}
+	public void setId(UUID id) {
+		this.id = id;
 	}
 	public UUID getVehicleLeader() {
 		return vehicleLeader;
