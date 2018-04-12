@@ -3,18 +3,23 @@ import java.util.UUID;
 
 import javax.sql.PooledConnection;
 
+
 public class Vehicle extends Entity implements Runnable {
 	double autonomie;
-	int distance;
+	double distance;
 	UUID id;
 	UUID idPlatoon = null;
 	ArrayList<Entity> vehiclePlatoonList;
 	Platoon myPlatoon = null;
-
 	final static double DEC_ENERGY = 1;
 	final static double DEC_LEADER = DEC_ENERGY * 1.2;
+	final static double LOW_DIST = 40;
+	final static double VLOW_DIST = 20;
+	final static double LOW_LEADER_BATTERY = 33;
+	final static double LOW_BATTERY = 10;
+//	final static double VLOW_BATTERY = 5;
 	
-	public Vehicle (int autonomie, int distance, UUID id, ArrayList<Entity> vehiclePlatoonList) {
+	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList) {
 		this.autonomie = autonomie;
 		this.distance = distance;
 		this.id = id;
@@ -84,7 +89,7 @@ public class Vehicle extends Entity implements Runnable {
 	public void setAutonomie(double autonomie) {
 		this.autonomie = autonomie;
 	}
-	public int getDistance() {
+	public double getDistance() {
 		return distance;
 	}
 	public void setDistance(int distance) {
@@ -170,11 +175,31 @@ public class Vehicle extends Entity implements Runnable {
 		this.distance -= 10;
 
 		// TODO
-
-		// distance < seuil --> quitte le peloton
-
-		// leader && [second plus de batterie] --> relai
-
+		//Add each tick only new policies will be added
+		if(myPlatoon!=null) {
+			// distance < seuil --> quitte le peloton
+			if(distance < VLOW_DIST) {
+				Element elt = new Element("QuitPlatoon", Priority.HIGH, this);
+				myPlatoon.policies.addElement(elt); 
+			}
+			else if(distance < LOW_DIST) {
+				Element elt = new Element("QuitPlatoon", Priority.MEDIUM, this);
+				myPlatoon.policies.addElement(elt); 
+			}
+			if(autonomie < LOW_BATTERY) {
+				Element elt = new Element("QuitPlatoon", Priority.HIGH, this);
+			}
+			if(this == myPlatoon.leader && autonomie < LOW_LEADER_BATTERY) {
+				Element elt = new Element("Relay", Priority.HIGH);
+				myPlatoon.policies.addElement(elt);
+			}
+			
+			//leader ask platoon to choose wich adaptation policy to choose
+			if(this == myPlatoon.leader) {
+				myPlatoon.tickPolicies();
+			}
+			// leader && [second plus de batterie] --> relai
+		}
 	}
 
 	public String getDisplayString() {
