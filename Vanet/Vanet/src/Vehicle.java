@@ -3,24 +3,24 @@ import java.util.UUID;
 
 import javax.sql.PooledConnection;
 
-public class Vehicle implements Runnable{
-	int autonomie;
+public class Vehicle extends Entity implements Runnable {
+	double autonomie;
 	int distance;
 	UUID id;
 	UUID idPlatoon = null;
-	ArrayList<Object> vehiclePlatoonList;
+	ArrayList<Entity> vehiclePlatoonList;
+	Platoon myPlatoon = null;
+
+	final static double DEC_ENERGY = 1;
+	final static double DEC_LEADER = DEC_ENERGY * 1.2;
 	
-	public Vehicle (int autonomie, int distance, UUID id, ArrayList<Object> vehiclePlatoonList) {
+	public Vehicle (int autonomie, int distance, UUID id, ArrayList<Entity> vehiclePlatoonList) {
 		this.autonomie = autonomie;
 		this.distance = distance;
 		this.id = id;
 		this.vehiclePlatoonList = vehiclePlatoonList;
 	}
-	public void tick() {
-		this.autonomie -= 10;
-		this.distance -=10;
-	}
-	
+
 	public void refill() {
 		this.autonomie =100;
 	}
@@ -69,10 +69,10 @@ public class Vehicle implements Runnable{
 		else System.out.println("error " + autonomie + " "  + distance);
 	}
 	//UUID uniqueKey = UUID.randomUUID();
-	public int getAutonomie() {
+	public double getAutonomie() {
 		return autonomie;
 	}
-	public void setAutonomie(int autonomie) {
+	public void setAutonomie(double autonomie) {
 		this.autonomie = autonomie;
 	}
 	public int getDistance() {
@@ -115,6 +115,44 @@ public class Vehicle implements Runnable{
 		}
 		if(index > vehiclePlatoonList.size()) return -1;
 		return index;
+	}
+
+	public void join(Vehicle v) {
+		if (this.myPlatoon != null) return;
+		if (v.myPlatoon != null) {
+			v.myPlatoon.accept(this);
+		}
+		else {
+			v.createPlatoon(this);
+		}
+	}
+
+	public void setPlatoon(Platoon p) {
+		myPlatoon = p;
+	}
+
+	public void createPlatoon(Vehicle v) {
+		// TODO -- adaptation policy
+		if (true) {
+			Platoon platoon = new Platoon(this, v);
+		}
+	}
+
+	public void tick() {
+
+		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
+		this.distance -= 10;
+
+		// TODO
+
+		// distance < seuil --> quitte le peloton
+
+		// leader && [second plus de batterie] --> relai
+
+	}
+
+	public String getDisplayString() {
+		return "auto: " + autonomie + ", distance: " + distance;
 	}
 
 }

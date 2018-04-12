@@ -1,20 +1,36 @@
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class Platoon implements Runnable{
-	int consommationLeader;
+public class Platoon extends Entity implements Runnable {
+	int consommationLeader = 2;
 	int DistanceStation[] = new int[2]; //unused
-	int numberVehicleMax; //unused
-    ArrayList<Vehicle> vehiclesList = new ArrayList<>();
+	final static int NUMBER_VEHICLE_MAX = 5; //unused
+    ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     UUID id;
 	UUID vehicleLeader = null;
+	Vehicle leader;
 	
 	public Platoon(int consommationLeader, int numberVehicleMax,UUID id, UUID vehicleLeader) {
 		this.consommationLeader = consommationLeader;
-		this.numberVehicleMax = numberVehicleMax;
+		//this.NUMBER_VEHICLE_MAX = numberVehicleMax;
 		this.id = id;
 		this.vehicleLeader = vehicleLeader;
 	}
+
+	public Platoon(Vehicle _leader, Vehicle... others) {
+	    leader = _leader;
+		id = UUID.randomUUID();
+		vehiclesList.add(leader);
+		vehicleLeader = leader.id;
+		leader.setPlatoon(this);
+		for (Vehicle v : others) {
+			vehiclesList.add(v);
+			v.setPlatoon(this);
+		}
+		System.out.println("Platoon created " + id);
+	}
+
+
 	public void addVehicle(Vehicle v){
 		vehiclesList.add(v);
 	}
@@ -34,6 +50,7 @@ public class Platoon implements Runnable{
 	public void run() {
 		tick();
 	}
+	
 	public void tick() {
 		vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
 	}
@@ -72,11 +89,11 @@ public class Platoon implements Runnable{
 		DistanceStation = distanceStation;
 	}
 	public int getNumberVehicleMax() {
-		return numberVehicleMax;
+		return NUMBER_VEHICLE_MAX;
 	}
-	public void setNumberVehicleMax(int numberVehicleMax) {
-		this.numberVehicleMax = numberVehicleMax;
-	}
+	/*public void setNumberVehicleMax(int numberVehicleMax) {
+		this.NUMBER_VEHICLE_MAX = numberVehicleMax;
+	} */
 	public ArrayList<Vehicle> getVehiclesList() {
 		return vehiclesList;
 	}
@@ -90,5 +107,29 @@ public class Platoon implements Runnable{
 		this.vehicleLeader = vehicleLeader;
 	}
 	
-	
+
+	public void accept(Vehicle v) {
+		// TODO -- adaptation policy
+		if (vehiclesList.size() < NUMBER_VEHICLE_MAX) {
+			vehiclesList.add(v);
+			v.setPlatoon(this);
+			System.out.println("Vehicle " + v + " joined platoon" + this);
+		}
+	}
+
+	public String toString() {
+		return id.toString();
+	}
+
+	public void affiche() {
+	    System.out.print("[");
+	    for (int i=0; i < vehiclesList.size(); i++) {
+	        if (i > 0) {
+	            System.out.print(" | ");
+            }
+	        System.out.print(vehiclesList.get(i).getDisplayString());
+        }
+        System.out.println("]");
+    }
+
 }
