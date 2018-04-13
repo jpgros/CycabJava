@@ -16,46 +16,47 @@ public class VanetFSM implements FsmModel {
     /**
      * Automaton describing the FSM of a Cycab
      */
-    ArrayList<Vehicle> vanet = new ArrayList<Vehicle>();
+    Road sut;
     
     public VanetFSM() {
-
+        sut = new Road();
     }
 
     public String getState() {
-        return vanet.toString();
+        return sut.toString();
     }
 
 
     public void reset(boolean testing) {
-        vanet.clear();
+        sut.reset();
     }
 
     public boolean tickGuard() {
         return true;
     }
-    public double tickProba() { return 0.95; }
+    public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; }
     @Action
-    public void tick() {
-        for (Vehicle v : vanet) {
-            v.tick();
-        }
+    public Object[] tick() {
+        sut.tick();
+        return new Object[]{ sut };
     }
 
-    public boolean addVehicleGuard() { return vanet.size() < 5; }
-    public double addVehicleProba() { return 0.02; }
+    public boolean addVehicleGuard() { return ! sut.isFull(); }
+    public double addVehicleProba() { return sut.nbVehiclesOnRoad() == 0 ? 1 : 0.05; }
     @Action
-    public void addVehicle() {
-        Vehicle v = new Vehicle(100, (int)(Math.random() * 5000) + 1000, UUID.randomUUID(), null);
-        vanet.add(v);
+    public Object[] addVehicle() {
+        int auto = (int) (Math.random() * 10) + 20;
+        int dist = (int)(Math.random() * 5000) + 1000;
+        sut.addVehicle(auto, dist);
+        return new Object[]{ sut, auto, dist };
     }
 
 
     public boolean requestJoinGuard() {
-        if (vanet.size() < 2) {
+        if (sut.nbVehiclesOnRoad() < 2) {
             return false;
         }
-        for (Vehicle v : vanet) {
+        for (Vehicle v : sut) {
             if (v.getPlatoon() == null) {
                 return true;
             }
@@ -66,21 +67,45 @@ public class VanetFSM implements FsmModel {
         return 0.03;
     }
     @Action
-    public void requestJoin() {
-        int start = (int)(Math.random() * vanet.size());
-        for (int i=0; i < vanet.size(); i++) {
-            int j = (i + start) % vanet.size();
-            if (vanet.get(j).getPlatoon() == null) {
+    public Object[] requestJoin() {
+        int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
+        for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
+            int j = (i + start) % sut.nbVehiclesOnRoad();
+            if (sut.getVehicle(j).getPlatoon() == null) {
                 int k = 0;
                 do {
-                    k = (int) (Math.random() * vanet.size());
+                    k = (int) (Math.random() * sut.nbVehiclesOnRoad());
                 }
-                while (k != j);
-                vanet.get(j).join(vanet.get(k));
+                while (k == j);
+                System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
+                return new Object[]{ sut, j, k };
             }
         }
+        return new Object[]{ sut }; // should not happen
     }
-    
 
+
+
+    public boolean forceQuitPlatoonGuard() {
+        for (Vehicle v : sut) {
+            if (v.getPlatoon() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.05; }
+    @Action
+    public Object[] forceQuitPlatoon() {
+        int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
+        for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
+            int j = (i + start) % sut.nbVehiclesOnRoad();
+            if (sut.getVehicle(j).getPlatoon() != null) {
+                sut.forceQuitPlatoon(j);
+                return new Object[]{sut, j};
+            }
+        }
+        return new Object[]{ sut }; // should not happen
+    }
 }
 

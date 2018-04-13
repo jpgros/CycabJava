@@ -10,13 +10,48 @@ public class VanetMain {
 
 	public static void main(String[] args) {
 
+		Road r = new Road();
+		r.addVehicle(40, (int)(Math.random() * 1000));
+		r.addVehicle(40, (int)(Math.random() * 1000));
+		r.addVehicle(40, (int)(Math.random() * 1000));
+		r.join(0, 1);
+		r.join(2, 1);
+		int i=0;
+		while (i < 10) {
+			i++;
+			r.tick();
+			r.affiche();
+		}
+
+		/*
 		Vehicle[] vehicles = new Vehicle[3];
 		for(int i=0; i<vehicles.length; i++) {
-			vehicles[i] = new Vehicle(100, (int)(Math.random() * 1000), UUID.randomUUID(),vehiclePlatoonList);
+			vehicles[i] = new Vehicle(40, (int)(Math.random() * 1000), UUID.randomUUID(),vehiclePlatoonList);
 			vehiclePlatoonList.add(vehicles[i]);
 			// pool.execute(vehicles[i]);
 		}
 
+		vehicles[0].join(vehicles[1]);
+		vehicles[2].join(vehicles[1]);
+
+		int i=0;
+		while (i < 10) {
+			i++;
+			System.out.println("tick : " + i);
+			for (Vehicle v : vehicles) {
+				v.tick();
+			}
+			for (Vehicle v : vehicles) {
+				if (v.myPlatoon != null && v.myPlatoon.leader == v) {
+					v.myPlatoon.affiche();
+					v.myPlatoon.tick();
+				}
+			}
+
+		}
+		// vehicles[0].quitPlatoon();
+
+		/*
 		int i=0;
 		while (i < 100) {
 			i++;
@@ -42,6 +77,7 @@ public class VanetMain {
 			}
 
 		}
+		*/
 		
 	}
 

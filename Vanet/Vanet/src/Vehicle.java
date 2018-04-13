@@ -27,6 +27,7 @@ public class Vehicle extends Entity implements Runnable {
 	}
 
 	public void refill() {
+		System.out.println("Refill vehicle " + id);
 		this.autonomie =100;
 	}
 	
@@ -74,7 +75,7 @@ public class Vehicle extends Entity implements Runnable {
 			}
 		}
 		System.out.println("Vehicle id : " + id + " stopped");
-		quitPlatoon(idPlatoon);
+		quitPlatoon(/*idPlatoon*/);
 		if(distance == 0) System.out.println("destination reached");
 		else if (autonomie > 0 && autonomie < 10 ) { 
 			System.out.println("No energy left");
@@ -131,22 +132,29 @@ public class Vehicle extends Entity implements Runnable {
 		return index;
 	}
 	
-	public void quitPlatoon(UUID idPlatoon) {
-		if(idPlatoon != null) {
-			int index =0;
-			boolean notFounded = true;
-			Platoon p = new Platoon();
-			while(notFounded) {
-				if(vehiclePlatoonList.get(index).getClass() == p.getClass()) {
-					p = (Platoon) vehiclePlatoonList.get(index);
-					if(idPlatoon == p.getId()) {
-						p.getVehiclesList().remove(this);
-						idPlatoon=null;
-						System.out.println("vehicule quitted platoon");
+	public void quitPlatoon(/*UUID idPlatoon*/) {
+		if (myPlatoon != null) {
+			System.out.println("vehicle " + this.getId() + " force-quitted platoon "+ this.getPlatoon().id  );
+			myPlatoon.deleteVehicle(this);
+		}
+		/*
+			if(idPlatoon != null) {
+				int index =0;
+				boolean notFounded = true;
+				Platoon p = new Platoon();
+				while(notFounded) {
+					if(vehiclePlatoonList.get(index).getClass() == p.getClass()) {
+						p = (Platoon) vehiclePlatoonList.get(index);
+						if(idPlatoon == p.getId()) {
+							p.getVehiclesList().remove(this);
+							idPlatoon=null;
+							System.out.println("vehicule quitted platoon");
+						}
 					}
 				}
 			}
 		}
+		*/
 	}
 
 	public Platoon getPlatoon() {
@@ -192,22 +200,29 @@ public class Vehicle extends Entity implements Runnable {
 			}
 			if(autonomie < LOW_BATTERY) {
 				Element elt = new Element("QuitPlatoon", Priority.HIGH, this);
+				myPlatoon.policies.addElement(elt);
 			}
 			if(this == myPlatoon.leader && autonomie < LOW_LEADER_BATTERY) {
-				Element elt = new Element("Relay", Priority.HIGH);
+				Element elt = new Element("Relay", Priority.HIGH, this);
 				myPlatoon.policies.addElement(elt);
 			}
 			
 			//leader ask platoon to choose wich adaptation policy to choose
 			if(this == myPlatoon.leader) {
-				myPlatoon.tick();
+			//	myPlatoon.tick();
 			}
 			// leader && [second plus de batterie] --> relai
+		}
+		else {
+			if (autonomie < LOW_BATTERY) {
+				refill();	// TODO: improve
+			}
 		}
 	}
 
 	public String getDisplayString() {
-		return "auto: " + autonomie + ", distance: " + distance;
+		String l = (myPlatoon != null && myPlatoon.leader == this) ? "*" : "";
+		return "id: " + id.toString().split("-")[0] + l + ", auto: " + autonomie + ", distance: " + distance;
 	}
 
 }

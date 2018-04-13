@@ -37,6 +37,9 @@ public class Element{
 	public void setPriority(Priority priority) {
 		this.priority = priority;
 	}
-	
+
+	public String toString() {
+		return name + "(" + vehicle.id + ") -> " + priority;
+	}
 
 }

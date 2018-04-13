@@ -24,10 +24,10 @@ public class VanetGenetic {
 
         // initialize population using biased-random exploration of a FSM.
         StochasticTester st = new StochasticTester(fsm);
-        ArrayList<MyTest> initial = st.generate(10, 30);
+        ArrayList<MyTest> initial = st.generate(10, 50);
         for (MyTest mt : initial) {
             double[] fits = new double[mt.size()];
-            double min = replayAndEvaluateTest(fsm, mt, fits);
+            double min = 0; // replayAndEvaluateTest(fsm, mt, fits);
             System.out.print("(" + min + ") [");
             for (int i=0; i < mt.size(); i++) {
                 if (i > 0) System.out.print(", ");
@@ -56,7 +56,7 @@ public class VanetGenetic {
         fsm.reset(true);
         // CyCabProperty prop = new Property2();
         for (int i=0; i < t.size(); i++) {
-            String step = t.getStepAt(i);
+            String step = ""; // t.getStepAt(i);
             try {
                 Method m = fsm.getClass().getDeclaredMethod(step);
                 m.invoke(fsm);

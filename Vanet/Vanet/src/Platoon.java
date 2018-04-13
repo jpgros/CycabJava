@@ -67,7 +67,8 @@ public class Platoon extends Entity implements Runnable {
 					relay();
 				}
 				deleteVehicle(elt.vehicle);
-			}
+                System.out.println("vehicle " + elt.vehicle.getId() + " quitted platoon "+ this.id  );
+            }
 		}
 	}
 	
@@ -85,7 +86,7 @@ public class Platoon extends Entity implements Runnable {
 	//}
 	
 	public void relay() {
-		int index = containsVehicleOnBatteryLevel(vehiclesList,33); 
+		int index = containsVehicleOnBatteryLevel(vehiclesList,/*33*/ (int)leader.autonomie + 1);
 		if (index !=-1) {
 			System.out.print("Leader vehicle "+ leader.getId());
 			leader = vehiclesList.get(index);
@@ -93,13 +94,16 @@ public class Platoon extends Entity implements Runnable {
 		}
 	
 		else {
-			if (vehiclesList.size()>0) {
-				leader = vehiclesList.get(0);
+            System.out.println("No better vehicle avaiblable");
+            /*
+            if (vehiclesList.size()>0) {
+				leader = vehiclesList.get((int)(Math.random() * vehiclesList.size()));
 				System.out.println("Leader vehicle replaced by random " + leader.getId());
 			}
 			else {
 				System.out.println("No more vehicle avaiblable");
 			}
+			*/
 		}
 		
 	}
@@ -113,15 +117,22 @@ public class Platoon extends Entity implements Runnable {
 			//int index = Math.abs(random.nextInt(vehiclesList.size()));
 			if(vehiclesList.size()>0) leader = vehiclesList.get(0);
 		}
-		System.out.println("vehicle " + v.getId() + " quitted platoon "+ this.id  );
-		
+		policies.removeForVehicle(v);
+
 	}
 	
 	public void addVehicle() {
 		
 	}
 	public int containsVehicleOnBatteryLevel(ArrayList<Vehicle> platoonList, int batteryExiged) {
-		boolean notFounded = true;
+		for (int i=0; i < platoonList.size(); i++) {
+		    if (platoonList.get(i).autonomie >= batteryExiged) {
+		        return i;
+            }
+        }
+        return -1;
+		/*
+	    boolean notFounded = true;
 		int index =0;
 		while(notFounded && index < platoonList.size()) {
 			notFounded = platoonList.get(index).getAutonomie() < batteryExiged;
@@ -130,6 +141,7 @@ public class Platoon extends Entity implements Runnable {
 		if(index>=platoonList.size()) return -1;
 		index --; //to cancel the last index++
 		return index;
+		*/
 	}
 	
 	public void accept(Vehicle v) {
@@ -154,6 +166,7 @@ public class Platoon extends Entity implements Runnable {
 	        System.out.print(vehiclesList.get(i).getDisplayString());
         }
         System.out.println("]");
+	    System.out.println("Policy: " + policies);
     }
 	public int getConsommationLeader() {
 		return consommationLeader;

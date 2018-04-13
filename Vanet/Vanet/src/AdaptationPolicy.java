@@ -63,6 +63,22 @@ public class AdaptationPolicy {
 		if (index >=listPolicy.size()) return -1;
 		return index;
 	}
-	
+
+	public void removeForVehicle(Vehicle v) {
+		int i = 0;
+		while (i < listPolicy.size()) {
+			if (listPolicy.get(i).vehicle == v) {
+				listPolicy.remove(i);
+			}
+			else {
+				i++;
+			}
+		}
+	}
+
+
+	public String toString() {
+		return listPolicy.toString();
+	}
 }
 

@@ -42,6 +42,7 @@ public class StochasticTester {
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         // for each of the resulting test cases
         for (int i=0; i < nb; i++) {
+            System.out.println("== Generating test #" + i + " ==");
             // initialize step counter
             int j=0;
             // reset FSM exploration
@@ -52,7 +53,7 @@ public class StochasticTester {
             // while limit has not been reached and there exists a next step
             do {
                 // compute next step
-                String newStep = computeNextStep();
+                MyStep newStep = computeNextStep();
                 b = (newStep != null);
                 if (b) {
                     currentTest.append(newStep);
@@ -73,7 +74,7 @@ public class StochasticTester {
      *  Side-effect: modifies the FSM. 
      * @return a String providing the name of the action that was invoked. 
      */
-    private String computeNextStep() {
+    private MyStep computeNextStep() {
         String ret = null;
         double sum = 0;
         double rand = 0;
@@ -87,10 +88,13 @@ public class StochasticTester {
             for (Method act : actionsReady.keySet()) {
                 sum += actionsReady.get(act);
                 if (rand <= sum) {
-                    String name = act.getName();
                     try {
-                        act.invoke(fsm);
-                        return act.getName();
+                        Object[] tab = (Object[]) act.invoke(fsm);
+                        Object[] params = new Object[tab.length - 1];
+                        for (int i=1; i < tab.length; i++) {
+                            params[i-1] = tab[i];
+                        }
+                        return new MyStep(act, tab[0], params);
                     } catch (IllegalAccessException e) {
                         System.err.println("Illegal access to " + act.getName());
                         System.err.println("Shouldn't have happened");
@@ -98,7 +102,7 @@ public class StochasticTester {
                     } catch (InvocationTargetException e) {
                         System.err.println("Exception on target invocation on " + act.getName());
                         System.err.println("Shouldn't have happened");
-                        // e.printStackTrace(System.err);
+                        e.printStackTrace(System.err);
                     }
                 }
             }
@@ -185,14 +189,14 @@ public class StochasticTester {
 /**
  * Simple class encapsulating a test as a sequence (ArrayList) of String representing action names. 
  */
-class MyTest implements Iterable<String> {
+class MyTest implements Iterable<MyStep> {
 
-    ArrayList<String> steps;
+    ArrayList<MyStep> steps;
     public MyTest() {
-        steps = new ArrayList<String>();
+        steps = new ArrayList<MyStep>();
     }
 
-    public void append(String step) {
+    public void append(MyStep step) {
         steps.add(step);
     }
 
@@ -200,7 +204,7 @@ class MyTest implements Iterable<String> {
         return steps.size();
     }
 
-    public String getStepAt(int i) {
+    public MyStep getStepAt(int i) {
         return steps.get(i);
     }
 
@@ -208,8 +212,35 @@ class MyTest implements Iterable<String> {
         return steps.toString();
     }
 
-    public Iterator<String> iterator() {
+    public Iterator<MyStep> iterator() {
         return steps.iterator();
     }
 
+}
+
+class MyStep {
+    Method meth;
+    Object instance;
+    Object[] params;
+
+    public MyStep(Method _m, Object _i, Object[] _p) {
+        meth = _m;
+        instance = _i;
+        params = _p;
+    }
+
+    public void execute() throws InvocationTargetException, IllegalAccessException {
+        meth.invoke(instance, params);
+    }
+
+    public String toString() {
+        String ret = /*instance + "." +*/ meth.getName() + "(";
+        for (int i=0; i < params.length; i++) {
+            if (i > 0) {
+                ret += ",";
+            }
+            ret += params[i].toString();
+        }
+        return ret + ")";
+    }
 }
