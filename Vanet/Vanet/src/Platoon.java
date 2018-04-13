@@ -86,7 +86,22 @@ public class Platoon extends Entity implements Runnable {
 	
 	public void relay() {
 		int index = containsVehicleOnBatteryLevel(vehiclesList,33); 
-		if (index !=-1)	vehicleLeader = vehiclesList.get(index).getId(); 
+		if (index !=-1) {
+			System.out.print("Leader vehicle "+ leader.getId());
+			leader = vehiclesList.get(index);
+			 System.out.println(" replaced by elected " + leader.getId());
+		}
+	
+		else {
+			if (vehiclesList.size()>0) {
+				leader = vehiclesList.get(0);
+				System.out.println("Leader vehicle replaced by random " + leader.getId());
+			}
+			else {
+				System.out.println("No more vehicle avaiblable");
+			}
+		}
+		
 	}
 	
 	public void deleteVehicle(Vehicle v){
@@ -112,7 +127,7 @@ public class Platoon extends Entity implements Runnable {
 			notFounded = platoonList.get(index).getAutonomie() < batteryExiged;
 			index++;
 		}
-		if(index>platoonList.size()) return -1;
+		if(index>=platoonList.size()) return -1;
 		index --; //to cancel the last index++
 		return index;
 	}
