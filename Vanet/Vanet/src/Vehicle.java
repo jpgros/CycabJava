@@ -144,6 +144,10 @@ public class Vehicle extends Entity implements Runnable {
 		}
 	}
 
+	public Platoon getPlatoon() {
+		return myPlatoon;
+	}
+
 	public void join(Vehicle v) {
 		if (this.myPlatoon != null) return;
 		if (v.myPlatoon != null) {
