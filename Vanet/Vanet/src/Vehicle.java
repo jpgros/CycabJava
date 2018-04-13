@@ -196,7 +196,7 @@ public class Vehicle extends Entity implements Runnable {
 			
 			//leader ask platoon to choose wich adaptation policy to choose
 			if(this == myPlatoon.leader) {
-				myPlatoon.tickPolicies();
+				myPlatoon.tick();
 			}
 			// leader && [second plus de batterie] --> relai
 		}

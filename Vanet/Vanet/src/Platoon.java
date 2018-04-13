@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.UUID;
 
 public class Platoon extends Entity implements Runnable {
@@ -57,10 +58,7 @@ public class Platoon extends Entity implements Runnable {
 	}
 	
 	public void tick() {
-		vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
-	}
-	
-	public void tickPolicies() {
+		//vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
 		if(policies.listPolicy.size()>0) {
 			Element elt = policies.listPolicy.remove(0);
 			if(elt.name == "Relay") this.relay();
@@ -73,16 +71,35 @@ public class Platoon extends Entity implements Runnable {
 		}
 	}
 	
+//	public void tickPolicies() {
+//		if(policies.listPolicy.size()>0) {
+//			Element elt = policies.listPolicy.remove(0);
+//			if(elt.name == "Relay") this.relay();
+//			else if(elt.name == "QuitPlatoon") {
+//				if(elt.vehicle == leader) {
+//					relay();
+//				}
+//				deleteVehicle(elt.vehicle);
+//			}
+//		}
+	//}
+	
 	public void relay() {
-		int index = containsVehicleOnBatteryLevel(vehiclesList,33); //wrong idnex method
-		if (index !=-1)	vehicleLeader = vehiclesList.get(index).getId(); //can be a problem leader will be always at position leader a leave anyway with qitting method
+		int index = containsVehicleOnBatteryLevel(vehiclesList,33); 
+		if (index !=-1)	vehicleLeader = vehiclesList.get(index).getId(); 
 	}
 	
 	public void deleteVehicle(Vehicle v){
 		v.idPlatoon = null;
 		v.myPlatoon = null;
 		this.vehiclesList.remove(v);
+		if(v==leader) { // if deleted vehicle was leader, we elect randomly a new leader, the adaptation policies will elect a new one if he does not fits the requirements
+			//Random random = new Random();
+			//int index = Math.abs(random.nextInt(vehiclesList.size()));
+			if(vehiclesList.size()>0) leader = vehiclesList.get(0);
+		}
 		System.out.println("vehicle " + v.getId() + " quitted platoon "+ this.id  );
+		
 	}
 	
 	public void addVehicle() {
