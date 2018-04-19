@@ -13,7 +13,8 @@ import static java.util.UUID.*;
 public class Road implements Iterable<Vehicle> {
 
     final static int MAX_CAPACITY = 5;
-
+	final static double FREQUENCYSTATION = 20;
+    double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
 
 
@@ -22,7 +23,7 @@ public class Road implements Iterable<Vehicle> {
     }
 
     public int addVehicle(double _auto, double _distance) {
-        allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null));
+        allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this));
         System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
         return allVehicles.size() - 1;
     }
@@ -59,6 +60,7 @@ public class Road implements Iterable<Vehicle> {
                 v.getPlatoon().tick();
             }
         }
+		updateDistStas();
         affiche();
     }
 
@@ -75,7 +77,14 @@ public class Road implements Iterable<Vehicle> {
         }
         System.out.println();
     }
-
+	public void updateDistStas(){
+		distanceStation[0]--;
+		if(distanceStation[0]<=0) {
+			if(distanceStation[0]<0) System.out.println("distance station negative, should not happen");
+			distanceStation[0]=distanceStation[1];
+			distanceStation[1] = FREQUENCYSTATION;
+		}
+	}
     public Iterator<Vehicle> iterator() {
         return allVehicles.iterator();
     }
@@ -91,4 +100,10 @@ public class Road implements Iterable<Vehicle> {
     public Vehicle getVehicle(int j) {
         return allVehicles.get(j);
     }
+	public double[] getDistanceStation() {
+		return distanceStation;
+	}
+	public void setDistanceStation(double[] distanceStas) {
+		distanceStation = distanceStas;
+	}
 }

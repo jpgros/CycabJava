@@ -1,14 +1,14 @@
 public class Element{
-	String name;
+	PolicyName name;
 	Priority priority;
 	Vehicle vehicle;
 	
-	public Element(String n, Priority p) {
+	public Element(PolicyName n, Priority p) {
 		name =n;
 		priority=p;
 	}
 	
-	public Element(String n, Priority p, Vehicle v) {
+	public Element(PolicyName n, Priority p, Vehicle v) {
 		name =n;
 		priority=p;
 		vehicle = v;
@@ -22,11 +22,11 @@ public class Element{
 	}
 
 
-	public String getName() {
+	public PolicyName getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(PolicyName name) {
 		this.name = name;
 	}
 

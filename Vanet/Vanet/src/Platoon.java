@@ -4,14 +4,12 @@ import java.util.UUID;
 
 public class Platoon extends Entity implements Runnable {
 	int consommationLeader = 2;
-	int DistanceStation[] = new int[2]; //unused
 	final static int NUMBER_VEHICLE_MAX = 5; //unused
     ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     UUID id;
 	UUID vehicleLeader = null;
 	Vehicle leader;
 	AdaptationPolicy policies =new AdaptationPolicy();
-
 	public Platoon(int consommationLeader, int numberVehicleMax,UUID id, UUID vehicleLeader) {
 		this.consommationLeader = consommationLeader;
 		//this.NUMBER_VEHICLE_MAX = numberVehicleMax;
@@ -19,14 +17,13 @@ public class Platoon extends Entity implements Runnable {
 		this.vehicleLeader = vehicleLeader;
 	}
 
-	public Platoon() {
-	    
+	public Platoon() {   
 
     }
 
 	public Platoon(Vehicle _leader, Vehicle... others) {
 	    leader = _leader;
-		id = UUID.randomUUID();
+	    id = UUID.randomUUID();
 		vehiclesList.add(leader);
 		vehicleLeader = leader.id;
 		leader.setPlatoon(this);
@@ -61,40 +58,43 @@ public class Platoon extends Entity implements Runnable {
 		//vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
 		if(policies.listPolicy.size()>0) {
 			Element elt = policies.listPolicy.remove(0);
-			if(elt.name == "Relay") this.relay();
-			else if(elt.name == "QuitPlatoon") {
+			if(elt.name == PolicyName.RELAY) this.relay();
+			else if(elt.name == PolicyName.QUITFAILURE || elt.name == PolicyName.QUITFORSTATION || elt.name == PolicyName.QUITFORSTATION) {
 				if(elt.vehicle == leader) {
 					relay();
 				}
 				deleteVehicle(elt.vehicle);
-                System.out.println("vehicle " + elt.vehicle.getId() + " quitted platoon "+ this.id  );
+				switch (elt.name) {
+				case QUITFAILURE:
+					System.out.println("vehicle " + elt.vehicle.getId() + " quitted platoon due to failure"+ this.id  );
+					break;
+				case QUITFORSTATION:
+					System.out.println("vehicle " + elt.vehicle.getId() + " quitted platoon due to station"+ this.id  );
+					break;
+				case QUITPLATOON:
+					System.out.println("vehicle " + elt.vehicle.getId() + " quitted platoon due to user"+ this.id  ); // or distance reached
+					break;
+				default:
+					System.out.println("Error, policy name not verified properly");
+					break;
+				}
+                
             }
 		}
 	}
 	
-//	public void tickPolicies() {
-//		if(policies.listPolicy.size()>0) {
-//			Element elt = policies.listPolicy.remove(0);
-//			if(elt.name == "Relay") this.relay();
-//			else if(elt.name == "QuitPlatoon") {
-//				if(elt.vehicle == leader) {
-//					relay();
-//				}
-//				deleteVehicle(elt.vehicle);
-//			}
-//		}
-	//}
 	
 	public void relay() {
-		int index = containsVehicleOnBatteryLevel(vehiclesList,/*33*/ (int)leader.autonomie + 1);
+		int index = containsVehicleOnScore(vehiclesList,/*33*/ leader.autonomie + 1, leader.distance);
 		if (index !=-1) {
 			System.out.print("Leader vehicle "+ leader.getId());
 			leader = vehiclesList.get(index);
 			 System.out.println(" replaced by elected " + leader.getId());
 		}
 	
-		else {
-            System.out.println("No better vehicle avaiblable");
+		else { // remove platoon
+			deletePlatoon();
+            System.out.println("No better vehicle available, Platoon deleted");
             /*
             if (vehiclesList.size()>0) {
 				leader = vehiclesList.get((int)(Math.random() * vehiclesList.size()));
@@ -105,26 +105,39 @@ public class Platoon extends Entity implements Runnable {
 			}
 			*/
 		}
-		
 	}
 	
 	public void deleteVehicle(Vehicle v){
-		v.idPlatoon = null;
-		v.myPlatoon = null;
-		this.vehiclesList.remove(v);
-		if(v==leader) { // if deleted vehicle was leader, we elect randomly a new leader, the adaptation policies will elect a new one if he does not fits the requirements
-			//Random random = new Random();
-			//int index = Math.abs(random.nextInt(vehiclesList.size()));
-			if(vehiclesList.size()>0) leader = vehiclesList.get(0);
+		if(this.vehiclesList!=null) {
+			v.idPlatoon = null;
+			v.myPlatoon = null;
+			this.vehiclesList.remove(v);
+			if(v==leader) { // if deleted vehicle was leader, we elect randomly a new leader, the adaptation policies will elect a new one if he does not fits the requirements
+				//Random random = new Random();
+				//int index = Math.abs(random.nextInt(vehiclesList.size()));
+				if(vehiclesList.size()>0) leader = vehiclesList.get(0);
+			}
+			policies.removeForVehicle(v);
 		}
-		policies.removeForVehicle(v);
 
 	}
-	
-	public void addVehicle() {
-		
+	public void deletePlatoon() {
+		if(vehiclesList.size()>=1) {
+			System.out.println("Deleting platoon ");
+			//vehiclesList.get(0).removePlatoonFromList();
+			for(int i =0; i<vehiclesList.size(); i++) {
+				vehiclesList.get(i).deletePlatoon();
+			}
+			this.leader=null;
+			this.vehiclesList=null;
+			this.policies=null;
+		}
+		else {
+			System.out.println("Case not taken care of");
+		}
 	}
-	public int containsVehicleOnBatteryLevel(ArrayList<Vehicle> platoonList, int batteryExiged) {
+
+	public int containsVehicleOnBatteryLevel(ArrayList<Vehicle> platoonList, double batteryExiged) {
 		for (int i=0; i < platoonList.size(); i++) {
 		    if (platoonList.get(i).autonomie >= batteryExiged) {
 		        return i;
@@ -142,6 +155,14 @@ public class Platoon extends Entity implements Runnable {
 		index --; //to cancel the last index++
 		return index;
 		*/
+	}
+	public int containsVehicleOnScore(ArrayList<Vehicle> platoonList, double batteryLeader, double distanceLeader) {
+		for (int i=0; i < platoonList.size(); i++) {
+		    if (Math.min(platoonList.get(i).autonomie,platoonList.get(i).distance) >= Math.min(batteryLeader,distanceLeader)) {
+		        return i;
+            }
+        }
+        return -1;
 	}
 	
 	public void accept(Vehicle v) {
@@ -173,12 +194,6 @@ public class Platoon extends Entity implements Runnable {
 	}
 	public void setConsommationLeader(int consommationLeader) {
 		this.consommationLeader = consommationLeader;
-	}
-	public int[] getDistanceStation() {
-		return DistanceStation;
-	}
-	public void setDistanceStation(int[] distanceStation) {
-		DistanceStation = distanceStation;
 	}
 	public int getNumberVehicleMax() {
 		return NUMBER_VEHICLE_MAX;
@@ -212,5 +227,5 @@ public class Platoon extends Entity implements Runnable {
 	public void setPolicies(AdaptationPolicy policies) {
 		this.policies = policies;
 	}
-
+	
 }

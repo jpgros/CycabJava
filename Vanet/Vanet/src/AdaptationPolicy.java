@@ -53,7 +53,7 @@ public class AdaptationPolicy {
 		}
 	}
 	
-	public int containsName(String n) {
+	public int containsName(PolicyName n) {
 		boolean notFounded = true;
 		int index =0;
 		while(notFounded && index < listPolicy.size()) {
