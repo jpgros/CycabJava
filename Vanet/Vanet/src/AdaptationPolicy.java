@@ -27,7 +27,7 @@ public class AdaptationPolicy {
 				listPolicy.add(randomNum, elt);
 			}
 			if(elt.getPriority()==Priority.MEDIUM) {
-				while(looping && indexSup<listPolicy.size() ) {
+				while(looping && indexInf<listPolicy.size() ) {
 					looping = listPolicy.get(indexSup).getPriority()==Priority.HIGH;
 					indexInf++;
 				}

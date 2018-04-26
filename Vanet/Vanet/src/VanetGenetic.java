@@ -18,7 +18,7 @@ import java.util.ArrayList;
  */
 public class VanetGenetic {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         FsmModel fsm = new VanetFSM();
 
@@ -27,7 +27,7 @@ public class VanetGenetic {
         ArrayList<MyTest> initial = st.generate(10, 50);
         for (MyTest mt : initial) {
             double[] fits = new double[mt.size()];
-            double min = 0; // replayAndEvaluateTest(fsm, mt, fits);
+            double min = replayAndEvaluateTest(fsm, mt, fits);
             System.out.print("(" + min + ") [");
             for (int i=0; i < mt.size(); i++) {
                 if (i > 0) System.out.print(", ");
@@ -51,16 +51,16 @@ public class VanetGenetic {
         }
     }
 
-    public static double replayAndEvaluateTest(FsmModel fsm, MyTest t, double[] fitnesses) {
+    public static double replayAndEvaluateTest(FsmModel fsm, MyTest t, double[] fitnesses) throws PropertyFailedException {
         double min = -1;
         fsm.reset(true);
-        // CyCabProperty prop = new Property2();
+        VanetProperty prop = new Property5();
         for (int i=0; i < t.size(); i++) {
-            String step = ""; // t.getStepAt(i);
+            MyStep step = t.getStepAt(i);
             try {
-                Method m = fsm.getClass().getDeclaredMethod(step);
+                Method m = fsm.getClass().getDeclaredMethod(step.meth.getName());
                 m.invoke(fsm);
-                double fitness = 0; // TODO prop.match(fsm.getSUT());
+                double fitness = prop.match(((VanetFSM)fsm).getSUT());
                 fitnesses[i] = fitness;
                 min = (i==0 || fitness < min) ? fitness : min;
             }

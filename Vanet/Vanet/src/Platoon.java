@@ -118,6 +118,9 @@ public class Platoon extends Entity implements Runnable {
 				if(vehiclesList.size()>0) leader = vehiclesList.get(0);
 			}
 			policies.removeForVehicle(v);
+			if (vehiclesList.size() == 1) {
+				deletePlatoon();
+			}
 		}
 
 	}

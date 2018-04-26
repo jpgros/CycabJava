@@ -26,6 +26,9 @@ public class VanetFSM implements FsmModel {
         return sut.toString();
     }
 
+    public Road getSUT() {
+        return sut;
+    }
 
     public void reset(boolean testing) {
         sut.reset();
