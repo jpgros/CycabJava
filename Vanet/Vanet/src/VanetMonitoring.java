@@ -77,6 +77,7 @@ public class VanetMonitoring {
                 sum += actionsReady.get(act);
                 if (rand <= sum) {
                     try {
+                        System.out.println("\nInvoking: " + act.getName()) ;
                         act.invoke(fsm);
                         return true;
                     } catch (IllegalAccessException e) {
@@ -104,6 +105,7 @@ public class VanetMonitoring {
             }
             catch (PropertyFailedException e) {
                 System.err.println("Property violated : " + e.getMessage());
+                System.exit(-1);
             }
         }
     }
