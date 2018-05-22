@@ -1,8 +1,11 @@
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
-public class Platoon extends Entity implements Runnable {
+public class Platoon extends Entity { //implements Runnable {
 	int consommationLeader = 2;
 	final static int NUMBER_VEHICLE_MAX = 5; //unused
     ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
@@ -10,6 +13,8 @@ public class Platoon extends Entity implements Runnable {
 	UUID vehicleLeader = null;
 	Vehicle leader;
 	AdaptationPolicy policies =new AdaptationPolicy();
+	PrintWriter writer =null;
+	
 	public Platoon(int consommationLeader, int numberVehicleMax,UUID id, UUID vehicleLeader) {
 		this.consommationLeader = consommationLeader;
 		//this.NUMBER_VEHICLE_MAX = numberVehicleMax;
@@ -21,17 +26,19 @@ public class Platoon extends Entity implements Runnable {
 
     }
 
-	public Platoon(Vehicle _leader, Vehicle... others) {
+	public Platoon(Vehicle _leader, PrintWriter w, Vehicle... others) {
 	    leader = _leader;
 	    id = UUID.randomUUID();
 		vehiclesList.add(leader);
 		vehicleLeader = leader.id;
 		leader.setPlatoon(this);
+		writer=w;
 		for (Vehicle v : others) {
 			vehiclesList.add(v);
 			v.setPlatoon(this);
 		}
 		System.out.println("Platoon created " + id);
+		writer.println("Platoon created " + id);
 	}
 
 	public void addVehicle(Vehicle v){
@@ -50,11 +57,14 @@ public class Platoon extends Entity implements Runnable {
 		}
 		return index;
 	}
-	public void run() {
-		tick();
-	}
+//	public void run() {
+//		tick();
+//	}
 	
-	public void tick() {
+	public void tick(){
+		
+		
+		String x = "";
 		//vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
 		if(policies.listPolicy.size()>0) {
 			Element elt = policies.listPolicy.remove(0);
@@ -66,16 +76,24 @@ public class Platoon extends Entity implements Runnable {
 				deleteVehicle(elt.vehicle);
 				switch (elt.name) {
 				case QUITFAILURE:
-					System.out.println("vehicle " + elt.vehicle.getId() + " quitted platoon due to failure"+ this.id  );
+					x = "vehicle " + elt.vehicle.getId() + " quitted platoon due to failure"+ this.id  ;
+					System.out.println(x);
+					writer.println(x);
 					break;
 				case QUITFORSTATION:
-					System.out.println("vehicle " + elt.vehicle.getId() + " quitted platoon due to station"+ this.id  );
+					x = "vehicle " + elt.vehicle.getId() + " quitted platoon due to station"+ this.id  ;
+					System.out.println(x);
+					writer.println(x);
 					break;
 				case QUITPLATOON:
-					System.out.println("vehicle " + elt.vehicle.getId() + " quitted platoon due to user"+ this.id  ); // or distance reached
+					x = "vehicle " + elt.vehicle.getId() + " quitted platoon due to user"+ this.id  ;
+					System.out.println(x); // or distance reached
+					writer.println(x);
 					break;
 				default:
-					System.out.println("Error, policy name not verified properly");
+					x= "Error, policy name not verified properly";
+					System.out.println(x);
+					writer.println(x);
 					break;
 				}
                 
@@ -95,6 +113,7 @@ public class Platoon extends Entity implements Runnable {
 		else { // remove platoon
 			deletePlatoon();
             System.out.println("No better vehicle available, Platoon deleted");
+            writer.println("No better vehicle available, Platoon deleted");
             /*
             if (vehiclesList.size()>0) {
 				leader = vehiclesList.get((int)(Math.random() * vehiclesList.size()));
@@ -127,6 +146,7 @@ public class Platoon extends Entity implements Runnable {
 	public void deletePlatoon() {
 		if(vehiclesList.size()>=1) {
 			System.out.println("Deleting platoon ");
+			writer.println("Deleting platoon");
 			//vehiclesList.get(0).removePlatoonFromList();
 			for(int i =0; i<vehiclesList.size(); i++) {
 				vehiclesList.get(i).deletePlatoon();
@@ -174,6 +194,7 @@ public class Platoon extends Entity implements Runnable {
 			vehiclesList.add(v);
 			v.setPlatoon(this);
 			System.out.println("Vehicle " + v + " joined platoon" + this);
+			writer.println("Vehicle " + v + " joined platoon" + this);
 		}
 	}
 
@@ -186,11 +207,15 @@ public class Platoon extends Entity implements Runnable {
 	    for (int i=0; i < vehiclesList.size(); i++) {
 	        if (i > 0) {
 	            System.out.print(" | ");
+	            writer.print(" | ");
             }
 	        System.out.print(vehiclesList.get(i).getDisplayString());
+	        writer.print(vehiclesList.get(i).getDisplayString());
         }
         System.out.println("]");
 	    System.out.println("Policy: " + policies);
+	    writer.println("]");
+	    writer.println("Policy: " + policies);
     }
 	public int getConsommationLeader() {
 		return consommationLeader;

@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import static java.util.UUID.*;
 
+import java.io.PrintWriter;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Frederic Dadeau
@@ -16,15 +18,18 @@ public class Road implements Iterable<Vehicle> {
 	final static double FREQUENCYSTATION = 20;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
-
-
+    PrintWriter writer = null;
+    public Road(PrintWriter w) {
+    	writer = w;
+    }
     public void reset() {
         allVehicles.clear();
     }
 
     public int addVehicle(double _auto, double _distance) {
-        allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this));
+        allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this,writer));
         System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
+        writer.println("Vehicle created at index " + (allVehicles.size() - 1));
         return allVehicles.size() - 1;
     }
 
@@ -51,7 +56,7 @@ public class Road implements Iterable<Vehicle> {
     }
 
 
-    public void tick() {
+    public void tick(PrintWriter writer) {
         for (Vehicle v : allVehicles) {
             v.tick();
         }
@@ -70,9 +75,12 @@ public class Road implements Iterable<Vehicle> {
                 v.getPlatoon().affiche();
             }
         }
+        String x="";
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() == null) {
-                System.out.print(v.getDisplayString() + " | ");
+            	x=v.getDisplayString() + " | ";
+                System.out.print(x);
+                writer.print(x);
             }
         }
         System.out.println();

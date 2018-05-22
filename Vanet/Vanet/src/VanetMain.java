@@ -1,3 +1,6 @@
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -9,8 +12,14 @@ public class VanetMain {
 
 
 	public static void main(String[] args) {
-
-		Road r = new Road();
+		PrintWriter writer = null;
+		try {
+			writer = new PrintWriter("output.txt", "UTF-8");
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Road r = new Road(writer);
 		r.addVehicle(40, (int)(Math.random() * 1000));
 		r.addVehicle(40, (int)(Math.random() * 1000));
 		r.addVehicle(40, (int)(Math.random() * 1000));
@@ -19,10 +28,10 @@ public class VanetMain {
 		int i=0;
 		while (i < 10) {
 			i++;
-			r.tick();
+			r.tick(writer);
 			r.affiche();
 		}
-
+		writer.close();
 		/*
 		Vehicle[] vehicles = new Vehicle[3];
 		for(int i=0; i<vehicles.length; i++) {

@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,8 +20,8 @@ import java.util.ArrayList;
 public class VanetGenetic {
 
     public static void main(String[] args) throws Exception {
-
-        FsmModel fsm = new VanetFSM();
+    	PrintWriter writer = new PrintWriter("outputGenetic.txt", "UTF-8");
+        FsmModel fsm = new VanetFSM(writer);
 
         // initialize population using biased-random exploration of a FSM.
         StochasticTester st = new StochasticTester(fsm);
@@ -54,7 +55,7 @@ public class VanetGenetic {
     public static double replayAndEvaluateTest(FsmModel fsm, MyTest t, double[] fitnesses) throws PropertyFailedException {
         double min = -1;
         fsm.reset(true);
-        VanetProperty prop = new Property5();
+        VanetProperty prop = new Property3();
         for (int i=0; i < t.size(); i++) {
             MyStep step = t.getStepAt(i);
             try {

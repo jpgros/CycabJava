@@ -8,6 +8,7 @@
 import nz.ac.waikato.modeljunit.*;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -17,9 +18,11 @@ public class VanetFSM implements FsmModel {
      * Automaton describing the FSM of a Cycab
      */
     Road sut;
+    PrintWriter writer = null;
     
-    public VanetFSM() {
-        sut = new Road();
+    public VanetFSM(PrintWriter w) {
+        sut = new Road(w);
+        writer = w;
     }
 
     public String getState() {
@@ -39,8 +42,8 @@ public class VanetFSM implements FsmModel {
     }
     public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; }
     @Action
-    public Object[] tick() {
-        sut.tick();
+    public Object[] tick(PrintWriter writer) {
+        sut.tick(writer);
         return new Object[]{ sut };
     }
 

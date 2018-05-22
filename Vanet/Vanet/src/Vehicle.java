@@ -1,3 +1,4 @@
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -12,21 +13,24 @@ public class Vehicle extends Entity {
 	ArrayList<Entity> vehiclePlatoonList;
 	Platoon myPlatoon = null;
 	Road road = null;
+	PrintWriter writer = null;
 	final static double DEC_ENERGY = 1;
 	final static double DEC_LEADER = DEC_ENERGY * 1.2;
 	final static double LOW_LEADER_DIST = 40;
 	final static double LOW_DIST = 30;
 	final static double VLOW_DIST = 20;
 	final static double LOW_LEADER_BATTERY = 33;
-	final static double LOW_BATTERY = 10;
+	final static double LOW_BATTERY = 15; // should be > property3
 //	final static double VLOW_BATTERY = 5;
 	
-	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r) {
+	
+	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r, PrintWriter w) {
 		this.autonomie = autonomie;
 		this.distance = distance;
 		this.id = id;
 		this.vehiclePlatoonList = vehiclePlatoonList;
 		this.road=r;
+		this.writer=w;
 	}
 
 	public void refill() {
@@ -161,7 +165,7 @@ public class Vehicle extends Entity {
 	public void createPlatoon(Vehicle v) {
 		// TODO -- adaptation policy
 		if (true) {
-			Platoon platoon = new Platoon(this, v);
+			Platoon platoon = new Platoon(this, writer, v);
 		}
 	}
 	public void removePlatoonFromList() {
