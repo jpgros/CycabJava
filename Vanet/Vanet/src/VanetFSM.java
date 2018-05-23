@@ -7,6 +7,7 @@
 
 import nz.ac.waikato.modeljunit.*;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -19,10 +20,16 @@ public class VanetFSM implements FsmModel {
      */
     Road sut;
     PrintWriter writer = null;
+    FileReader vehicleReader =null;
+    FileReader platoonReader =null;
+    FileReader roadReader =null;
     
-    public VanetFSM(PrintWriter w) {
-        sut = new Road(w);
+    public VanetFSM(PrintWriter w, FileReader vr, FileReader pr, FileReader rr) {
+        sut = new Road(w,vr,pr,rr);
         writer = w;
+        vehicleReader=vr;
+        platoonReader=pr;
+        roadReader=rr;
     }
 
     public String getState() {
@@ -43,7 +50,7 @@ public class VanetFSM implements FsmModel {
     public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; }
     @Action
     public Object[] tick(PrintWriter writer) {
-        sut.tick(writer);
+        sut.tick();
         return new Object[]{ sut };
     }
 

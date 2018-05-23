@@ -76,17 +76,17 @@ public class Platoon extends Entity { //implements Runnable {
 				deleteVehicle(elt.vehicle);
 				switch (elt.name) {
 				case QUITFAILURE:
-					x = "vehicle " + elt.vehicle.getId() + " quitted platoon due to failure"+ this.id  ;
+					x = "Reconfiguration : vehicle " + elt.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + elt.getPriority()+ "} "+ this.id;
 					System.out.println(x);
 					writer.println(x);
 					break;
 				case QUITFORSTATION:
-					x = "vehicle " + elt.vehicle.getId() + " quitted platoon due to station"+ this.id  ;
+					x = "Reconfiguration : vehicle " + elt.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + elt.getPriority()+ "} "+ this.id;
 					System.out.println(x);
 					writer.println(x);
 					break;
 				case QUITPLATOON:
-					x = "vehicle " + elt.vehicle.getId() + " quitted platoon due to user"+ this.id  ;
+					x = "Reconfiguration :vehicle " + elt.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + elt.getPriority()+ "} "+ this.id;
 					System.out.println(x); // or distance reached
 					writer.println(x);
 					break;

@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -14,6 +17,9 @@ public class Vehicle extends Entity {
 	Platoon myPlatoon = null;
 	Road road = null;
 	PrintWriter writer = null;
+	FileReader read = null;
+	BufferedReader reader = null;
+	
 	final static double DEC_ENERGY = 1;
 	final static double DEC_LEADER = DEC_ENERGY * 1.2;
 	final static double LOW_LEADER_DIST = 40;
@@ -24,13 +30,15 @@ public class Vehicle extends Entity {
 //	final static double VLOW_BATTERY = 5;
 	
 	
-	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r, PrintWriter w) {
+	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r, PrintWriter w, FileReader read) {
 		this.autonomie = autonomie;
 		this.distance = distance;
 		this.id = id;
 		this.vehiclePlatoonList = vehiclePlatoonList;
 		this.road=r;
 		this.writer=w;
+		this.read=read;
+		this.reader= new BufferedReader(this.read);
 	}
 
 	public void refill() {
@@ -229,6 +237,33 @@ public class Vehicle extends Entity {
 			}
 		}
 	}
+	
+//	public void parsingFile() {
+//		String arrayString[] = new String[3];
+//		String arraySplit[];
+//		boolean event = true;
+//		while(!arrayString[0].contains("when") && !arrayString[0].contains("End of policies")) {
+//			try {
+//				arrayString[0]=reader.readLine();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		if(arrayString[0].contains("when")) {
+//			try {
+//				arrayString[1]=reader.readLine();
+//				arrayString[2]=reader.readLine();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			arrayString[0].replaceAll("when", "");
+//			arraySplit=arrayString[0].split("=");
+//			arraySplit[arraySplit.length-1].replaceAll(" ","");
+//			event = (arraySplit[arraySplit.length-1] == "true") ? true : false; 
+//		}
+//	}
 
 	public String getDisplayString() {
 		String l = (myPlatoon != null && myPlatoon.leader == this) ? "*" : "";

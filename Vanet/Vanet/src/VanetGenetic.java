@@ -4,6 +4,7 @@ import nz.ac.waikato.modeljunit.FsmModel;
 import java.awt.List;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -21,7 +22,10 @@ public class VanetGenetic {
 
     public static void main(String[] args) throws Exception {
     	PrintWriter writer = new PrintWriter("outputGenetic.txt", "UTF-8");
-        FsmModel fsm = new VanetFSM(writer);
+    	FileReader vehicleReader = new FileReader("vehiclePolicies.txt");
+    	FileReader platoonReader = new FileReader("platoonPolicies.txt");
+    	FileReader roadReader = new FileReader("platoonPolicies.txt"); 
+        FsmModel fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);
 
         // initialize population using biased-random exploration of a FSM.
         StochasticTester st = new StochasticTester(fsm);

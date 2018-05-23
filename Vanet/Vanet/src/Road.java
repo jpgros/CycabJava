@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import static java.util.UUID.*;
 
+import java.io.FileReader;
 import java.io.PrintWriter;
 
 /**
@@ -19,15 +20,22 @@ public class Road implements Iterable<Vehicle> {
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
     PrintWriter writer = null;
-    public Road(PrintWriter w) {
+    FileReader vehicleReader = null;
+    FileReader platoonReader = null;
+    FileReader roadReader = null;
+    
+    public Road(PrintWriter w, FileReader vr, FileReader pr, FileReader rr) {
     	writer = w;
+    	vehicleReader=vr;
+    	platoonReader=pr;
+    	roadReader=rr;
     }
     public void reset() {
         allVehicles.clear();
     }
 
     public int addVehicle(double _auto, double _distance) {
-        allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this,writer));
+        allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this,writer,vehicleReader));
         System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
         writer.println("Vehicle created at index " + (allVehicles.size() - 1));
         return allVehicles.size() - 1;
@@ -56,7 +64,7 @@ public class Road implements Iterable<Vehicle> {
     }
 
 
-    public void tick(PrintWriter writer) {
+    public void tick() {
         for (Vehicle v : allVehicles) {
             v.tick();
         }

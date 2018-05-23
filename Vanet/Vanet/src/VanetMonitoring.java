@@ -1,6 +1,10 @@
 import nz.ac.waikato.modeljunit.Action;
 import nz.ac.waikato.modeljunit.FsmModel;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,7 +21,20 @@ public class VanetMonitoring {
 
 
     public static void main(String[] args) {
-        VanetFSM fsm = new VanetFSM();
+    	PrintWriter writer=null;
+    	FileReader vehicleReader=null;
+    	FileReader platoonReader=null;
+    	FileReader roadReader=null;
+    	try {
+			writer = new PrintWriter("outputGenetic.txt", "UTF-8");
+			vehicleReader = new FileReader("vehiclePolicies.txt");
+	    	platoonReader = new FileReader("platoonPolicies.txt");
+	    	roadReader = new FileReader("platoonPolicies.txt"); 
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        VanetFSM fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);        
         ArrayList<VanetProperty> props = new ArrayList<VanetProperty>();
         props.add(new Property1());
         props.add(new Property2());

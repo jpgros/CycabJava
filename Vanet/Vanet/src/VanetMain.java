@@ -1,4 +1,7 @@
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -12,14 +15,20 @@ public class VanetMain {
 
 
 	public static void main(String[] args) {
-		PrintWriter writer = null;
-		try {
+		PrintWriter writer=null;
+    	FileReader vehicleReader=null;
+    	FileReader platoonReader=null;
+    	FileReader roadReader=null;
+    	try {
 			writer = new PrintWriter("output.txt", "UTF-8");
+			vehicleReader = new FileReader("vehiclePolicies.txt");
+	    	platoonReader = new FileReader("platoonPolicies.txt");
+	    	roadReader = new FileReader("roadPolicies.txt"); 
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Road r = new Road(writer);
+		Road r = new Road(writer, vehicleReader,platoonReader,roadReader);
 		r.addVehicle(40, (int)(Math.random() * 1000));
 		r.addVehicle(40, (int)(Math.random() * 1000));
 		r.addVehicle(40, (int)(Math.random() * 1000));
@@ -28,10 +37,50 @@ public class VanetMain {
 		int i=0;
 		while (i < 10) {
 			i++;
-			r.tick(writer);
+			r.tick();
 			r.affiche();
 		}
 		writer.close();
+		try {
+			vehicleReader.close();
+			platoonReader.close();
+			roadReader.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		int low=0,medium=0,high =0;
+		FileReader reader=null;
+		try {
+			reader = new FileReader("output.txt");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		BufferedReader outputReader = new BufferedReader(reader);
+		String line =null;
+		String priority=null;
+		try {
+			while((line = outputReader.readLine()) != null) {
+				if(line.contains("Reconfiguration")){
+					priority=line.substring(line.indexOf("{")+1, line.indexOf("}"));
+					switch(priority) {
+					case "LOW" : low++;
+						break;
+					case "MEDIUM" : medium++;
+						break;
+					case "HIGH" : high++;
+						break;
+					default : System.out.println(priority); 
+					}
+				}
+			}
+		System.out.println("High reconfiguration occured " + high+ " times, medium reconfiguration occured " + medium + " times, low reconfiguration occured "+ low+ " times");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		/*
 		Vehicle[] vehicles = new Vehicle[3];
 		for(int i=0; i<vehicles.length; i++) {
