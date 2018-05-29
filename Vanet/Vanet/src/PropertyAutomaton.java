@@ -115,7 +115,7 @@ class Property3 extends VanetProperty {
                         forEachVehicle.put(v, 1);
                     } else break;
                 case 1:
-                    if (v.myPlatoon == null) {
+                    if (v.myPlatoon == null) { 
                         // vehicle out of the platoon
                         forEachVehicle.put(v, 2);
                     } else if (v.autonomie < 10 || v.distance == 0) {
@@ -150,7 +150,7 @@ class Property4 extends VanetProperty {
                 forEachVehicle.put(v, 0);
             }
             switch (forEachVehicle.get(v)) {
-                case 0:
+                case 0: //how it initiates ? same behavior as case 2 ?
                 case 2:
                     if (v.myPlatoon != null && v.myPlatoon.leader == v) {
                         forEachVehicle.put(v, 1);
@@ -186,17 +186,18 @@ class Property5 extends VanetProperty {
                 forEachVehicle.put(v, 0);
             }
             switch (forEachVehicle.get(v)) {
-                case 0:
+                case 0: //not in platoon or just created
                     if (v.myPlatoon != null) {
                         forEachVehicle.put(v, 1);
                     }
                     break;
-                case 1:
+                case 1: //in platoon
                     if (v.myPlatoon == null) {
                         // vehicle out of the platoon
-                        forEachVehicle.put(v, 2);
+                        forEachVehicle.put(v, 2); //2 and not 0 because of the score ?
                     } else if (v.autonomie == 100) {
                         throw new PropertyFailedException(this, "Vehicle " + v.id + " should not refill while in platoon.");
+                        // verify this property
                     }
                     break;
             }
@@ -207,3 +208,7 @@ class Property5 extends VanetProperty {
         return ret;
     }
 }
+
+
+//Property 6 no platoon with listNextLeader empty AND without leader
+//property 7 distance > next station

@@ -21,12 +21,12 @@ import java.util.ArrayList;
 public class VanetGenetic {
 
     public static void main(String[] args) throws Exception {
+
     	PrintWriter writer = new PrintWriter("outputGenetic.txt", "UTF-8");
     	FileReader vehicleReader = new FileReader("vehiclePolicies.txt");
     	FileReader platoonReader = new FileReader("platoonPolicies.txt");
     	FileReader roadReader = new FileReader("platoonPolicies.txt"); 
         FsmModel fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);
-
         // initialize population using biased-random exploration of a FSM.
         StochasticTester st = new StochasticTester(fsm);
         ArrayList<MyTest> initial = st.generate(10, 50);

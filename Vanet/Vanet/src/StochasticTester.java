@@ -83,7 +83,7 @@ public class StochasticTester {
             return null;
         }
         do {
-            sum = 0;
+        	sum = 0;
             rand = Math.random();
             for (Method act : actionsReady.keySet()) {
                 sum += actionsReady.get(act);

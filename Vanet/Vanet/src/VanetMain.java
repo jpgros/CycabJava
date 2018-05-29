@@ -30,6 +30,7 @@ public class VanetMain {
 		}
 		Road r = new Road(writer, vehicleReader,platoonReader,roadReader);
 		r.addVehicle(40, (int)(Math.random() * 1000));
+
 		r.addVehicle(40, (int)(Math.random() * 1000));
 		r.addVehicle(40, (int)(Math.random() * 1000));
 		r.join(0, 1);

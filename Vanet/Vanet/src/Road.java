@@ -16,7 +16,7 @@ import java.io.PrintWriter;
 public class Road implements Iterable<Vehicle> {
 
     final static int MAX_CAPACITY = 5;
-	final static double FREQUENCYSTATION = 20;
+	final static double FREQUENCYSTATION = 10;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
     PrintWriter writer = null;

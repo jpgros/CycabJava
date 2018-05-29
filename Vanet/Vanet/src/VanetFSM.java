@@ -49,7 +49,7 @@ public class VanetFSM implements FsmModel {
     }
     public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; }
     @Action
-    public Object[] tick(PrintWriter writer) {
+    public Object[] tick() {
         sut.tick();
         return new Object[]{ sut };
     }
@@ -84,17 +84,19 @@ public class VanetFSM implements FsmModel {
         int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
         for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
             int j = (i + start) % sut.nbVehiclesOnRoad();
-            if (sut.getVehicle(j).getPlatoon() == null) {
+            if ((sut.getVehicle(j).getPlatoon() == null) && (sut.getVehicle(j).getAutonomie() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) {
                 int k = 0;
                 do {
                     k = (int) (Math.random() * sut.nbVehiclesOnRoad());
                 }
                 while (k == j);
-                System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
-                return new Object[]{ sut, j, k };
+                if(sut.getVehicle(k).getAutonomie() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)){
+                	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
+                	return new Object[]{ sut, j, k };
+                }
             }
         }
-        return new Object[]{ sut }; // should not happen
+        return new Object[]{ sut }; // should not happen : except if vehicle did not found another vehicle
     }
 
 

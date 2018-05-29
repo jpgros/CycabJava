@@ -50,7 +50,9 @@ public class Vehicle extends Entity {
 			System.out.println("Tried to refill but still in Platoon");
 		}
 	}
-	
+	public double getMinValue() {
+		return Math.min(this.getAutonomie(),this.getDistance());
+	}
 //	public void run() {
 //		System.out.println("Vehicle id : " + id + " started");
 //		while(distance >0 && autonomie>10) {
@@ -186,28 +188,40 @@ public class Vehicle extends Entity {
 	public void tick() {
 		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
 		this.distance -= 10;
-
+		String x ="";
 		// TODO
 		//Add each tick only new policies will be added
 		if(myPlatoon!=null) {
 			// distance < seuil --> quitte le peloton
 			if(distance < VLOW_DIST) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.HIGH, this);
+				x = "Event : vehicle " + this.getId() + " is very close from destination [VLOW_DIST]";
+				System.out.println(x);
+				writer.println(x);
 				myPlatoon.policies.addElement(elt); 
 			}
 			else if(distance < LOW_DIST) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.MEDIUM, this);
+				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]";
+				System.out.println(x);
+				writer.println(x);
 				myPlatoon.policies.addElement(elt); 
 			}
 			if(autonomie < LOW_BATTERY) {
 				Element elt = new Element(PolicyName.QUITFAILURE, Priority.HIGH, this);
+				x = "Event : vehicle " + this.getId() + " is low on energy [LOW]";
+				System.out.println(x);
+				writer.println(x);
 				myPlatoon.policies.addElement(elt);
 			}
 			if(this == myPlatoon.leader && (autonomie < LOW_LEADER_BATTERY || distance < LOW_LEADER_DIST)) {
 				Element elt = new Element(PolicyName.RELAY, Priority.HIGH, this);
-				myPlatoon.policies.addElement(elt);
+				myPlatoon.policies.addElement(elt);				
 			}
 			if((autonomie -10.0)< (road.distanceStation[0] +road.distanceStation[1])){ //keep a margin of 10 
+				x = "Event : vehicle " + this.getId() + " is taking next station stop [NEXT_STATION]";
+				System.out.println(x);
+				writer.println(x);
 				if(road.distanceStation[0] < 8) {
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.HIGH, this);
 					myPlatoon.policies.addElement(elt);
@@ -232,8 +246,10 @@ public class Vehicle extends Entity {
 			// leader && [second plus de batterie] --> relai
 		}
 		else {
-			if (autonomie < LOW_BATTERY) {
-				refill();	// TODO: improve
+			if ((autonomie -10.0)< (road.distanceStation[0] +road.distanceStation[1]) && road.distanceStation[0] < 2) {
+				x = "Event : vehicle " + this.getId() + " is refilling [REFILL]";
+				writer.println(x);
+				refill();	
 			}
 		}
 	}
@@ -267,7 +283,7 @@ public class Vehicle extends Entity {
 
 	public String getDisplayString() {
 		String l = (myPlatoon != null && myPlatoon.leader == this) ? "*" : "";
-		return "id: " + id.toString().split("-")[0] + l + ", auto: " + autonomie + ", distance: " + distance;
+		return "id: " + id.toString().split("-")[0] + l + ", auto: " + autonomie + ", distance: " + distance + " platoon: " + myPlatoon + " next station: "+ road.distanceStation[0];
 	}
 
 }
