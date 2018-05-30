@@ -65,17 +65,29 @@ public class Road implements Iterable<Vehicle> {
 
 
     public void tick() {
-        for (Vehicle v : allVehicles) {
+        for (int i=0; i < allVehicles.size(); i++) {
+            Vehicle v = allVehicles.get(i);
             v.tick();
+            if(v.distance <=0) {
+                if(v.myPlatoon!=null) {
+                    removeVehicle(v, "Error : vehicle: "+ v.id+ " reached distance but is inside platoon, removed anyway ");
+                }
+                else {
+                    removeVehicle(v, "Event : vehicle: "+ v.id+ " reached distance and quitting successfully the road ");
+                }
+                i--;
+            }
         }
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
                 v.getPlatoon().tick();
             }
         }
-		updateDistStas();
+        updateDistStas();
         affiche();
     }
+
+
 
     public void affiche() {
         for (Vehicle v : allVehicles) {
@@ -93,7 +105,17 @@ public class Road implements Iterable<Vehicle> {
         }
         System.out.println();
     }
-	public void updateDistStas(){
+
+    public int removeVehicle(Vehicle v, String x) {
+        allVehicles.remove(allVehicles.indexOf(v));
+        System.out.println(x);
+        writer.println(x);
+        return allVehicles.size() -1;
+    }
+
+
+
+    public void updateDistStas(){
 		distanceStation[0]--;
 		if(distanceStation[0]<=0) {
 			if(distanceStation[0]<0) System.out.println("distance station negative, should not happen");

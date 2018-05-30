@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -6,7 +8,7 @@ import java.util.ArrayList;
  * Date: 30/05/2018
  * Time: 11:09
  */
-public class AdaptationPolicyModel<SUT> {
+public class AdaptationPolicyModel {
 
     // Set of rules <TP --> PropertyAutomaton, config --> PropertyAutomaton, Reconf --> PolicyName (ENUM), Priority --> Priority (ENUM) >
 
@@ -18,14 +20,24 @@ public class AdaptationPolicyModel<SUT> {
         rules.add(r);
     }
 
-    public void match(SUT sut, ExecutionReport er) {
+    int compteur = 0;
+
+    public void match(Road sut, ExecutionReport er) {
         // check reconfig effective du SUT
-        // TODO  er.notifyNonExecutedPolicy
-        // vide liste reconf et calcul pour le tour suivant
-        candidateReconfigurations.clear();
+        if (compteur > 0) {
+            for (Vehicle v : sut.allVehicles) {
+                if (v.myPlatoon != null && v.myPlatoon.leader == v && v.myPlatoon.lastReconf != null) {
+                    er.notifyStepAfter(compteur, v.myPlatoon.lastReconf);
+                }
+            }
+        }
+        compteur++;
+
         for (Rule r : rules) {
-            if (r.matches(sut, er)) {
-                candidateReconfigurations.add(r);
+            for (Vehicle v : sut.allVehicles) {
+                if (r.matches(sut, v, er)) {
+                    er.notifyStepBefore(compteur, r, v);
+                }
             }
         }
     }
@@ -33,12 +45,12 @@ public class AdaptationPolicyModel<SUT> {
 
 class Rule {
 
-    PropertyAutomaton TP;
-    PropertyAutomaton config;
+    VanetProperty TP;
+    VanetProperty config;
     PolicyName reconf;
     Priority prio;
     
-    public Rule(PropertyAutomaton TP, PropertyAutomaton config, PolicyName reconf, Priority prio) {
+    public Rule(VanetProperty TP, VanetProperty config, PolicyName reconf, Priority prio) {
         this.TP = TP;
         this.config = config;
         this.reconf = reconf;
@@ -62,13 +74,15 @@ class Rule {
     }
 
 
-    public <SUT> boolean matches(SUT sut, ExecutionReport er) {
+    public boolean matches(Road sut, Vehicle v, ExecutionReport er) {
         try {
+            TP.setCurrentVehicle(v);
             TP.match(sut);
-            er.notifyTP(this, TP);
+            er.notifyTP(this, v, TP);
 
+            config.setCurrentVehicle(v);
             config.match(sut);
-            er.notifyConfig(this, TP);
+            er.notifyConfig(this, v, TP);
 
             return true;
         }
@@ -79,13 +93,80 @@ class Rule {
     }
 }
 
+
 class ExecutionReport {
-    
-    public void notifyConfig(Rule rule, PropertyAutomaton tp) {
-        // TODO
+
+    HashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>> steps = new LinkedHashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>>();
+
+    HashMap<PropertyAutomaton,Integer> occurrences = new HashMap<PropertyAutomaton, Integer>();
+
+
+    public void notifyConfig(Rule rule, Vehicle v, PropertyAutomaton tp) {
+        if (occurrences.get(tp) == null) {
+            occurrences.put(tp, 1);
+        }
+        else {
+            occurrences.put(tp, occurrences.get(tp) + 1);
+        }
     }
 
-    public void notifyTP(Rule rule, PropertyAutomaton tp) {
-        // TODO
+    public void notifyTP(Rule rule, Vehicle v, PropertyAutomaton tp) {
+        if (occurrences.get(tp) == null) {
+            occurrences.put(tp, 1);
+        }
+        else {
+            occurrences.put(tp, occurrences.get(tp) + 1);
+        }
+    }
+
+    public void notifyStepBefore(int i, Rule r, Vehicle v) {
+        if (steps.get(i) == null) {
+            steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
+        }
+        steps.get(i).getFirst().add(new Element(r.reconf, r.prio, v));
+    }
+
+    public void notifyStepAfter(int i, Element lastReconf) {
+        if (steps.get(i) == null) {
+            // when no reconfiguration was expected 
+            steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
+        }
+        steps.get(i).getSecond().add(new Element(lastReconf.name, lastReconf.priority, lastReconf.vehicle));
+    }
+
+    public void dump() {
+        for (Integer step : steps.keySet()) {
+            System.out.println("*** Step " + step);
+            System.out.println("Eligible reconfigurations: " + steps.get(step).getFirst());
+            System.out.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+        }
+
+    }
+}
+
+
+class Pair<K, V> {
+    K first;
+    V second;
+
+    public Pair(K first, V second) {
+        this.first = first;
+        this.second = second;
+    }
+
+    public K getFirst() {
+        return first;
+    }
+
+    public void setFirst(K first) {
+        this.first = first;
+    }
+
+    public V getSecond() {
+        return second;
+    }
+
+    public void setSecond(V second) {
+        this.second = second;
     }
 }

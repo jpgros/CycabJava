@@ -53,9 +53,9 @@ public class Platoon extends Entity { //implements Runnable {
 		vehiclesList.remove(v);
 	}
 	public void eligibleLeader(Vehicle v) {
-		double minValue = v.getMinValue();
+		double minValue = v.getMinValue(true);
 		for(int i =0; i<nextLeaderList.size();i++) {
-			if(minValue>= nextLeaderList.get(i).getMinValue()) {
+			if(minValue>= nextLeaderList.get(i).getMinValue(true)) {
 				nextLeaderList.add(i, v);
 				break;
 			}
@@ -131,6 +131,9 @@ public class Platoon extends Entity { //implements Runnable {
 				}
                 
             }
+		}
+		else {
+			lastReconf = null;
 		}
 		tickCounter -= (tickCounter== 0) ? 0 : 1;
 	}

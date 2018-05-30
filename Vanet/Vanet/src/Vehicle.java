@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import javax.sql.PooledConnection;
 
+import static sun.tools.java.Constants.DEC;
+
 
 public class Vehicle extends Entity {
 	double autonomie;
@@ -20,8 +22,8 @@ public class Vehicle extends Entity {
 	FileReader read = null;
 	BufferedReader reader = null;
 	
-	final static double DEC_ENERGY = 1;
-	final static double DEC_LEADER = DEC_ENERGY * 1.2;
+	final double DEC_ENERGY = 1 + Math.random() / 5;
+	final double DEC_LEADER = DEC_ENERGY * 1.2;
 	final static double LOW_LEADER_DIST = 40;
 	final static double LOW_DIST = 30;
 	final static double VLOW_DIST = 20;
@@ -50,8 +52,10 @@ public class Vehicle extends Entity {
 			System.out.println("Tried to refill but still in Platoon");
 		}
 	}
-	public double getMinValue() {
-		return Math.min(this.getAutonomie(),this.getDistance());
+	public double getMinValue(boolean isLeader) {
+		return (isLeader) ?
+				Math.min(this.autonomie * this.getDistance() / DEC_LEADER, this.getDistance()) :
+				Math.min(this.autonomie * this.getDistance() / DEC, this.getDistance());
 	}
 //	public void run() {
 //		System.out.println("Vehicle id : " + id + " started");

@@ -8,7 +8,7 @@ public class VanetConformanceMonitor {
 
     AdaptationAutomaton<Road> aa;
 
-    AdaptationPolicyModel<Road> apm = null;
+    AdaptationPolicyModel apm = null;
 
     ExecutionReport er = new ExecutionReport();
     
@@ -21,5 +21,8 @@ public class VanetConformanceMonitor {
         apm.match(sut, er);
     }
 
+    public void printReport() {
+        er.dump();
+    }
 
 }

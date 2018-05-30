@@ -111,7 +111,7 @@ public class StochasticTester {
                     } catch (InvocationTargetException e) {
                         System.err.println("Exception on target invocation on " + act.getName());
                         System.err.println("Shouldn't have happened");
-                        e.printStackTrace(System.err);
+                        e.getCause().printStackTrace(System.err);
                     }
                 }
             }
