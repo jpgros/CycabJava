@@ -19,6 +19,12 @@ abstract class VanetProperty implements PropertyAutomaton<Road> {
 
     protected int state = 0;
 
+    protected Vehicle currentVehicle = null;
+
+    public void setCurrentVehicle(Vehicle v) {
+        currentVehicle = v;
+    }
+
     @Override
     public int getState() {
         return state;

@@ -21,6 +21,8 @@ public class StochasticTester {
     /** Actions declared in that FSM with their probabilities */
     private HashMap<Method, Double> actionsAndProbabilities;
 
+    private VanetConformanceMonitor vcm = null;
+
     /**
      * Constructor. Initializes the FSM and computes associated actionsAndProbabilities.
      * @param _fsm
@@ -30,6 +32,10 @@ public class StochasticTester {
         actionsAndProbabilities = getActionTaggedMethods(fsm);
         System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
         fsm.reset(true);
+    }
+
+    public void setMonitor(VanetConformanceMonitor _vcm) {
+        vcm = _vcm;
     }
 
     /**
@@ -58,6 +64,9 @@ public class StochasticTester {
                 if (b) {
                     currentTest.append(newStep);
                     j++;
+                    if (vcm != null) {
+                        vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
+                    }
                 }
             }
             while (j < length && b);
