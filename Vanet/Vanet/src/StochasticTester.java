@@ -58,6 +58,7 @@ public class StochasticTester {
             boolean b = true;
             // while limit has not been reached and there exists a next step
             do {
+            	System.out.println("Step : " +j);
                 // compute next step
                 MyStep newStep = computeNextStep();
                 b = (newStep != null);
