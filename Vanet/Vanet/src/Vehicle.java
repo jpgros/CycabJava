@@ -24,11 +24,19 @@ public class Vehicle extends Entity {
 	
 	final double DEC_ENERGY = 1 + Math.random() / 5;
 	final double DEC_LEADER = DEC_ENERGY * 1.2;
-	final static double LOW_LEADER_DIST = 40;
-	final static double LOW_DIST = 30;
-	final static double VLOW_DIST = 20;
-	final static double LOW_LEADER_BATTERY = 33;
-	final static double LOW_BATTERY = 15; // should be > property3
+	final double DEC_DISTANCE = 10;
+//	final static double LOW_LEADER_DIST = 40;
+//	final static double LOW_DIST = 30;
+//	final static double VLOW_DIST = 20;
+//	final static double LOW_LEADER_BATTERY = 33;
+//	final static double LOW_BATTERY = 15; // should be > property3
+//	
+	final static double HIGH_PRIO_TICK = 10;
+	final static double MEDIUM_PRIO_TICK = 15;
+	final static double LOW_PRIO_TICK = 20;
+	final static double HIGH_PRIO_RELAY_TICK = 15;
+	final static double MEDIUM_PRIO_RELAY_TICK = 20;
+	final static double LOW_PRIO_RELAY_TICK = 25;
 //	final static double VLOW_BATTERY = 5;
 	
 	
@@ -52,10 +60,12 @@ public class Vehicle extends Entity {
 			System.out.println("Tried to refill but still in Platoon");
 		}
 	}
-	public double getMinValue(boolean isLeader) {
-		return (isLeader) ?
-				Math.min(this.autonomie * this.getDistance() / DEC_LEADER, this.getDistance()) :
-				Math.min(this.autonomie * this.getDistance() / DEC, this.getDistance());
+	public double getMinValue() { 
+				return Math.min(getAutonomieTick(), getDistanceTick());
+//				System.out.println("VERIFICATION GETMINVALUE : v auto: "+ this.autonomie + " v distance: " +this.distance);
+//				return (isLeader) ?
+//				Math.min(this.autonomie * this.getDistance() / DEC_LEADER, this.getDistance()) :
+//				Math.min(this.autonomie * this.getDistance() / DEC, this.getDistance());
 	}
 //	public void run() {
 //		System.out.println("Vehicle id : " + id + " started");
@@ -197,28 +207,28 @@ public class Vehicle extends Entity {
 		//Add each tick only new policies will be added
 		if(myPlatoon!=null) {
 			// distance < seuil --> quitte le peloton
-			if(distance < VLOW_DIST) {
+			if(getDistanceTick() < HIGH_PRIO_TICK) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.HIGH, this);
 				x = "Event : vehicle " + this.getId() + " is very close from destination [VLOW_DIST]";
 				System.out.println(x);
 				writer.println(x);
 				myPlatoon.policies.addElement(elt); 
 			}
-			else if(distance < LOW_DIST) {
+			else if(getDistanceTick() < MEDIUM_PRIO_TICK) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.MEDIUM, this);
 				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]";
 				System.out.println(x);
 				writer.println(x);
 				myPlatoon.policies.addElement(elt); 
 			}
-			if(autonomie < LOW_BATTERY) {
+			if(getAutonomieTick()< HIGH_PRIO_TICK) {
 				Element elt = new Element(PolicyName.QUITFAILURE, Priority.HIGH, this);
 				x = "Event : vehicle " + this.getId() + " is low on energy [LOW]";
 				System.out.println(x);
 				writer.println(x);
 				myPlatoon.policies.addElement(elt);
 			}
-			if(this == myPlatoon.leader && (autonomie < LOW_LEADER_BATTERY || distance < LOW_LEADER_DIST)) {
+			if (this == myPlatoon.leader && (getAutonomieTick() < HIGH_PRIO_TICK || getDistanceTick() < HIGH_PRIO_TICK )) {
 				Element elt = new Element(PolicyName.RELAY, Priority.HIGH, this);
 				myPlatoon.policies.addElement(elt);				
 			}
@@ -241,6 +251,10 @@ public class Vehicle extends Entity {
 				else {
 					System.out.println("Should not happen QuitToStation policy problem");
 				}
+			}
+			if(!this.isLeader() && myPlatoon.vehiclesList.size()>=3 && getMinValue()> myPlatoon.leader.getMinValue()) {
+				Element elt = new Element(PolicyName.UPGRADERELAY, Priority.MEDIUM, this);
+				myPlatoon.policies.addElement(elt);
 			}
 			
 			//leader ask platoon to choose wich adaptation policy to choose
@@ -284,7 +298,25 @@ public class Vehicle extends Entity {
 //			event = (arraySplit[arraySplit.length-1] == "true") ? true : false; 
 //		}
 //	}
-
+	public double getDistanceTick() {
+		return distance/DEC_DISTANCE;
+	}
+	public double getAutonomieTick() {
+		if(isLeader()) {
+			return autonomie/DEC_LEADER;
+		}
+		else {
+			return autonomie/DEC_ENERGY;
+		}
+	}
+	public boolean isLeader() {
+		if(this.myPlatoon !=null) {
+			return this.myPlatoon.leader ==this;
+		}
+		else {
+			return false;
+		}
+	}
 	public String getDisplayString() {
 		String l = (myPlatoon != null && myPlatoon.leader == this) ? "*" : "";
 		return "id: " + id.toString().split("-")[0] + l + ", auto: " + autonomie + ", distance: " + distance + " platoon: " + myPlatoon + " next station: "+ road.distanceStation[0];

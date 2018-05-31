@@ -135,12 +135,18 @@ class ExecutionReport {
     }
 
     public void dump() {
-        for (Integer step : steps.keySet()) {
+    	int lastStep =0;
+    	for (Integer step : steps.keySet()) {
+    		while (lastStep < step) {
+    			System.out.println("*** Step " + lastStep);
+    			lastStep++;
+    		}
             System.out.println("*** Step " + step);
             System.out.println("Eligible reconfigurations: " + steps.get(step).getFirst());
             System.out.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+            lastStep++;
         }
-
+    	System.out.println("Last step with eligible reconfiguration is step " + --lastStep);
     }
 }
 

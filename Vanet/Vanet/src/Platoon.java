@@ -53,9 +53,9 @@ public class Platoon extends Entity { //implements Runnable {
 		vehiclesList.remove(v);
 	}
 	public void eligibleLeader(Vehicle v) {
-		double minValue = v.getMinValue(true);
+		double minValue = v.getMinValue();
 		for(int i =0; i<nextLeaderList.size();i++) {
-			if(minValue>= nextLeaderList.get(i).getMinValue(true)) {
+			if(minValue>= nextLeaderList.get(i).getMinValue()) {
 				nextLeaderList.add(i, v);
 				break;
 			}
@@ -91,6 +91,13 @@ public class Platoon extends Entity { //implements Runnable {
 			if(lastReconf.name == PolicyName.RELAY) {
 				this.relay();
 				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + " tick : " + tickCounter;
+				System.out.println(x);
+				writer.println(x);
+				tickCounter=6;
+			}
+			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
+				this.upgradeRelay(lastReconf.vehicle);
+				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + " tick : " + tickCounter;
 				System.out.println(x);
 				writer.println(x);
 				tickCounter=6;
@@ -142,7 +149,7 @@ public class Platoon extends Entity { //implements Runnable {
 	public void relay() {
 		if(!nextLeaderList.isEmpty()) {
 			System.out.print("Leader vehicle "+ leader.getId());
-			leader = nextLeaderList.remove(0);
+			this.leader = nextLeaderList.remove(0);			
 			System.out.println(" replaced by elected " + leader.getId());
 		}
 		
@@ -160,6 +167,10 @@ public class Platoon extends Entity { //implements Runnable {
 			}
 			*/
 		}
+	}
+	
+	public void upgradeRelay(Vehicle v) {
+		this.leader=v;
 	}
 	
 	public void deleteVehicle(Vehicle v){

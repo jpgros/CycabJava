@@ -41,7 +41,7 @@
 
 	}
 	//when after low battery if vehicle is in platoon then quitPlatoon is high
-	class Adaptation1 extends VanetAdaptation {
+/*	class Adaptation1 extends VanetAdaptation {
 		HashMap<Vehicle, Integer> forEachVehicle = new HashMap<Vehicle, Integer>();
 		
 		public double match(Road sut) throws AdaptationFailedException {
@@ -150,7 +150,7 @@
 			}
 			return -1;
 		}
-	}
+	}*/
 	
 	// adaptation 2 : when after high energy ; if distance > x and vehicle is solo then utility of join is high
 
