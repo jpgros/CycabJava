@@ -1,3 +1,4 @@
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,7 +14,6 @@ public class AdaptationPolicyModel {
     // Set of rules <TP --> PropertyAutomaton, config --> PropertyAutomaton, Reconf --> PolicyName (ENUM), Priority --> Priority (ENUM) >
 
     ArrayList<Rule> rules = new ArrayList<Rule>();
-
     ArrayList<Rule> candidateReconfigurations = new ArrayList<Rule>();
 
     public void addRule(Rule r) {
@@ -93,14 +93,17 @@ class Rule {
     }
 }
 
-
 class ExecutionReport {
 
     HashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>> steps = new LinkedHashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>>();
-
+    
     HashMap<PropertyAutomaton,Integer> occurrences = new HashMap<PropertyAutomaton, Integer>();
-
-
+    PrintWriter writerErr =null;
+    
+    public ExecutionReport(PrintWriter w) {
+    	writerErr = w;
+    }
+    
     public void notifyConfig(Rule rule, Vehicle v, PropertyAutomaton tp) {
         if (occurrences.get(tp) == null) {
             occurrences.put(tp, 1);
@@ -144,6 +147,29 @@ class ExecutionReport {
             System.out.println("*** Step " + step);
             System.out.println("Eligible reconfigurations: " + steps.get(step).getFirst());
             System.out.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+           // if(steps.get(step).getSecond().size()>0 && (steps.get(step).getFirst().contains(steps.get(step).getSecond()))) {
+            //if priority eligible > actual 
+            // if eligible empty andnot actual
+            if(steps.get(step).getSecond().size()>0 && steps.get(step).getFirst().size()==0) {
+            	writerErr.println("*** Step " + step + " encountered a problem : reconfiguration occured but was nout founded eligible");
+                writerErr.println("Eligible reconfigurations: " + steps.get(step).getFirst());
+                writerErr.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+            }
+//            if(steps.get(step).getSecond().size()>0) {
+//            	Element elt = steps.get(step).getSecond().get(0);
+//            	ArrayList<Element> eltArray = steps.get(step).getSecond();
+//            	writerErr.print("element = " +elt);
+//            	if(!(eltArray.size()>0 && eltArray.contains)){
+//            		
+//            	}
+//            }
+            
+//            if(steps.get(step).getSecond().size()>0 && steps.get(step).getFirst(). )==0) {
+//            	writerErr.println("*** Step " + step + " encountered a problem : reconfiguration occured but was nout founded eligible");
+//                writerErr.println("Eligible reconfigurations: " + steps.get(step).getFirst());
+//                writerErr.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+//            }
+            //}
             lastStep++;
         }
     	System.out.println("Last step with eligible reconfiguration is step " + --lastStep);

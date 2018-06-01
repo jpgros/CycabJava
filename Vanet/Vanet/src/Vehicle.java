@@ -25,7 +25,7 @@ public class Vehicle extends Entity {
 	final double DEC_ENERGY = 1 + Math.random() / 5;
 	final double DEC_LEADER = DEC_ENERGY * 1.2;
 	final double DEC_DISTANCE = 10;
-	final static double LOW_LEADER_DIST = 300;
+	final static double LOW_LEADER_DIST = 200;
 	final static double LOW_DIST = 200;
 	final static double VLOW_DIST = 100;
 	final static double LOW_LEADER_BATTERY = 33;
@@ -64,8 +64,8 @@ public class Vehicle extends Entity {
 //				return Math.min(getAutonomieTick(), getDistanceTick());
 				//System.out.println("VERIFICATION GETMINVALUE : v auto: "+ this.autonomie + " v distance: " +this.distance);
 				return (isLeader()) ?
-				Math.min(this.autonomie * this.getDistance() / DEC_LEADER, this.getDistance()) :
-				Math.min(this.autonomie * this.getDistance() / DEC, this.getDistance());
+				Math.min(this.autonomie * (this.getDistance() / DEC_LEADER), this.getDistance()) :
+				Math.min(this.autonomie * (this.getDistance() / DEC), this.getDistance());
 	}
 //	public void run() {
 //		System.out.println("Vehicle id : " + id + " started");
@@ -228,7 +228,7 @@ public class Vehicle extends Entity {
 				writer.println(x);
 				myPlatoon.policies.addElement(elt);
 			}
-			if (this == myPlatoon.leader && (autonomie < LOW_LEADER_BATTERY || distance < LOW_LEADER_DIST )) {
+			if (this == myPlatoon.leader && this.getMinValue() < LOW_LEADER_DIST) { // (autonomie < LOW_LEADER_BATTERY || distance < LOW_LEADER_DIST )) {
 				Element elt = new Element(PolicyName.RELAY, Priority.HIGH, this);
 				myPlatoon.policies.addElement(elt);				
 			}

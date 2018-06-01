@@ -78,13 +78,14 @@ public class Road implements Iterable<Vehicle> {
                 i--;
             }
         }
+        updateDistStas();
+        affiche();
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
                 v.getPlatoon().tick();
             }
         }
-        updateDistStas();
-        affiche();
+        
     }
 
 

@@ -18,6 +18,7 @@ public class VanetFACS {
     public static void main(String[] args) throws Exception {
 
         PrintWriter writer = new PrintWriter("./outputGenetic.txt", "UTF-8");
+        PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8");
         FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         FileReader roadReader = new FileReader("./platoonPolicies.txt");
@@ -29,16 +30,18 @@ public class VanetFACS {
         // Adaptation policy rules go here
         setRulesForAPM(apm);
         
-        VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm);
+        VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);
         st.setMonitor(vcm);
 
         ArrayList<MyTest> initial = st.generate(1, 400);
 
         vcm.printReport();
+        writerErr.close();
+
     }
 
     public static void setRulesForAPM(AdaptationPolicyModel a) {
-
+    	
         // Rule: -- relai d'un vehicule qui vient d'entrer dans le peloton
         //  after join(v) until quit(v)
         //      if min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
@@ -129,7 +132,7 @@ class r2p2 extends VanetProperty {
     //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
     @Override
     public double match(Road sut) throws PropertyFailedException {
-        if (currentVehicle.getMinValue() >150) //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
+        if (currentVehicle.getMinValue() >200) //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
             throw new PropertyFailedException(this, "Vehicle not ready to downgrade");
         return 0;
     }
@@ -159,7 +162,7 @@ class r3p2 extends VanetProperty {
     //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
     @Override
     public double match(Road sut) throws PropertyFailedException {
-        if (currentVehicle.getMinValue() >250) //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
+        if (currentVehicle.getMinValue() >300) //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
             throw new PropertyFailedException(this, "Vehicle not ready to downgrade");
         return 0;
     }
@@ -209,7 +212,7 @@ class r5p1 extends VanetProperty {
 class r5p2 extends VanetProperty {
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.getMinValue() > 200)
+	        if ( currentVehicle.distance > 200)
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        return 0;
 	    }
@@ -233,7 +236,7 @@ class r6p1 extends VanetProperty {
 class r6p2 extends VanetProperty {
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.getMinValue() > 150)
+	        if ( currentVehicle.distance > 150) //getMinValue() 
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        return 0;
 	    }
