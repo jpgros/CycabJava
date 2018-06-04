@@ -22,6 +22,7 @@ public class VanetFACS {
         FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         FileReader roadReader = new FileReader("./platoonPolicies.txt");
+
         FsmModel fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);
 
         StochasticTester st = new StochasticTester(fsm);
@@ -29,12 +30,14 @@ public class VanetFACS {
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm);
-        
+
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);
         st.setMonitor(vcm);
+        writer.println("goes here");
 
-        ArrayList<MyTest> initial = st.generate(1, 400);
-
+        ArrayList<MyTest> initial = st.generate(1, 100);
+        System.out.println("here");
+        writer.println("and here");
         vcm.printReport();
         writerErr.close();
 
@@ -48,7 +51,6 @@ public class VanetFACS {
         //          relay |--> medium
         Rule r1 = new Rule(new r1p1(), new r1p2(), PolicyName.UPGRADERELAY, Priority.MEDIUM);
         a.addRule(r1);
-
 
         Rule r2  = new Rule(new r2p1(), new r2p2(), PolicyName.RELAY, Priority.HIGH); //or quitstation
         a.addRule(r2);

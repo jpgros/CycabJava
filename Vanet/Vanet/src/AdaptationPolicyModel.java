@@ -32,7 +32,6 @@ public class AdaptationPolicyModel {
             }
         }
         compteur++;
-
         for (Rule r : rules) {
             for (Vehicle v : sut.allVehicles) {
                 if (r.matches(sut, v, er)) {
@@ -75,7 +74,9 @@ class Rule {
 
 
     public boolean matches(Road sut, Vehicle v, ExecutionReport er) {
+
         try {
+
             TP.setCurrentVehicle(v);
             TP.match(sut);
             er.notifyTP(this, v, TP);
@@ -123,6 +124,7 @@ class ExecutionReport {
     }
 
     public void notifyStepBefore(int i, Rule r, Vehicle v) {
+    	System.out.println("WENT HERE");
         if (steps.get(i) == null) {
             steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
         }
@@ -130,7 +132,8 @@ class ExecutionReport {
     }
 
     public void notifyStepAfter(int i, Element lastReconf) {
-        if (steps.get(i) == null) {
+    	System.out.println("WENT HEREEEE");
+    	if (steps.get(i) == null) {
             // when no reconfiguration was expected 
             steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
         }

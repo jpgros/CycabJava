@@ -65,7 +65,7 @@ public class StochasticTester {
                 if (b) {
                     currentTest.append(newStep);
                     j++;
-                    if (vcm != null) {
+                    if (vcm != null) { 
                         vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
                     }
                 }

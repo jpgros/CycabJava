@@ -85,16 +85,12 @@ public class VanetFSM implements FsmModel {
         for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
             int j = (i + start) % sut.nbVehiclesOnRoad();
             if ((sut.getVehicle(j).getPlatoon() == null) && (sut.getVehicle(j).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) {
-                System.out.println("vehicle :" + sut.getVehicle(j) + " whit autonomy : "+ sut.getVehicle(j).autonomie + " is capable of joining" );
-                writer.println("vehicle :" + sut.getVehicle(j) + " whit autonomy : "+ sut.getVehicle(j).autonomie + " is capable of joining");
             	int k = 0;
                 do {
                     k = (int) (Math.random() * sut.nbVehiclesOnRoad());
                 }
                 while (k == j);
                 if(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)){
-                	System.out.println("vehicle :" + sut.getVehicle(j) + " whit autonomy : "+ sut.getVehicle(j).getMinValue() + " is capable of joining " + sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION );
-                	writer.println("vehicle :" + sut.getVehicle(j) + " whit autonomy : "+ sut.getVehicle(j).autonomie + " is capable of joining");
                 	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
                 	return new Object[]{ sut, j, k };
                 }

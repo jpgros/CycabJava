@@ -62,7 +62,6 @@ public class Vehicle extends Entity {
 	}
 	public double getMinValue() { 
 //				return Math.min(getAutonomieTick(), getDistanceTick());
-				System.out.println("VERIFICATION GETMINVALUE : v auto: "+ this.autonomie + " v distance: " +this.distance);
 				return (isLeader()) ?
 				Math.min(this.autonomie * (this.DEC_DISTANCE / DEC_LEADER), this.getDistance()) :
 				Math.min(this.autonomie * (this.DEC_DISTANCE / DEC), this.getDistance());
