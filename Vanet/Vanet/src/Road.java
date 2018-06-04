@@ -16,7 +16,7 @@ import java.io.PrintWriter;
 public class Road implements Iterable<Vehicle> {
 
     final static int MAX_CAPACITY = 5;
-	final static double FREQUENCYSTATION = 10;
+	final static double FREQUENCYSTATION = 100;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
     PrintWriter writer = null;
@@ -54,14 +54,14 @@ public class Road implements Iterable<Vehicle> {
             allVehicles.get(i).quitPlatoon();
         }
     }
-
-    public boolean refill(int i) {
-        if (allVehicles.get(i).getPlatoon() == null) {
-            allVehicles.get(i).refill();
-            return true;
-        }
-        return false;
-    }
+//why ?
+//    public boolean refill(int i) {
+//        if (allVehicles.get(i).getPlatoon() == null) {
+//            allVehicles.get(i).refill();
+//            return true;
+//        }
+//        return false;
+//    }
 
 
     public void tick() {
@@ -117,7 +117,7 @@ public class Road implements Iterable<Vehicle> {
 
 
     public void updateDistStas(){
-		distanceStation[0]--;
+		distanceStation[0]-=10;
 		if(distanceStation[0]<=0) {
 			if(distanceStation[0]<0) System.out.println("distance station negative, should not happen");
 			distanceStation[0]=distanceStation[1];

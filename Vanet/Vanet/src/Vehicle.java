@@ -62,10 +62,10 @@ public class Vehicle extends Entity {
 	}
 	public double getMinValue() { 
 //				return Math.min(getAutonomieTick(), getDistanceTick());
-				//System.out.println("VERIFICATION GETMINVALUE : v auto: "+ this.autonomie + " v distance: " +this.distance);
+				System.out.println("VERIFICATION GETMINVALUE : v auto: "+ this.autonomie + " v distance: " +this.distance);
 				return (isLeader()) ?
-				Math.min(this.autonomie * (this.getDistance() / DEC_LEADER), this.getDistance()) :
-				Math.min(this.autonomie * (this.getDistance() / DEC), this.getDistance());
+				Math.min(this.autonomie * (this.DEC_DISTANCE / DEC_LEADER), this.getDistance()) :
+				Math.min(this.autonomie * (this.DEC_DISTANCE / DEC), this.getDistance());
 	}
 //	public void run() {
 //		System.out.println("Vehicle id : " + id + " started");
@@ -203,6 +203,16 @@ public class Vehicle extends Entity {
 		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
 		this.distance -= 10;
 		String x ="";
+		if(this.distance < 0 ) {
+			x = "Error : Distance left negative !";
+			System.out.println(x);
+			writer.println(x);
+		}
+		else if( this.autonomie < 0){
+			x = "Error : Battery left negative !";
+			System.out.println(x);
+			writer.println(x);
+		}
 		// TODO
 		//Add each tick only new policies will be added
 		if(myPlatoon!=null) {
@@ -264,8 +274,8 @@ public class Vehicle extends Entity {
 			// leader && [second plus de batterie] --> relai
 		}
 		else {
-			if ((autonomie -10.0)< (road.distanceStation[0] +road.distanceStation[1]) && road.distanceStation[0] < 2) {
-				x = "Event : vehicle " + this.getId() + " is refilling [REFILL]";
+			if ((getAutonomieDistance() -10.0)< (road.distanceStation[0] +road.distanceStation[1]) && road.distanceStation[0] < 11) {
+				x = "Event : vehicle " + this.getId() + " is refilling [REFILL] and getAutonomyvalue gives : " + getAutonomieDistance();
 				writer.println(x);
 				refill();	
 			}
@@ -301,12 +311,12 @@ public class Vehicle extends Entity {
 	public double getDistanceTick() {
 		return distance/DEC_DISTANCE;
 	}
-	public double getAutonomieTick() {
+	public double getAutonomieDistance() {
 		if(isLeader()) {
-			return autonomie/DEC_LEADER;
+			return autonomie*(DEC_DISTANCE/DEC_LEADER);
 		}
 		else {
-			return autonomie/DEC_ENERGY;
+			return autonomie*(DEC_DISTANCE/DEC_ENERGY);
 		}
 	}
 

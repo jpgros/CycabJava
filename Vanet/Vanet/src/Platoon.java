@@ -81,10 +81,34 @@ public class Platoon extends Entity { //implements Runnable {
 	
 	public void tick(){
 		String x = "";
+		int index=0;
 		//vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
 		System.out.println("tick policy: " + tickCounter);
 		if(policies.listPolicy.size()>0 && tickCounter==0) {
 			lastReconf = policies.listPolicy.remove(0);
+			//verification that vehicle Leader wants to relay and quit platoon:
+			if(lastReconf.vehicle.isLeader() && lastReconf.name == PolicyName.RELAY) {
+				Element elt = new Element(PolicyName.QUITFAILURE,Priority.HIGH);
+				elt.vehicle=lastReconf.vehicle;
+				index = contains(elt, policies.listPolicy);
+				if(index !=-1) {
+					lastReconf = policies.listPolicy.remove(index);
+				}
+				else {
+					elt.name=PolicyName.QUITFORSTATION;
+					index = contains(elt, policies.listPolicy);
+					if(index!=-1) {
+						lastReconf = policies.listPolicy.remove(index);
+					}
+					else {
+						elt.name=PolicyName.QUITPLATOON;
+						index = contains(elt, policies.listPolicy);
+						if(index!=-1) {
+							lastReconf = policies.listPolicy.remove(index);
+						}
+					}
+				}
+			}
 			policies.listPolicy.clear();
 			System.out.println("policy list cleared");
 			writer.println("policy list cleared");
@@ -234,7 +258,20 @@ public class Platoon extends Entity { //implements Runnable {
 //        }
 //        return -1;
 //	}
-	
+	public int contains(Element elt, ArrayList<Element> array) {
+		int index = 0;
+		boolean bool = true;
+		if (array.size() >0) {
+			do {
+				bool = !array.get(index).equals(elt);
+				index ++;
+			}while(bool && index < array.size());
+			index--;
+			return array.get(index).equals(elt) ? index : -1;
+			}
+		return -1;
+	}
+		
 	public void accept(Vehicle v) {
 		// TODO -- adaptation policy
 		if (vehiclesList.size() < NUMBER_VEHICLE_MAX) {
@@ -248,7 +285,7 @@ public class Platoon extends Entity { //implements Runnable {
 	public String toString() {
 		return id.toString();
 	}
-
+	
 	public void affiche() {
 	    System.out.print("[");
 	    for (int i=0; i < vehiclesList.size(); i++) {
