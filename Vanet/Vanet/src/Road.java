@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.UUID;
 
 import static java.util.UUID.*;
@@ -23,7 +24,7 @@ public class Road implements Iterable<Vehicle> {
     FileReader vehicleReader = null;
     FileReader platoonReader = null;
     FileReader roadReader = null;
-    
+    LinkedList<Element> lastReconfList = new LinkedList<Element>();
     public Road(PrintWriter w, FileReader vr, FileReader pr, FileReader rr) {
     	writer = w;
     	vehicleReader=vr;
@@ -105,6 +106,7 @@ public class Road implements Iterable<Vehicle> {
             }
         }
         System.out.println();
+        writer.println();
     }
 
     public int removeVehicle(Vehicle v, String x) {

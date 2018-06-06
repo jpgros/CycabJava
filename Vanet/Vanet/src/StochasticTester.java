@@ -1,6 +1,7 @@
 import nz.ac.waikato.modeljunit.Action;
 import nz.ac.waikato.modeljunit.FsmModel;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,7 +16,7 @@ import java.util.Iterator;
  * Time: 09:26
  */
 public class StochasticTester {
-
+	public PrintWriter writer = null;
     /** FSM model that describes a probabilistic usage automaton */
     private FsmModel fsm;
     /** Actions declared in that FSM with their probabilities */
@@ -33,7 +34,18 @@ public class StochasticTester {
         System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
         fsm.reset(true);
     }
-
+    
+    /**
+     * Constructor. Initializes the FSM  and writer, computes associated actionsAndProbabilities.
+     * @param _fsm
+     */
+    public StochasticTester(FsmModel _fsm, PrintWriter w) {
+        fsm = _fsm;
+        actionsAndProbabilities = getActionTaggedMethods(fsm);
+        System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+        fsm.reset(true);
+        writer=w;
+    }
     public void setMonitor(VanetConformanceMonitor _vcm) {
         vcm = _vcm;
     }
@@ -59,6 +71,7 @@ public class StochasticTester {
             // while limit has not been reached and there exists a next step
             do {
             	System.out.println("Step : " +j);
+            	writer.println("Step : "+j);
                 // compute next step
                 MyStep newStep = computeNextStep();
                 b = (newStep != null);

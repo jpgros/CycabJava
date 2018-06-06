@@ -13,6 +13,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import com.sun.tools.internal.ws.resources.GeneratorMessages;
+
 public class VanetFSM implements FsmModel {
 
     /**

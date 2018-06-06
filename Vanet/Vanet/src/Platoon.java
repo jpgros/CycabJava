@@ -14,6 +14,7 @@ public class Platoon extends Entity { //implements Runnable {
     UUID id;
 	UUID vehicleLeader = null;
 	Vehicle leader;
+	Road road = null;
 	AdaptationPolicy policies =new AdaptationPolicy();
 	PrintWriter writer =null;
 	Element lastReconf =null;
@@ -29,13 +30,14 @@ public class Platoon extends Entity { //implements Runnable {
 
     }
 
-	public Platoon(Vehicle _leader, PrintWriter w, Vehicle... others) {
+	public Platoon(Vehicle _leader, PrintWriter w, Road r, Vehicle... others) {
 	    leader = _leader;
 	    id = UUID.randomUUID();
 		vehiclesList.add(leader);
 		vehicleLeader = leader.id;
 		leader.setPlatoon(this);
 		writer=w;
+		road =r;
 		for (Vehicle v : others) {
 			vehiclesList.add(v);
 			eligibleLeader(v);
@@ -163,9 +165,9 @@ public class Platoon extends Entity { //implements Runnable {
                 
             }
 		}
-		else {
-			lastReconf = null;
-		}
+//		else {
+//			lastReconf = null;
+//		}
 		tickCounter -= (tickCounter== 0) ? 0 : 1;
 	}
 	
@@ -217,11 +219,12 @@ public class Platoon extends Entity { //implements Runnable {
 	public void deletePlatoon() {
 		if(vehiclesList.size()>=1) {
 			System.out.println("Deleting platoon ");
-			writer.println("Deleting platoon");
+			writer.println("Deleting platoon" + this.vehiclesList);
 			//vehiclesList.get(0).removePlatoonFromList();
 			for(int i =0; i<vehiclesList.size(); i++) {
 				vehiclesList.get(i).deletePlatoon();
 			}
+			road.lastReconfList.add(this.lastReconf);
 			this.leader=null;
 			this.vehiclesList=null;
 			this.policies=null;

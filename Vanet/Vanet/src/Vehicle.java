@@ -61,11 +61,12 @@ public class Vehicle extends Entity {
 		}
 	}
 	public double getMinValue() { 
-//				return Math.min(getAutonomieTick(), getDistanceTick());
-				return (isLeader()) ?
-				Math.min(this.autonomie * (this.DEC_DISTANCE / DEC_LEADER), this.getDistance()) :
-				Math.min(this.autonomie * (this.DEC_DISTANCE / DEC), this.getDistance());
-	}
+//		return Math.min(getAutonomieTick(), getDistanceTick());
+//		return (isLeader()) ?
+//		Math.min(this.autonomie * (this.DEC_DISTANCE / DEC_LEADER), this.getDistance()) :
+//		Math.min(this.autonomie * (this.DEC_DISTANCE / DEC_ENERGY), this.getDistance());
+		return Math.min(getAutonomieDistance(),this.getDistance());
+}
 //	public void run() {
 //		System.out.println("Vehicle id : " + id + " started");
 //		while(distance >0 && autonomie>10) {
@@ -188,7 +189,7 @@ public class Vehicle extends Entity {
 	public void createPlatoon(Vehicle v) {
 		// TODO -- adaptation policy
 		if (true) {
-			Platoon platoon = new Platoon(this, writer, v);
+			Platoon platoon = new Platoon(this, writer,this.road, v);
 		}
 	}
 	public void removePlatoonFromList() {
@@ -224,7 +225,7 @@ public class Vehicle extends Entity {
 				myPlatoon.policies.addElement(elt); 
 			}
 			else if(distance < LOW_DIST) {
-				Element elt = new Element(PolicyName.QUITPLATOON, Priority.MEDIUM, this);
+				Element elt = new Element(PolicyName.QUITPLATOON, Priority.LOW, this);
 				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]";
 				System.out.println(x);
 				writer.println(x);
@@ -241,19 +242,19 @@ public class Vehicle extends Entity {
 				Element elt = new Element(PolicyName.RELAY, Priority.HIGH, this);
 				myPlatoon.policies.addElement(elt);				
 			}
-			if((autonomie -10.0)< (road.distanceStation[0] +road.distanceStation[1])){ //keep a margin of 10 
+			if((this.getAutonomieDistance() -10.0)< (road.distanceStation[0] +road.distanceStation[1])){ //keep a margin of 10 
 				x = "Event : vehicle " + this.getId() + " is taking next station stop [NEXT_STATION]";
 				System.out.println(x);
 				writer.println(x);
-				if(road.distanceStation[0] < 8) {
+				if(road.distanceStation[0] < 50) { //verifying adding priority does nto causes bugs
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.HIGH, this);
 					myPlatoon.policies.addElement(elt);
 				}
-				else if(road.distanceStation[0] >= 8 && road.distanceStation[0] < 15) {
+				else if(road.distanceStation[0] < 70) { //road.distanceStation[0] >= 8 && 
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.MEDIUM, this);
 					myPlatoon.policies.addElement(elt);
 				}
-				else if(road.distanceStation[0] >= 15) {
+				else if(road.distanceStation[0] < 100) {
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.LOW, this);
 					myPlatoon.policies.addElement(elt);
 				}
@@ -318,6 +319,7 @@ public class Vehicle extends Entity {
 			return autonomie*(DEC_DISTANCE/DEC_ENERGY);
 		}
 	}
+
 
 	public boolean isLeader() {
 		if(this.myPlatoon !=null) {

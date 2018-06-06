@@ -30,6 +30,21 @@ public class AdaptationPolicyModel {
                     er.notifyStepAfter(compteur, v.myPlatoon.lastReconf);
                 }
             }
+            while(sut.lastReconfList.size()>0) { //if a platoon get deleted, the last reconf is retrieved here
+            	Element elt = sut.lastReconfList.remove(0);
+//            	if(elt ==null) {
+//            		System.out.println("c est null");
+//            		sut.writer.println("c est null");
+//            	}
+            	if(elt!=null) {
+            	System.out.println("elt = " +elt.priority);
+            	sut.writer.println("elt = " +elt.priority);
+            	er.notifyStepAfter(compteur, elt);
+            	System.out.println("Retrieved last reconf of platoon");
+            	sut.writer.println("Retrieved last reconf of platoon");
+            	//compteur++; ?
+            	}
+           }
         }
         compteur++;
         for (Rule r : rules) {
@@ -80,11 +95,9 @@ class Rule {
             TP.setCurrentVehicle(v);
             TP.match(sut);
             er.notifyTP(this, v, TP);
-
             config.setCurrentVehicle(v);
             config.match(sut);
             er.notifyConfig(this, v, TP);
-
             return true;
         }
         catch (PropertyFailedException pfe) {
@@ -124,7 +137,6 @@ class ExecutionReport {
     }
 
     public void notifyStepBefore(int i, Rule r, Vehicle v) {
-    	System.out.println("WENT HERE");
         if (steps.get(i) == null) {
             steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
         }
@@ -132,7 +144,6 @@ class ExecutionReport {
     }
 
     public void notifyStepAfter(int i, Element lastReconf) {
-    	System.out.println("WENT HEREEEE");
     	if (steps.get(i) == null) {
             // when no reconfiguration was expected 
             steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
@@ -152,7 +163,7 @@ class ExecutionReport {
             System.out.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
            // if(steps.get(step).getSecond().size()>0 && (steps.get(step).getFirst().contains(steps.get(step).getSecond()))) {
             //if priority eligible > actual 
-            // if eligible empty andnot actual
+            // if eligible empty and not actual
             if(steps.get(step).getSecond().size()>0 && steps.get(step).getFirst().size()==0) {
             	writerErr.println("*** Step " + step + " encountered a problem : reconfiguration occured but was nout founded eligible");
                 writerErr.println("Eligible reconfigurations: " + steps.get(step).getFirst());

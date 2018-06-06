@@ -25,7 +25,7 @@ public class VanetFACS {
 
         FsmModel fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);
 
-        StochasticTester st = new StochasticTester(fsm);
+        StochasticTester st = new StochasticTester(fsm,writer);
 
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
@@ -33,11 +33,7 @@ public class VanetFACS {
 
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);
         st.setMonitor(vcm);
-        writer.println("goes here");
-
-        ArrayList<MyTest> initial = st.generate(1, 100);
-        System.out.println("here");
-        writer.println("and here");
+        ArrayList<MyTest> initial = st.generate(1, 300);
         vcm.printReport();
         writerErr.close();
 
@@ -59,8 +55,8 @@ public class VanetFACS {
         //      if min(v.distance, v.auto) < 100
         //          relay |--> low
 
-        Rule r3  = new Rule(new r3p1(), new r3p2(), PolicyName.RELAY, Priority.LOW); //or quitstation
-        a.addRule(r3);
+//        Rule r3  = new Rule(new r3p1(), new r3p2(), PolicyName.RELAY, Priority.LOW); //or quitstation
+//        a.addRule(r3);
         // Rule: -- relai du leader qui arrive à destination ou échéance
         //  after relay(v) until quit(v) | relay
         //      if min(v.distance, v.auto) < 50
@@ -77,8 +73,37 @@ public class VanetFACS {
 
         Rule r5  = new Rule(new r5p1(), new r5p2(), PolicyName.QUITPLATOON, Priority.LOW); //or quitstation
         a.addRule(r5);
-        Rule r6  = new Rule(new r6p1(), new r6p2(), PolicyName.QUITPLATOON, Priority.MEDIUM); //or quitstation
+//        Rule r6  = new Rule(new r6p1(), new r6p2(), PolicyName.QUITPLATOON, Priority.MEDIUM); //or quitstation
+//        a.addRule(r6);
+        
+        
+        Rule r6  = new Rule(new r6p1(), new r6p2(), PolicyName.QUITPLATOON, Priority.LOW); //or quitstation
         a.addRule(r6);
+        //Rule : -- depart du vehicule qui a une batterie faible
+        // after join(v) until quit(v)
+        // if v.autonomy <15
+        // quitfailure |----> high
+        
+        Rule r7  = new Rule(new r7p1(), new r7p2(), PolicyName.QUITPLATOON, Priority.LOW); //or quitstation
+        a.addRule(r7);
+        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
+        // after join(v) until quit(v)
+        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 50
+        // quitforstation |----> high
+        
+        Rule r8  = new Rule(new r8p1(), new r8p2(), PolicyName.QUITPLATOON, Priority.LOW); //or quitstation
+        a.addRule(r8);
+        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
+        // after join(v) until quit(v)
+        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 70
+        // quitforstation |----> medium
+        
+        Rule r9  = new Rule(new r9p1(), new r9p2(), PolicyName.QUITPLATOON, Priority.LOW); //or quitstation
+        a.addRule(r9);
+        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
+        // after join(v) until quit(v)
+        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 100
+        // quitforstation |----> low
 
     }
 
@@ -143,35 +168,35 @@ class r2p2 extends VanetProperty {
     }
 }
 
-class r3p1 extends VanetProperty {
-    //  after join(v) until quit(v)
-    @Override
-    public double match(Road sut) throws PropertyFailedException {
-        if (currentVehicle.myPlatoon == null ) {
-            throw new PropertyFailedException(this, "Vehicle not in platoon");
-        }
-        else if (currentVehicle.myPlatoon.leader == currentVehicle) {
-        	throw new PropertyFailedException(this, "Vehicle not leader");
-        }
-        return 0;
-    }
-    public String toString(){
-    	return "r3p1";
-    }
-}
-
-class r3p2 extends VanetProperty {
-    //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
-    @Override
-    public double match(Road sut) throws PropertyFailedException {
-        if (currentVehicle.getMinValue() >300) //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
-            throw new PropertyFailedException(this, "Vehicle not ready to downgrade");
-        return 0;
-    }
-    public String toString(){
-    	return "r3p2";
-    }
-}
+//class r3p1 extends VanetProperty {
+//    //  after join(v) until quit(v)
+//    @Override
+//    public double match(Road sut) throws PropertyFailedException {
+//        if (currentVehicle.myPlatoon == null ) {
+//            throw new PropertyFailedException(this, "Vehicle not in platoon");
+//        }
+//        else if (currentVehicle.myPlatoon.leader == currentVehicle) {
+//        	throw new PropertyFailedException(this, "Vehicle not leader");
+//        }
+//        return 0;
+//    }
+//    public String toString(){
+//    	return "r3p1";
+//    }
+//}
+//
+//class r3p2 extends VanetProperty {
+//    //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
+//    @Override
+//    public double match(Road sut) throws PropertyFailedException {
+//        if (currentVehicle.getMinValue() >300) //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
+//            throw new PropertyFailedException(this, "Vehicle not ready to downgrade");
+//        return 0;
+//    }
+//    public String toString(){
+//    	return "r3p2";
+//    }
+//}
 
 class r4p1 extends VanetProperty {
 	  @Override
@@ -189,7 +214,7 @@ class r4p1 extends VanetProperty {
 class r4p2 extends VanetProperty {
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.getMinValue() > 100)
+	        if ( currentVehicle.distance > 100)
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        return 0;
 	    }
@@ -222,6 +247,7 @@ class r5p2 extends VanetProperty {
 	    	return "r5p2";
 	    }
 }
+
 class r6p1 extends VanetProperty {
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
@@ -238,7 +264,7 @@ class r6p1 extends VanetProperty {
 class r6p2 extends VanetProperty {
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.distance > 150) //getMinValue() 
+	        if ( currentVehicle.autonomie > 15)
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        return 0;
 	    }
@@ -246,4 +272,105 @@ class r6p2 extends VanetProperty {
 	    	return "r6p2";
 	    }
 }
+
+///////////////////
+
+class r7p1 extends VanetProperty {
+	  @Override
+	    public double match(Road sut) throws PropertyFailedException {
+	        if (currentVehicle.myPlatoon == null || (currentVehicle.getAutonomieDistance() -sut.FREQUENCYSTATION) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1])) {
+	            throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
+	        }
+	        return 0;
+	    }
+	  public String toString(){
+	    	return "r7p1";
+	    }
+}
+
+class r7p2 extends VanetProperty {
+	 @Override
+	    public double match(Road sut) throws PropertyFailedException {
+	        if ( currentVehicle.road.distanceStation[0] > 50)
+	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+	        return 0;
+	    }
+	 	public String toString(){
+	    	return "r7p2";
+	    }
+}
+class r8p1 extends VanetProperty {
+	  @Override
+	    public double match(Road sut) throws PropertyFailedException {
+	        if (currentVehicle.myPlatoon == null || (currentVehicle.getAutonomieDistance() -sut.FREQUENCYSTATION) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1])) {
+	            throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
+	        }
+	        return 0;
+	    }
+	  public String toString(){
+	    	return "r8p1";
+	    }
+}
+
+class r8p2 extends VanetProperty {
+	 @Override
+	    public double match(Road sut) throws PropertyFailedException {
+	        if ( currentVehicle.road.distanceStation[0] > 70)
+	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+	        return 0;
+	    }
+	 	public String toString(){
+	    	return "r8p2";
+	    }
+}
+class r9p1 extends VanetProperty {
+	  @Override
+	    public double match(Road sut) throws PropertyFailedException {
+	        if (currentVehicle.myPlatoon == null || (currentVehicle.getAutonomieDistance() -sut.FREQUENCYSTATION) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1])) {
+	            throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to qit for station");
+	        }
+	        return 0;
+	    }
+	  public String toString(){
+	    	return "r9p1";
+	    }
+}
+
+class r9p2 extends VanetProperty {
+	 @Override
+	    public double match(Road sut) throws PropertyFailedException {
+	        if ( currentVehicle.road.distanceStation[0] > 100)
+	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+	        return 0;
+	    }
+	 	public String toString(){
+	    	return "r9p2";
+	    }
+}
+
+
+//class r6p1 extends VanetProperty {
+//	  @Override
+//	    public double match(Road sut) throws PropertyFailedException {
+//	        if (currentVehicle.myPlatoon == null) {
+//	            throw new PropertyFailedException(this, "Vehicle not in platoon");
+//	        }
+//	        return 0;
+//	    }
+//	  public String toString(){
+//	    	return "r6p1";
+//	    }
+//}
+//
+//class r6p2 extends VanetProperty {
+//	 @Override
+//	    public double match(Road sut) throws PropertyFailedException {
+//	        if ( currentVehicle.distance > 150) //getMinValue() 
+//	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+//	        return 0;
+//	    }
+//	 	public String toString(){
+//	    	return "r6p2";
+//	    }
+//}
 
