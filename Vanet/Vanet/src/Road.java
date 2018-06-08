@@ -36,8 +36,8 @@ public class Road implements Iterable<Vehicle> {
     }
 
     public int addVehicle(double _auto, double _distance) {
-        allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this,writer,vehicleReader));
-        System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
+    	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this,writer,vehicleReader));
+    	System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
         writer.println("Vehicle created at index " + (allVehicles.size() - 1));
         return allVehicles.size() - 1;
     }
@@ -69,7 +69,7 @@ public class Road implements Iterable<Vehicle> {
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.tick();
-            if(v.distance <=0) {
+            if(v.distance <=10) {
                 if(v.myPlatoon!=null) {
                     removeVehicle(v, "Error : vehicle: "+ v.id+ " reached distance but is inside platoon, removed anyway ");
                 }
@@ -86,6 +86,7 @@ public class Road implements Iterable<Vehicle> {
                 v.getPlatoon().tick();
             }
         }
+
         
     }
 

@@ -32,16 +32,13 @@ public class AdaptationPolicyModel {
             }
             while(sut.lastReconfList.size()>0) { //if a platoon get deleted, the last reconf is retrieved here
             	Element elt = sut.lastReconfList.remove(0);
-//            	if(elt ==null) {
-//            		System.out.println("c est null");
-//            		sut.writer.println("c est null");
-//            	}
+
             	if(elt!=null) {
             	System.out.println("elt = " +elt.priority);
             	sut.writer.println("elt = " +elt.priority);
             	er.notifyStepAfter(compteur, elt);
-            	System.out.println("Retrieved last reconf of platoon");
-            	sut.writer.println("Retrieved last reconf of platoon");
+            	System.out.println("Retrieved last reconf of platoon before deletion");
+            	sut.writer.println("Retrieved last reconf of platoon before deletion");
             	//compteur++; ?
             	}
            }

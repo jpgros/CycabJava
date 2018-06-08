@@ -44,7 +44,6 @@ public class Vehicle extends Entity {
 		this.autonomie = autonomie;
 		this.distance = distance;
 		this.id = id;
-		this.vehiclePlatoonList = vehiclePlatoonList;
 		this.road=r;
 		this.writer=w;
 		this.read=read;
@@ -223,6 +222,7 @@ public class Vehicle extends Entity {
 				System.out.println(x);
 				writer.println(x);
 				myPlatoon.policies.addElement(elt); 
+				writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 			}
 			else if(distance < LOW_DIST) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.LOW, this);
@@ -230,6 +230,7 @@ public class Vehicle extends Entity {
 				System.out.println(x);
 				writer.println(x);
 				myPlatoon.policies.addElement(elt); 
+				writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 			}
 			if(autonomie< LOW_BATTERY) {
 				Element elt = new Element(PolicyName.QUITFAILURE, Priority.HIGH, this);
@@ -237,34 +238,56 @@ public class Vehicle extends Entity {
 				System.out.println(x);
 				writer.println(x);
 				myPlatoon.policies.addElement(elt);
+				writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
+
 			}
 			if (this == myPlatoon.leader && this.getMinValue() < LOW_LEADER_DIST) { // (autonomie < LOW_LEADER_BATTERY || distance < LOW_LEADER_DIST )) {
+				x = "Event : vehicle " + this.getId() + " should relay soon [HIGH]";
+				System.out.println(x);
+				writer.println(x);
 				Element elt = new Element(PolicyName.RELAY, Priority.HIGH, this);
-				myPlatoon.policies.addElement(elt);				
+				myPlatoon.policies.addElement(elt);	
+				writer.println(" minvalue :" + this.getMinValue());
+
 			}
 			if((this.getAutonomieDistance() -10.0)< (road.distanceStation[0] +road.distanceStation[1])){ //keep a margin of 10 
 				x = "Event : vehicle " + this.getId() + " is taking next station stop [NEXT_STATION]";
 				System.out.println(x);
 				writer.println(x);
 				if(road.distanceStation[0] < 50) { //verifying adding priority does nto causes bugs
+					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [HIGH]";
+					System.out.println(x);
+					writer.println(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.HIGH, this);
 					myPlatoon.policies.addElement(elt);
+					writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 				}
 				else if(road.distanceStation[0] < 70) { //road.distanceStation[0] >= 8 && 
+					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]";
+					System.out.println(x);
+					writer.println(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.MEDIUM, this);
 					myPlatoon.policies.addElement(elt);
+					writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 				}
-				else if(road.distanceStation[0] < 100) {
+				else if(road.distanceStation[0] <= 100) {
+					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [LOW]";
+					System.out.println(x);
+					writer.println(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.LOW, this);
 					myPlatoon.policies.addElement(elt);
+					writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 				}
 				else {
-					System.out.println("Should not happen QuitToStation policy problem");
+					x = "Error : Should not happen QuitToStation policy problem " + road.distanceStation[0];
+					System.out.println(x);
+					writer.println(x);
 				}
 			}
-			if(!this.isLeader() && myPlatoon.vehiclesList.size()>=3 && getMinValue()> myPlatoon.leader.getMinValue()) {
+			if(!this.isLeader() && myPlatoon.vehiclesList.size()>=3 && ((this.getMinValue()/DEC_LEADER)> myPlatoon.leader.getMinValue())) {
 				Element elt = new Element(PolicyName.UPGRADERELAY, Priority.MEDIUM, this);
 				myPlatoon.policies.addElement(elt);
+				writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 			}
 			
 			//leader ask platoon to choose wich adaptation policy to choose
