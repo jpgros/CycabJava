@@ -73,15 +73,18 @@ public class StochasticTester {
             	System.out.println("Step : " +j);
             	writer.println("Step : "+j);
                 // compute next step
-                MyStep newStep = computeNextStep();
+                MyStep newStep = computeNextStep();            
                 b = (newStep != null);
                 if (b) {
                     currentTest.append(newStep);
+                    
                     j++;
                     if (vcm != null) { 
                         vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
                     }
                 }
+                //ticktrigger here
+                ((VanetFSM) fsm).getSUT().tickTrigger();
             }
             while (j < length && b);
             // add computed test case to the result

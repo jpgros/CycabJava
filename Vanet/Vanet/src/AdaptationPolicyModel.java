@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
  * Time: 11:09
  */
 public class AdaptationPolicyModel {
-
+	Element lastTriggeredReconf=null;
     // Set of rules <TP --> PropertyAutomaton, config --> PropertyAutomaton, Reconf --> PolicyName (ENUM), Priority --> Priority (ENUM) >
 
     ArrayList<Rule> rules = new ArrayList<Rule>();
@@ -23,34 +23,43 @@ public class AdaptationPolicyModel {
     int compteur = 0;
 
     public void match(Road sut, ExecutionReport er) {
+    	   for (Rule r : rules) {
+               for (Vehicle v : sut.allVehicles) {
+                   if (r.matches(sut, v, er)) {
+                       er.notifyStepBefore(compteur, r, v);
+                   }
+               }
+           }
         // check reconfig effective du SUT
         if (compteur > 0) {
             for (Vehicle v : sut.allVehicles) {
                 if (v.myPlatoon != null && v.myPlatoon.leader == v && v.myPlatoon.lastReconf != null) {
-                    er.notifyStepAfter(compteur, v.myPlatoon.lastReconf);
+                    er.notifyStepAfter(compteur, v.myPlatoon.lastReconf,lastTriggeredReconf);
                 }
             }
-            while(sut.lastReconfList.size()>0) { //if a platoon get deleted, the last reconf is retrieved here
-            	Element elt = sut.lastReconfList.remove(0);
-
-            	if(elt!=null) {
-            	System.out.println("elt = " +elt.priority);
-            	sut.writer.println("elt = " +elt.priority);
-            	er.notifyStepAfter(compteur, elt);
-            	System.out.println("Retrieved last reconf of platoon before deletion");
-            	sut.writer.println("Retrieved last reconf of platoon before deletion");
-            	//compteur++; ?
-            	}
-           }
+            
+//            while(sut.lastReconfList.size()>0) { //if a platoon get deleted, the last reconf is retrieved here
+//            	Element elt = sut.lastReconfList.remove(0);
+//
+//            	if(elt!=null) {
+//            		System.out.println("lastrecfonfounded");
+//            		if(lastTriggeredReconf!=null) {
+//            			System.out.println("lastreconftriggered founded");
+//            		if(!lastTriggeredReconf.equals(elt)) {
+//            			System.out.println("same last reconfs");
+//		            	lastTriggeredReconf=null;
+//		            	System.out.println("elt = " +elt.priority);
+//		            	sut.writer.println("elt = " +elt.priority);
+//		            	er.notifyStepAfter(compteur, elt,lastTriggeredReconf);
+//		            	System.out.println("Retrieved last reconf of platoon before deletion");
+//		            	sut.writer.println("Retrieved last reconf of platoon before deletion");
+//		            	compteur++; 
+//	            	}
+//            		}
+//            	}
+//           }
         }
         compteur++;
-        for (Rule r : rules) {
-            for (Vehicle v : sut.allVehicles) {
-                if (r.matches(sut, v, er)) {
-                    er.notifyStepBefore(compteur, r, v);
-                }
-            }
-        }
     }
 }
 
@@ -132,32 +141,42 @@ class ExecutionReport {
             occurrences.put(tp, occurrences.get(tp) + 1);
         }
     }
-
+    //eligible reconf
     public void notifyStepBefore(int i, Rule r, Vehicle v) {
         if (steps.get(i) == null) {
             steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
         }
         steps.get(i).getFirst().add(new Element(r.reconf, r.prio, v));
     }
-
-    public void notifyStepAfter(int i, Element lastReconf) {
+    //actual reconf
+    public void notifyStepAfter(int i, Element lastReconf, Element lastTriggeredReconf) {
     	if (steps.get(i) == null) {
             // when no reconfiguration was expected 
-            steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
+            steps.put(i,new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
         }
         steps.get(i).getSecond().add(new Element(lastReconf.name, lastReconf.priority, lastReconf.vehicle));
+        lastTriggeredReconf=lastReconf;
     }
 
     public void dump() {
     	int lastStep =0;
+    	String x ="";
     	for (Integer step : steps.keySet()) {
     		while (lastStep < step) {
-    			System.out.println("*** Step " + lastStep);
+    			x = "*** Step " + lastStep;
+    			System.out.println(x);
+    			writerErr.println(x);
     			lastStep++;
     		}
-            System.out.println("*** Step " + step);
-            System.out.println("Eligible reconfigurations: " + steps.get(step).getFirst());
-            System.out.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+    		x = "*** Step " + step;
+            System.out.println(x);
+            writerErr.println(x);
+            x ="Eligible reconfigurations: " + steps.get(step).getFirst();
+            System.out.println(x);
+            writerErr.println(x);
+            x=" --> Actual reconfiguration: " + steps.get(step).getSecond();
+            System.out.println(x);
+            writerErr.println(x);
            // if(steps.get(step).getSecond().size()>0 && (steps.get(step).getFirst().contains(steps.get(step).getSecond()))) {
             //if priority eligible > actual 
             // if eligible empty and not actual

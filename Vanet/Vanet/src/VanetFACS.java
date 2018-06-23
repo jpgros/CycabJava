@@ -3,6 +3,7 @@ import nz.ac.waikato.modeljunit.FsmModel;
 
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,11 +31,11 @@ public class VanetFACS {
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);
-
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);
         st.setMonitor(vcm);
         ArrayList<MyTest> initial = st.generate(1, 400);
         vcm.printReport();
+        
         writerErr.close();
         writer.close();
         vehicleReader.close();
@@ -87,21 +88,21 @@ public class VanetFACS {
         // if v.autonomy <15
         // quitfailure |----> high
         
-        Rule r7  = new Rule(new r7p1(), new r7p2(), PolicyName.QUITFORSTATION, Priority.HIGH); //or quitstation
+        Rule r7  = new Rule(new r7p1(writer), new r7p2(writer), PolicyName.QUITFORSTATION, Priority.HIGH); //or quitstation
         a.addRule(r7);
         //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
         // after join(v) until quit(v)
         // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 50
         // quitforstation |----> high
         
-        Rule r8  = new Rule(new r8p1(), new r8p2(), PolicyName.QUITFORSTATION, Priority.MEDIUM); //or quitstation
+        Rule r8  = new Rule(new r8p1(writer), new r8p2(writer), PolicyName.QUITFORSTATION, Priority.MEDIUM); //or quitstation
         a.addRule(r8);
         //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
         // after join(v) until quit(v)
         // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 70
         // quitforstation |----> medium
         
-        Rule r9  = new Rule(new r9p1(), new r9p2(), PolicyName.QUITFORSTATION, Priority.LOW); //or quitstation
+        Rule r9  = new Rule(new r9p1(writer), new r9p2(writer), PolicyName.QUITFORSTATION, Priority.LOW); //or quitstation
         a.addRule(r9);
         //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
         // after join(v) until quit(v)
@@ -156,7 +157,7 @@ class r2p1 extends VanetProperty {
 //        	throw new PropertyFailedException(this, "Vehicle not leader");
 //        }
         else {
-        	writer.println("TP relay OK for vehicle "+ currentVehicle.id);
+        	writer.println("Config relay OK for vehicle "+ currentVehicle.id);
         }
         return 0;
     }
@@ -174,13 +175,13 @@ class r2p2 extends VanetProperty {
     //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
     @Override
     public double match(Road sut) throws PropertyFailedException {
-        if (currentVehicle.getMinValue() >200) { //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
-        	writer.println("Config relay KO for vehicle "+ currentVehicle.id + "minVal"+ currentVehicle.getMinValue());
+        if (currentVehicle.getMinValueLeader() >200) { //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
+        	writer.println("TP relay KO for vehicle "+ currentVehicle.id + "minVal "+ currentVehicle.getMinValueLeader());
             throw new PropertyFailedException(this, "Vehicle not ready to downgrade");}
         
     
 	   else {
-	    	writer.println("Config relay OK for vehicle "+ currentVehicle.id);
+	    	writer.println("TP relay OK for vehicle "+ currentVehicle.id + "minval " + currentVehicle.getMinValueLeader());
 	    }
         return 0;
     }
@@ -297,10 +298,19 @@ class r6p2 extends VanetProperty {
 ///////////////////
 
 class r7p1 extends VanetProperty {
+	  PrintWriter writer =null;
+      //  after join(v) until quit(v)
+	  public r7p1(PrintWriter w) {
+		  writer = w;
+	  }
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
 	        if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
+	        	writer.println("Config KO for quitStas HIGH" + " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
 	            throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
+	        }
+	        else {
+	        	writer.println("Config OK for quitStas HIGH");
 	        }
 	        return 0;
 	    }
@@ -310,10 +320,20 @@ class r7p1 extends VanetProperty {
 }
 
 class r7p2 extends VanetProperty {
+	 PrintWriter writer =null;
+     //  after join(v) until quit(v)
+	 public r7p2(PrintWriter w) {
+	 	 writer = w;
+	 }
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.road.distanceStation[0] >= 50)
-	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+	        if ( currentVehicle.road.distanceStation[0] >= 50) {
+	        	writer.println("TP KO for quitStas HIGH");
+	        	throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+	        }
+	        else {
+	        	writer.println("TP OK for quitStas HIGH");
+	        }
 	        return 0;
 	    }
 	 	public String toString(){
@@ -321,10 +341,19 @@ class r7p2 extends VanetProperty {
 	    }
 }
 class r8p1 extends VanetProperty {
+	 PrintWriter writer =null;
+     //  after join(v) until quit(v)
+	 public r8p1(PrintWriter w) {
+		 writer = w;
+	 }
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
 	        if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
-	            throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
+	        	writer.println("config KO for quitStas MEDIUM"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+	        	throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
+	        }
+	        else {
+	        	writer.println("config OK for quitStas MEDIUM"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
 	        }
 	        return 0;
 	    }
@@ -334,10 +363,20 @@ class r8p1 extends VanetProperty {
 }
 
 class r8p2 extends VanetProperty {
+	 PrintWriter writer =null;
+     //  after join(v) until quit(v)
+	 public r8p2(PrintWriter w) {
+		 writer = w;
+	 }
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.road.distanceStation[0] >= 70)
-	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+	        if ( currentVehicle.road.distanceStation[0] >= 70) {
+	        	writer.println("TP KO for quitStas MEDIUM");
+	        	throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+	        }
+	        else {
+	        	writer.println("TP OK for quitStas MEDIUM");
+	        }
 	        return 0;
 	    }
 	 	public String toString(){
@@ -345,10 +384,19 @@ class r8p2 extends VanetProperty {
 	    }
 }
 class r9p1 extends VanetProperty {
+	  PrintWriter writer =null;
+      //  after join(v) until quit(v)
+	  public r9p1(PrintWriter w) {
+		  writer = w;
+	  }
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException { //currentVehicle.frequencystation causes problem
-	        if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
-	            throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to qit for station");
+	        if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) >= (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
+	        	writer.println("Config KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+	        	throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to qit for station");
+	        }
+	        else {
+	        	writer.println("Config OK for quitStas LOW");
 	        }
 	        return 0;
 	    }
@@ -358,10 +406,20 @@ class r9p1 extends VanetProperty {
 }
 
 class r9p2 extends VanetProperty {
+	 PrintWriter writer =null;
+     //  after join(v) until quit(v)
+	 public r9p2(PrintWriter w) {
+		 writer = w;
+	 }
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.road.distanceStation[0] >= 100)
+	        if ( currentVehicle.road.distanceStation[0] >= 100) {
+	        	writer.println("TP KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+	        }
+	        else {
+	        	writer.println("TP OK for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+	        }
 	        return 0;
 	    }
 	 	public String toString(){

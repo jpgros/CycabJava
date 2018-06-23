@@ -13,6 +13,11 @@ public class Element{
 		priority=p;
 		vehicle = v;
 	}
+	public Element(PolicyName n) {
+		name =n;
+		priority=null;
+		vehicle=null;
+	}
 	public Vehicle getVehicle() {
 		return vehicle;
 	}

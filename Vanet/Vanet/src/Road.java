@@ -24,7 +24,7 @@ public class Road implements Iterable<Vehicle> {
     FileReader vehicleReader = null;
     FileReader platoonReader = null;
     FileReader roadReader = null;
-    LinkedList<Element> lastReconfList = new LinkedList<Element>();
+    //LinkedList<Element> lastReconfList = new LinkedList<Element>();
     public Road(PrintWriter w, FileReader vr, FileReader pr, FileReader rr) {
     	writer = w;
     	vehicleReader=vr;
@@ -89,7 +89,13 @@ public class Road implements Iterable<Vehicle> {
 
         
     }
-
+    public void tickTrigger() {
+    	for (Vehicle v : allVehicles) {
+            if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
+            	v.getPlatoon().tickTrigger();
+            }
+        }
+    }
 
 
     public void affiche() {

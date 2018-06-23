@@ -66,7 +66,9 @@ public class VanetFSM implements FsmModel {
         return new Object[]{ sut, auto, dist };
     }
 
-
+    public void tickTrigger(){
+    	sut.tickTrigger();
+    }
     public boolean requestJoinGuard() {
         if (sut.nbVehiclesOnRoad() < 2) {
             return false;

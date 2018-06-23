@@ -66,6 +66,12 @@ public class Vehicle extends Entity {
 //		Math.min(this.autonomie * (this.DEC_DISTANCE / DEC_ENERGY), this.getDistance());
 		return Math.min(getAutonomieDistance(),this.getDistance());
 }
+	
+	public double getMinValueLeader() {
+		return Math.min((autonomie)*(DEC_DISTANCE/DEC_LEADER),this.getDistance());
+	}
+	
+	
 //	public void run() {
 //		System.out.println("Vehicle id : " + id + " started");
 //		while(distance >0 && autonomie>10) {
@@ -260,6 +266,7 @@ public class Vehicle extends Entity {
 					writer.println(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.HIGH, this);
 					myPlatoon.policies.addElement(elt);
+					writer.println(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]);
 					writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 				}
 				else if(road.distanceStation[0] < 70) { //road.distanceStation[0] >= 8 && 
@@ -268,6 +275,7 @@ public class Vehicle extends Entity {
 					writer.println(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.MEDIUM, this);
 					myPlatoon.policies.addElement(elt);
+					writer.println(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]);
 					writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 				}
 				else if(road.distanceStation[0] <= 100) {
@@ -276,6 +284,7 @@ public class Vehicle extends Entity {
 					writer.println(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.LOW, this);
 					myPlatoon.policies.addElement(elt);
+					writer.println(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]);
 					writer.println(" nb policies :" + myPlatoon.policies.listPolicy.size());
 				}
 				else {
