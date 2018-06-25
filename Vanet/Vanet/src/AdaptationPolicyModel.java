@@ -1,7 +1,10 @@
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -157,8 +160,30 @@ class ExecutionReport {
         steps.get(i).getSecond().add(new Element(lastReconf.name, lastReconf.priority, lastReconf.vehicle));
         lastTriggeredReconf=lastReconf;
     }
-
+    public void initiateMaps(Map<PolicyName, Integer> map, Map<PolicyName, Integer> map2) {
+    	ArrayList<Integer> list = new ArrayList<Integer>();
+    	list.add(0);
+    	list.add(0);
+    	map.put(PolicyName.QUITPLATOON, 0);
+    	map.put(PolicyName.QUITFORSTATION, 0);
+    	map.put(PolicyName.QUITFAILURE, 0);
+    	map.put(PolicyName.RELAY, 0);
+    	map.put(PolicyName.UPGRADERELAY, 0);
+    	//map.put(PolicyName.RUN, 0);
+    	
+    	map2.put(PolicyName.QUITPLATOON, 0);
+    	map2.put(PolicyName.QUITFORSTATION, 0);
+    	map2.put(PolicyName.QUITFAILURE, 0);
+    	map2.put(PolicyName.RELAY, 0);
+    	map2.put(PolicyName.UPGRADERELAY, 0);
+    	//map2.put(PolicyName.RUN, 0);
+    }
     public void dump() {
+    	Map<PolicyName, Integer> eligibleMap = new HashMap<PolicyName, Integer>();
+    	Map<PolicyName, Integer> actualMap = new HashMap<PolicyName, Integer>();
+
+    	//Map<PolicyName, List<Integer>> eligibleActualCounter = new HashMap<PolicyName, List<Integer>>();
+    	initiateMaps(eligibleMap,actualMap);
     	int lastStep =0;
     	String x ="";
     	for (Integer step : steps.keySet()) {
@@ -171,13 +196,21 @@ class ExecutionReport {
     		x = "*** Step " + step;
             System.out.println(x);
             writerErr.println(x);
-            x ="Eligible reconfigurations: " + steps.get(step).getFirst();
+            ArrayList<Element> elt = steps.get(step).getFirst();
+            ArrayList<Element> elt2 = steps.get(step).getSecond();
+            x ="Eligible reconfigurations: " + elt;
             System.out.println(x);
             writerErr.println(x);
+            for(Element elig : elt) {
+            	eligibleMap.put(elig.name, eligibleMap.get(elig.name) + 1);
+            }
             x=" --> Actual reconfiguration: " + steps.get(step).getSecond();
             System.out.println(x);
             writerErr.println(x);
-           // if(steps.get(step).getSecond().size()>0 && (steps.get(step).getFirst().contains(steps.get(step).getSecond()))) {
+            for(Element elig : elt2) {
+            	actualMap.put(elig.name, actualMap.get(elig.name) + 1);
+            }
+            // if(steps.get(step).getSecond().size()>0 && (steps.get(step).getFirst().contains(steps.get(step).getSecond()))) {
             //if priority eligible > actual 
             // if eligible empty and not actual
             if(steps.get(step).getSecond().size()>0 && steps.get(step).getFirst().size()==0) {
@@ -203,6 +236,30 @@ class ExecutionReport {
             lastStep++;
         }
     	System.out.println("Last step with eligible reconfiguration is step " + --lastStep);
+    	x = "Eligible versus actuel reconfigurations :";
+    	System.out.println(x);
+    	writerErr.println(x);
+    	int i =0;
+    	 Iterator it = eligibleMap.entrySet().iterator();
+    	 Iterator it2 = actualMap.entrySet().iterator();
+
+    	    while (it.hasNext()) {
+ 
+    	        Map.Entry pair = (Map.Entry)it.next();
+    	        System.out.print(pair.getKey() + " = " + pair.getValue());
+    	        it.remove(); // avoids a ConcurrentModificationException
+    	        
+    	        Map.Entry pair2 = (Map.Entry)it2.next();
+    	        System.out.println(" / " + pair2.getValue());
+    	        it2.remove(); // avoids a ConcurrentModificationException
+    	    }
+//    	while(i<eligibleMap.size() ) {
+//    		for(Element elt : eligibleMap)
+//    		x= "actual/eligible : " + eligibleMap.+" / "+ eligibleActualCounter.get(i).get(0) ;
+//    		System.out.println(x);
+//    		writerErr.println(x);
+//    		i++;
+//    	}
     }
 }
 

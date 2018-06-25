@@ -122,6 +122,10 @@ class r1p1 extends VanetProperty {
         if (currentVehicle.myPlatoon == null) {
             throw new PropertyFailedException(this, "Vehicle not in platoon");
         }
+        else if(currentVehicle.myPlatoon.created) {
+            throw new PropertyFailedException(this, "Cannot upgrade a vehicle just after a platoon creation");
+
+        }
         return 0;
     }
     public String toString(){
@@ -152,6 +156,10 @@ class r2p1 extends VanetProperty {
     public double match(Road sut) throws PropertyFailedException {
         if ((currentVehicle.myPlatoon == null) || (currentVehicle.myPlatoon.leader != currentVehicle)) {
             throw new PropertyFailedException(this, "Vehicle not in platoon");
+        }
+        else if(currentVehicle.myPlatoon.created) {
+            throw new PropertyFailedException(this, "Cannot upgrade a vehicle just after a platoon creation");
+
         }
 //        if () {
 //        	throw new PropertyFailedException(this, "Vehicle not leader");
