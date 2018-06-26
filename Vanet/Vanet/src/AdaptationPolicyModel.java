@@ -122,7 +122,7 @@ class ExecutionReport {
     
     HashMap<PropertyAutomaton,Integer> occurrences = new HashMap<PropertyAutomaton, Integer>();
     PrintWriter writerErr =null;
-    
+    boolean property =true;
     public ExecutionReport(PrintWriter w) {
     	writerErr = w;
     }
@@ -226,13 +226,30 @@ class ExecutionReport {
 //            		
 //            	}
 //            }
+            // when the eligible reconfiguration is empty and not actual
+            if(steps.get(step).getSecond().size()>0 && steps.get(step).getFirst().size() ==0) {
+            	writerErr.println("*** Step " + step + " encountered a problem : reconfiguration occured but was nout founded eligible");
+                writerErr.println("Eligible reconfigurations: " + steps.get(step).getFirst());
+                writerErr.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+            	  property=false;
+            }
+            //when actual is empty and not eligible
+            else if(steps.get(step).getSecond().size()==0 && steps.get(step).getFirst().size() >0) {
+            	writerErr.println("*** Step " + step + " encountered a problem : reconfiguration founded eligible but did not occured");
+                writerErr.println("Eligible reconfigurations: " + steps.get(step).getFirst());
+                writerErr.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+            	property=false;            
+            }
+            //when actual is not null but not contained in eligible
+            else if(!containsReconf(steps.get(step).getSecond().get(0), steps.get(step).getFirst())) {
+            	writerErr.println("*** Step " + step + " encountered a problem : actual reconfiguration is not in eligible list");
+                writerErr.println("Eligible reconfigurations: " + steps.get(step).getFirst());
+                writerErr.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+            	property=false;          
+            }
             
-//            if(steps.get(step).getSecond().size()>0 && steps.get(step).getFirst(). )==0) {
-//            	writerErr.println("*** Step " + step + " encountered a problem : reconfiguration occured but was nout founded eligible");
-//                writerErr.println("Eligible reconfigurations: " + steps.get(step).getFirst());
-//                writerErr.println(" --> Actual reconfiguration: " + steps.get(step).getSecond());
+            
 //            }
-            //}
             lastStep++;
         }
     	System.out.println("Last step with eligible reconfiguration is step " + --lastStep);
@@ -253,6 +270,17 @@ class ExecutionReport {
     	        System.out.println(" / " + pair2.getValue());
     	        it2.remove(); // avoids a ConcurrentModificationException
     	    }
+    	    if(property) {
+    	    	x ="Verdict : test passed successfully";
+    	    	System.out.println(x);
+    	    	writerErr.println(x);
+    	    }
+    	    else {
+    	    	x ="Verdict : test failed";
+    	    	System.out.println(x);
+    	    	writerErr.println(x);
+    	    }
+    	    
 //    	while(i<eligibleMap.size() ) {
 //    		for(Element elt : eligibleMap)
 //    		x= "actual/eligible : " + eligibleMap.+" / "+ eligibleActualCounter.get(i).get(0) ;
@@ -260,6 +288,12 @@ class ExecutionReport {
 //    		writerErr.println(x);
 //    		i++;
 //    	}
+    }
+    public boolean containsReconf(Element e1, ArrayList<Element> array) {
+    	for(int i =0; i< array.size(); i++) {
+    		if(e1.name == array.get(i).name && e1.priority== array.get(i).priority && e1.vehicle==array.get(i).vehicle ) return true;
+    	}
+    	return false;
     }
 }
 
