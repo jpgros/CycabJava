@@ -95,7 +95,7 @@ public class Platoon extends Entity { //implements Runnable {
 		//System.out.println("tick policy: " + tickCounter);
 		//writer.println("tick policy: " + tickCounter);
 		//if(tickCounter ==0) {
-			lastReconf=null;
+			lastReconf=null; // to remove , already done in ticktrigger
 			if(policies.listPolicy.size()>0) {
 				lastReconf = policies.listPolicy.get(0);
 			}
@@ -192,6 +192,7 @@ public class Platoon extends Entity { //implements Runnable {
 			}
         }
 		created=false;
+		lastReconf=null;
 	}
 	
 	public void tickTriggerM1() { //always get lower priority
@@ -251,6 +252,7 @@ public class Platoon extends Entity { //implements Runnable {
 			}
         }
 		created=false;
+		lastReconf=null;
 	}
 	
 	public void tickTriggerM2() { //get random priority should be harde rto detect than M1
@@ -310,6 +312,67 @@ public class Platoon extends Entity { //implements Runnable {
 			}
         }
 		created=false;
+		lastReconf=null;
+	}
+	
+	public void tickTriggerM3() { //lastReconf not reinit at the end of tick trigger so if on the next step another action than tick is used, lastreconf will apear again into actual
+		String x = "";
+		if(policies.listPolicy.size()>0) {
+			lastReconf = policies.listPolicy.remove(0);
+			policies.listPolicy.clear();
+		
+			if(lastReconf.name == PolicyName.RELAY) {
+				this.relay();
+				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue(); //+ " tick : " + tickCounter;
+				System.out.println(x);
+				writer.println(x);
+				//tickCounter=6;
+			}
+			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
+				this.upgradeRelay(lastReconf.vehicle);
+				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;// + " tick : " + tickCounter;
+				System.out.println(x);
+				writer.println(x);
+				//tickCounter=6;
+			}
+			else if(lastReconf.name == PolicyName.QUITFAILURE || lastReconf.name == PolicyName.QUITPLATOON || lastReconf.name == PolicyName.QUITFORSTATION) {
+				if(lastReconf.vehicle == leader) {
+					relay();
+					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;
+					System.out.println(x);
+					writer.println(x);
+					//tickCounter=6;
+				}
+				deleteVehicle(lastReconf.vehicle);
+				switch (lastReconf.name) {
+				case QUITFAILURE:
+					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;
+					System.out.println(x);
+					writer.println(x);
+					//tickCounter+=3;
+					break;
+				case QUITFORSTATION:
+					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;
+					System.out.println(x);
+					writer.println(x);
+					//tickCounter+=5;
+					break;
+				case QUITPLATOON:
+					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;
+					System.out.println(x); // or distance reached
+					writer.println(x);
+					//tickCounter+=4;
+					break;
+				default:
+					x= "Error, policy name not verified properly";
+					System.out.println(x);
+					writer.println(x);
+					break;
+				}
+			}
+        }
+		created=false;
+		//lastReconf=null; mutant removes this line
 	}
 	
 	public void relay() {

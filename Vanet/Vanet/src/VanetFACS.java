@@ -462,7 +462,7 @@ class r9p2 extends VanetProperty {
 	 }
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.road.distanceStation[0] >= 100) {
+	        if ( currentVehicle.road.distanceStation[0] > 100) { //>= to have mutant
 	        	writer.println("TP KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        }

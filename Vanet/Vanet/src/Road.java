@@ -80,7 +80,6 @@ public class Road implements Iterable<Vehicle> {
                 i--;
             }
         }
-        updateDistStas();
         affiche();
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
@@ -97,6 +96,7 @@ public class Road implements Iterable<Vehicle> {
             	v.getPlatoon().tickTrigger();
             }
         }
+        updateDistStas();
     }
 
 
