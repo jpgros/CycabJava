@@ -15,7 +15,7 @@ import java.io.PrintWriter;
  * Time: 14:33
  */
 public class Road implements Iterable<Vehicle> {
-
+	boolean tick =false;
     final static int MAX_CAPACITY = 5;
 	final static double FREQUENCYSTATION = 100;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
@@ -66,6 +66,7 @@ public class Road implements Iterable<Vehicle> {
 
 
     public void tick() {
+    	tick=true;
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.tick();
@@ -90,6 +91,7 @@ public class Road implements Iterable<Vehicle> {
         
     }
     public void tickTrigger() {
+    	tick=false;
     	for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
             	v.getPlatoon().tickTrigger();

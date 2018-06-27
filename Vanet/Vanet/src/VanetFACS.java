@@ -49,7 +49,7 @@ public class VanetFACS {
         //  after join(v) until quit(v)
         //      if min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
         //          relay |--> medium
-        Rule r1 = new Rule(new r1p1(), new r1p2(), PolicyName.UPGRADERELAY, Priority.MEDIUM);
+        Rule r1 = new Rule(new r1p1(writer), new r1p2(writer), PolicyName.UPGRADERELAY, Priority.MEDIUM);
         a.addRule(r1);
 
         Rule r2  = new Rule(new r2p1(writer), new r2p2(writer), PolicyName.RELAY, Priority.HIGH); //or quitstation
@@ -116,11 +116,18 @@ public class VanetFACS {
 
 
 class r1p1 extends VanetProperty {
+	PrintWriter writer =null;
     //  after join(v) until quit(v)
     @Override
     public double match(Road sut) throws PropertyFailedException {
-        if (currentVehicle.myPlatoon == null) {
+    	if(! sut.tick) { //remove to have mutant
+    		throw new PropertyFailedException(this, "Road is using another action than tick");
+    	}
+    	else if (currentVehicle.myPlatoon == null) {
             throw new PropertyFailedException(this, "Vehicle not in platoon");
+        }
+        else if (currentVehicle.myPlatoon.leader == currentVehicle) {
+            throw new PropertyFailedException(this, "Vehicle alredy leader");
         }
         else if(currentVehicle.myPlatoon.created) {
             throw new PropertyFailedException(this, "Cannot upgrade a vehicle just after a platoon creation");
@@ -128,18 +135,31 @@ class r1p1 extends VanetProperty {
         }
         return 0;
     }
+    public r1p1(PrintWriter w) {
+    	writer = w;
+    }
     public String toString(){
     	return "r1p1";
     }
 }
 
 class r1p2 extends VanetProperty {
+	PrintWriter writer = null;
     //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
     @Override
     public double match(Road sut) throws PropertyFailedException {
         if (currentVehicle.myPlatoon.getVehiclesList().size() < 3 || (currentVehicle.getMinValue()/currentVehicle.DEC_LEADER) < currentVehicle.myPlatoon.leader.getMinValue())
             throw new PropertyFailedException(this, "Vehicle not ready to be leader");
-        return 0;
+
+    
+    else {
+    	writer.println("TP relay OK for vehicle min value "+ currentVehicle.getMinValue()/currentVehicle.DEC_LEADER + "leader minvalue "+ currentVehicle.myPlatoon.leader.getMinValue());
+
+    }
+    return 0;
+    }
+    public r1p2(PrintWriter w) {
+    	writer = w;
     }
     public String toString(){
     	return "r1p2";
@@ -154,7 +174,10 @@ class r2p1 extends VanetProperty {
 	}
     @Override
     public double match(Road sut) throws PropertyFailedException {
-        if ((currentVehicle.myPlatoon == null) || (currentVehicle.myPlatoon.leader != currentVehicle)) {
+    	if(! sut.tick) { //remove to have mutant
+    		throw new PropertyFailedException(this, "Road is using another action than tick");
+    	}
+    	else if ((currentVehicle.myPlatoon == null) || (currentVehicle.myPlatoon.leader != currentVehicle)) {
             throw new PropertyFailedException(this, "Vehicle not in platoon");
         }
         else if(currentVehicle.myPlatoon.created) {
@@ -231,7 +254,10 @@ class r2p2 extends VanetProperty {
 class r4p1 extends VanetProperty {
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if (currentVehicle.myPlatoon == null) {
+		    if(! sut.tick) { //remove to have mutant
+	    		throw new PropertyFailedException(this, "Road is using another action than tick");
+	    	}
+	    	else if (currentVehicle.myPlatoon == null) {
 	            throw new PropertyFailedException(this, "Vehicle not in platoon");
 	        }
 	        return 0;
@@ -256,7 +282,10 @@ class r4p2 extends VanetProperty {
 class r5p1 extends VanetProperty {
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if (currentVehicle.myPlatoon == null) {
+		    if(! sut.tick) { //remove to have mutant
+	    		throw new PropertyFailedException(this, "Road is using another action than tick");
+	    	}
+	    	else if (currentVehicle.myPlatoon == null) {
 	            throw new PropertyFailedException(this, "Vehicle not in platoon");
 	        }
 	        return 0;
@@ -281,7 +310,10 @@ class r5p2 extends VanetProperty {
 class r6p1 extends VanetProperty {
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if (currentVehicle.myPlatoon == null) {
+		    if(! sut.tick) { //remove to have mutant
+	    		throw new PropertyFailedException(this, "Road is using another action than tick");
+	    	}
+	    	else if (currentVehicle.myPlatoon == null) {
 	            throw new PropertyFailedException(this, "Vehicle not in platoon");
 	        }
 	        return 0;
@@ -294,7 +326,7 @@ class r6p1 extends VanetProperty {
 class r6p2 extends VanetProperty {
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.autonomie >= 15)
+		 	if ( currentVehicle.autonomie >= 15)
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        return 0;
 	    }
@@ -313,7 +345,10 @@ class r7p1 extends VanetProperty {
 	  }
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
+		  	if(! sut.tick) { //remove to have mutant
+	    		throw new PropertyFailedException(this, "Road is using another action than tick");
+	    	}
+	    	else if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
 	        	writer.println("Config KO for quitStas HIGH" + " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
 	            throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
 	        }
@@ -356,7 +391,10 @@ class r8p1 extends VanetProperty {
 	 }
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
+		    if(! sut.tick) { //remove to have mutant
+	    		throw new PropertyFailedException(this, "Road is using another action than tick");
+	    	}
+	    	else if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
 	        	writer.println("config KO for quitStas MEDIUM"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
 	        	throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
 	        }
@@ -399,7 +437,10 @@ class r9p1 extends VanetProperty {
 	  }
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException { //currentVehicle.frequencystation causes problem
-	        if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) >= (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
+		  	if(! sut.tick) { //remove to have mutant
+	    		throw new PropertyFailedException(this, "Road is using another action than tick");
+	    	}
+	    	else if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) >= (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
 	        	writer.println("Config KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
 	        	throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to qit for station");
 	        }

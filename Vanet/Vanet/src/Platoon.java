@@ -313,9 +313,14 @@ public class Platoon extends Entity { //implements Runnable {
 	}
 	
 	public void relay() {
+		if(!nextLeaderList.isEmpty()){
+			if(leader.getId()==nextLeaderList.get(0).getId()) {
+				nextLeaderList.remove(0);
+			}
+		}
 		if(!nextLeaderList.isEmpty()) {
 			System.out.print("Leader vehicle "+ leader.getId());
-			this.leader = nextLeaderList.remove(0);			
+			this.leader = nextLeaderList.remove(0);
 			System.out.println(" replaced by elected " + leader.getId());
 			writer.print("Leader vehicle "+ leader.getId());
             writer.println(" replaced by elected " + leader.getId());
