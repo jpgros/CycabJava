@@ -68,6 +68,10 @@ public class Road implements Iterable<Vehicle> {
     public void tick() {
     	tick=true;
         for (int i=0; i < allVehicles.size(); i++) {
+        	 Vehicle v = allVehicles.get(i);
+             v.updateVehicleVariables();
+        }
+        for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.tick();
             if(v.distance <=10) {

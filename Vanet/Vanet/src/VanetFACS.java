@@ -33,8 +33,28 @@ public class VanetFACS {
         setRulesForAPM(apm,writer);
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);
         st.setMonitor(vcm);
-        ArrayList<MyTest> initial = st.generate(1, 400);
+        ArrayList<MyTest> initial = st.generate(1, 4000);
         vcm.printReport();
+        
+        VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
+        st.setMonitor(vcm2);
+        ArrayList<MyTest> initial2 = st.generate(1, 400);
+        vcm2.printReport();
+        
+        VanetConformanceMonitor vcm3 = new VanetConformanceMonitor(apm, writerErr);
+        st.setMonitor(vcm3);
+        ArrayList<MyTest> initial3 = st.generate(1, 400);
+        vcm3.printReport();
+        
+        VanetConformanceMonitor vcm4 = new VanetConformanceMonitor(apm, writerErr);
+        st.setMonitor(vcm4);
+        ArrayList<MyTest> initial4 = st.generate(1, 400);
+        vcm4.printReport();
+        
+        VanetConformanceMonitor vcm5 = new VanetConformanceMonitor(apm, writerErr);
+        st.setMonitor(vcm5);
+        ArrayList<MyTest> initial5 = st.generate(1, 400);
+        vcm5.printReport();
         
         writerErr.close();
         writer.close();
@@ -133,6 +153,9 @@ class r1p1 extends VanetProperty {
             throw new PropertyFailedException(this, "Cannot upgrade a vehicle just after a platoon creation");
 
         }
+        else {
+        	writer.println("Config relay OK for vehicle "+ currentVehicle.getId());
+        }
         return 0;
     }
     public r1p1(PrintWriter w) {
@@ -148,7 +171,9 @@ class r1p2 extends VanetProperty {
     //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
     @Override
     public double match(Road sut) throws PropertyFailedException {
-        if (currentVehicle.myPlatoon.getVehiclesList().size() < 3 || (currentVehicle.getMinValue()/currentVehicle.DEC_LEADER) < currentVehicle.myPlatoon.leader.getMinValue())
+        writer.println("nb vehicles " + currentVehicle.myPlatoon.getVehiclesList().size() +" min val"+ currentVehicle.getMinValue()/currentVehicle.DEC_LEADER + "min val leader "+ currentVehicle.myPlatoon.leader.getMinValue());
+
+        if (currentVehicle.myPlatoon.getVehiclesList().size() < 3 || (currentVehicle.getMinValue()/currentVehicle.DEC_LEADER) <= currentVehicle.myPlatoon.leader.getMinValue())
             throw new PropertyFailedException(this, "Vehicle not ready to be leader");
 
     

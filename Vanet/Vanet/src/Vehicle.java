@@ -201,13 +201,15 @@ public class Vehicle extends Entity {
 		vehiclePlatoonList.remove(myPlatoon);
 	}
 	public void deletePlatoon() {
+		if(myPlatoon.leader==this) myPlatoon.leader=null;
 		myPlatoon=null;
 		idPlatoon=null;
 	}
-	public void tick() {
-		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
-		this.distance -= 10;
+	public void updateVehicleVariables(){ //put this method inside tick to have mutant
+											// the vehicles may compare their battery with the leader but his the leader did not ticked, the value may change with the monitor
 		String x ="";
+		this.distance -= 10;
+		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
 		if(this.distance < 0 ) {
 			x = "Error : Distance left negative !";
 			System.out.println(x);
@@ -218,6 +220,10 @@ public class Vehicle extends Entity {
 			System.out.println(x);
 			writer.println(x);
 		}
+	}
+	public void tick() {
+		String x ="";
+
 		// TODO
 		//Add each tick only new policies will be added
 		if(myPlatoon!=null) {
@@ -293,6 +299,7 @@ public class Vehicle extends Entity {
 					writer.println(x);
 				}
 			}
+			writer.println("nb vehicles"+ myPlatoon.vehiclesList.size() + "minval " + this.getMinValue()/DEC_LEADER+ "leader min val " +myPlatoon.leader.getMinValue());
 			if(!this.isLeader() && myPlatoon.vehiclesList.size()>=3 && ((this.getMinValue()/DEC_LEADER)> myPlatoon.leader.getMinValue())) {
 				Element elt = new Element(PolicyName.UPGRADERELAY, Priority.MEDIUM, this);
 				myPlatoon.policies.addElement(elt);
@@ -312,6 +319,7 @@ public class Vehicle extends Entity {
 				refill();	
 			}
 		}
+		
 	}
 	
 //	public void parsingFile() {

@@ -190,23 +190,23 @@ class ExecutionReport {
     		while (lastStep < step) {
     			x = "*** Step " + lastStep;
     			System.out.println(x);
-    			writerErr.println(x);
+    			//writerErr.println(x);
     			lastStep++;
     		}
     		x = "*** Step " + step;
             System.out.println(x);
-            writerErr.println(x);
+            //writerErr.println(x);
             ArrayList<Element> elt = steps.get(step).getFirst();
             ArrayList<Element> elt2 = steps.get(step).getSecond();
             x ="Eligible reconfigurations: " + elt;
             System.out.println(x);
-            writerErr.println(x);
+            //writerErr.println(x);
             for(Element elig : elt) {
             	eligibleMap.put(elig.name, eligibleMap.get(elig.name) + 1);
             }
             x=" --> Actual reconfiguration: " + steps.get(step).getSecond();
             System.out.println(x);
-            writerErr.println(x);
+            //writerErr.println(x);
             for(Element elig : elt2) {
             	actualMap.put(elig.name, actualMap.get(elig.name) + 1);
             }
@@ -253,7 +253,7 @@ class ExecutionReport {
             lastStep++;
         }
     	System.out.println("Last step with eligible reconfiguration is step " + --lastStep);
-    	x = "Eligible versus actuel reconfigurations :";
+    	x = "Eligible versus actual reconfigurations :";
     	System.out.println(x);
     	writerErr.println(x);
     	int i =0;

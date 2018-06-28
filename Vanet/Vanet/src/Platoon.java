@@ -53,9 +53,14 @@ public class Platoon extends Entity { //implements Runnable {
 		vehiclesList.add(v);
 		eligibleLeader(v);
 	}
-	public void removeVehicle(Vehicle v) {
-		vehiclesList.remove(v);
-	}
+//	public void removeVehicle(Vehicle v) {
+//		v.myPlatoon=null;
+//		if(v==leader) {
+//			writer.println("ERROR should not remove a leader without verifying platoon deltion forced");
+//			deletePlatoon();
+//		}
+//		vehiclesList.remove(v);
+//	}
 	public void eligibleLeader(Vehicle v) {
 		double minValue = v.getMinValue();
 		String x ="";
@@ -146,6 +151,10 @@ public class Platoon extends Entity { //implements Runnable {
 				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue(); //+ " tick : " + tickCounter;
 				System.out.println(x);
 				writer.println(x);
+//				x = "Replaced by " + this.leader.getId();
+//
+//				System.out.println(x);
+//				writer.println(x);
 				//tickCounter=6;
 			}
 			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
@@ -377,16 +386,17 @@ public class Platoon extends Entity { //implements Runnable {
 	
 	public void relay() {
 		if(!nextLeaderList.isEmpty()){
+			writer.println("actual leader id " +leader.getId() + "next leader " + nextLeaderList.get(0).getId());
 			if(leader.getId()==nextLeaderList.get(0).getId()) {
 				nextLeaderList.remove(0);
 			}
 		}
 		if(!nextLeaderList.isEmpty()) {
-			System.out.print("Leader vehicle "+ leader.getId());
+			//System.out.print("Leader vehicle "+ leader.getId());
 			this.leader = nextLeaderList.remove(0);
-			System.out.println(" replaced by elected " + leader.getId());
-			writer.print("Leader vehicle "+ leader.getId());
-            writer.println(" replaced by elected " + leader.getId());
+			//System.out.println(" replaced by elected " + leader.getId());
+			//writer.print("Leader vehicle "+ leader.getId());
+            writer.println(" replaced by elected " + this.leader.getId());
 
 		}
 		
@@ -421,12 +431,13 @@ public class Platoon extends Entity { //implements Runnable {
 				if(vehiclesList.size()>0) leader = vehiclesList.get(0);
 			}
 			policies.removeForVehicle(v);
-			if (vehiclesList.size() == 1) {
+			if (vehiclesList.size() <= 1) {
 				deletePlatoon();
 			}
 		}
 
 	}
+	
 	public void deletePlatoon() {
 		if(vehiclesList.size()>=1) {
 			System.out.println("Deleting platoon ");
