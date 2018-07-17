@@ -384,6 +384,68 @@ public class Platoon extends Entity { //implements Runnable {
 		//lastReconf=null; mutant removes this line
 	}
 	
+	public void tickTriggerM4() { // randomly doest not do a reconf
+		String x = "";
+		double proba  = Math.random();
+	    
+		if(policies.listPolicy.size()>0 && proba >=0.05) { //here
+			lastReconf = policies.listPolicy.remove(0);
+			policies.listPolicy.clear();
+		
+			if(lastReconf.name == PolicyName.RELAY) {
+				this.relay();
+				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue(); //+ " tick : " + tickCounter;
+				System.out.println(x);
+				writer.println(x);
+				//tickCounter=6;
+			}
+			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
+				this.upgradeRelay(lastReconf.vehicle);
+				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;// + " tick : " + tickCounter;
+				System.out.println(x);
+				writer.println(x);
+				//tickCounter=6;
+			}
+			else if(lastReconf.name == PolicyName.QUITFAILURE || lastReconf.name == PolicyName.QUITPLATOON || lastReconf.name == PolicyName.QUITFORSTATION) {
+				if(lastReconf.vehicle == leader) {
+					relay();
+					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;
+					System.out.println(x);
+					writer.println(x);
+					//tickCounter=6;
+				}
+				deleteVehicle(lastReconf.vehicle);
+				switch (lastReconf.name) {
+				case QUITFAILURE:
+					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;
+					System.out.println(x);
+					writer.println(x);
+					//tickCounter+=3;
+					break;
+				case QUITFORSTATION:
+					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;
+					System.out.println(x);
+					writer.println(x);
+					//tickCounter+=5;
+					break;
+				case QUITPLATOON:
+					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id;
+					System.out.println(x); // or distance reached
+					writer.println(x);
+					//tickCounter+=4;
+					break;
+				default:
+					x= "Error, policy name not verified properly";
+					System.out.println(x);
+					writer.println(x);
+					break;
+				}
+			}
+        }
+		created=false;
+		//lastReconf=null; mutant removes this line
+	}
+	
 	public void relay() {
 		if(!nextLeaderList.isEmpty()){
 			writer.println("actual leader id " +leader.getId() + "next leader " + nextLeaderList.get(0).getId());

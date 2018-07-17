@@ -181,7 +181,12 @@ class ExecutionReport {
     public void dump() {
     	Map<PolicyName, Integer> eligibleMap = new HashMap<PolicyName, Integer>();
     	Map<PolicyName, Integer> actualMap = new HashMap<PolicyName, Integer>();
-
+    	int eligLow=0;
+    	int eligMed=0;
+    	int eligHigh=0;
+    	int actuLow=0;
+    	int actuMed=0;
+    	int actuHigh=0;
     	//Map<PolicyName, List<Integer>> eligibleActualCounter = new HashMap<PolicyName, List<Integer>>();
     	initiateMaps(eligibleMap,actualMap);
     	int lastStep =0;
@@ -203,12 +208,38 @@ class ExecutionReport {
             //writerErr.println(x);
             for(Element elig : elt) {
             	eligibleMap.put(elig.name, eligibleMap.get(elig.name) + 1);
+            	if(elig.name==PolicyName.RELAY) eligHigh ++;
+            	
+//            	switch(elig.priority) {
+//            	case LOW :
+//            		eligLow++;
+//            		break;
+//            	case MEDIUM:
+//            		eligMed++;
+//            		break;
+//            	case HIGH: 
+//            		eligHigh++;
+//            		break;
+//            	}
             }
             x=" --> Actual reconfiguration: " + steps.get(step).getSecond();
             System.out.println(x);
             //writerErr.println(x);
             for(Element elig : elt2) {
             	actualMap.put(elig.name, actualMap.get(elig.name) + 1);
+            	if(elig.name==PolicyName.RELAY) eligHigh ++;
+
+//            	switch(elig.priority) {
+//            	case LOW :
+//            		actuLow++;
+//            		break;
+//            	case MEDIUM:
+//            		actuMed++;
+//            		break;
+//            	case HIGH: 
+//            		actuHigh++;
+//            		break;
+//            	}
             }
             // if(steps.get(step).getSecond().size()>0 && (steps.get(step).getFirst().contains(steps.get(step).getSecond()))) {
             //if priority eligible > actual 
@@ -256,7 +287,6 @@ class ExecutionReport {
     	x = "Eligible versus actual reconfigurations :";
     	System.out.println(x);
     	writerErr.println(x);
-    	int i =0;
     	 Iterator it = eligibleMap.entrySet().iterator();
     	 Iterator it2 = actualMap.entrySet().iterator();
 
@@ -270,6 +300,16 @@ class ExecutionReport {
     	        System.out.println(" / " + pair2.getValue());
     	        it2.remove(); // avoids a ConcurrentModificationException
     	    }
+//    	    x= "Low eligible vs actual : " + eligLow + "/" + actuLow;
+//    	    System.out.println(x);
+//    	    writerErr.println(x);
+//    	    x= "Medium eligible vs actual : " + eligMed + "/" + actuMed;
+//    	    System.out.println(x);
+//    	    writerErr.println(x);
+    	    x= "High eligible vs actual : " + eligHigh + "/" + actuHigh;
+    	    System.out.println(x);
+    	    writerErr.println(x);
+    	    
     	    if(property) {
     	    	x ="Verdict : test passed successfully";
     	    	System.out.println(x);

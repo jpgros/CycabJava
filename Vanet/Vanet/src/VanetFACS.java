@@ -101,7 +101,7 @@ public class VanetFACS {
 //        a.addRule(r6);
         
         
-        Rule r6  = new Rule(new r6p1(), new r6p2(), PolicyName.QUITFAILURE, Priority.HIGH); //or quitstation
+        Rule r6  = new Rule(new r6p1(writer), new r6p2(writer), PolicyName.QUITFAILURE, Priority.HIGH); //or quitstation
         a.addRule(r6);
         //Rule : -- depart du vehicule qui a une batterie faible
         // after join(v) until quit(v)
@@ -154,7 +154,7 @@ class r1p1 extends VanetProperty {
 
         }
         else {
-        	writer.println("Config relay OK for vehicle "+ currentVehicle.getId());
+        	writer.println("Config upgraderelay OK for vehicle "+ currentVehicle.getId());
         }
         return 0;
     }
@@ -178,7 +178,7 @@ class r1p2 extends VanetProperty {
 
     
     else {
-    	writer.println("TP relay OK for vehicle min value "+ currentVehicle.getMinValue()/currentVehicle.DEC_LEADER + "leader minvalue "+ currentVehicle.myPlatoon.leader.getMinValue());
+    	writer.println("TP upgraderelay OK for vehicle min value "+ currentVehicle.getMinValue()/currentVehicle.DEC_LEADER + "leader minvalue "+ currentVehicle.myPlatoon.leader.getMinValue());
 
     }
     return 0;
@@ -305,6 +305,8 @@ class r4p2 extends VanetProperty {
 }
 
 class r5p1 extends VanetProperty {
+    //  after join(v) until quit(v)
+	
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
 		    if(! sut.tick) { //remove to have mutant
@@ -313,6 +315,7 @@ class r5p1 extends VanetProperty {
 	    	else if (currentVehicle.myPlatoon == null) {
 	            throw new PropertyFailedException(this, "Vehicle not in platoon");
 	        }
+	    	
 	        return 0;
 	    }
 	  public String toString(){
@@ -321,6 +324,7 @@ class r5p1 extends VanetProperty {
 }
 
 class r5p2 extends VanetProperty {
+
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
 	        if ( currentVehicle.distance >= 200)
@@ -333,6 +337,11 @@ class r5p2 extends VanetProperty {
 }
 
 class r6p1 extends VanetProperty {
+	PrintWriter writer =null;
+
+	public r6p1(PrintWriter w) {
+		writer = w;
+	}
 	  @Override
 	    public double match(Road sut) throws PropertyFailedException {
 		    if(! sut.tick) { //remove to have mutant
@@ -341,6 +350,9 @@ class r6p1 extends VanetProperty {
 	    	else if (currentVehicle.myPlatoon == null) {
 	            throw new PropertyFailedException(this, "Vehicle not in platoon");
 	        }
+	    	else {
+	    		writer.println("Config OK QUITFAIL");
+	    	}
 	        return 0;
 	    }
 	  public String toString(){
@@ -349,10 +361,17 @@ class r6p1 extends VanetProperty {
 }
 
 class r6p2 extends VanetProperty {
+	PrintWriter writer =null;
+    //  after join(v) until quit(v)
+	public r6p2(PrintWriter w) {
+		writer = w;
+	}
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
 		 	if ( currentVehicle.autonomie >= 15)
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+		 	else writer.println("TP OK QUITFAIL");
+	        
 	        return 0;
 	    }
 	 	public String toString(){
