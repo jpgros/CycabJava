@@ -1,8 +1,13 @@
 
 import nz.ac.waikato.modeljunit.FsmModel;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,19 +20,32 @@ import java.util.ArrayList;
  * Time: 08:46
  */
 
-public class VanetFACS {
+public class VanetFACS implements Serializable{
     public static void main(String[] args) throws Exception {
-
-        PrintWriter writer = new PrintWriter("./outputGenetic.txt", "UTF-8");
+    	FileOutputStream outser = new FileOutputStream("output.ser");
+    	ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
+    	FileInputStream inser = new FileInputStream("input.ser");
+    	PrintWriter writer = new PrintWriter("./outputGenetic.txt", "UTF-8");
         PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8");
+        PrintWriter writerStep = new PrintWriter("./outputSteps.txt", "UTF-8");
+        //FileReader readerStep = new FileReader("./inputSteps.txt"); 
         FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         FileReader roadReader = new FileReader("./platoonPolicies.txt");
+        String strWriter ="";
+        String vhReader="";
+        String plReader="";
+        String rdReader="";
 
         FsmModel fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);
 
+        //test input ser
+        ObjectInputStream objectInputStream = new ObjectInputStream(inser);
+        //MyStep step =  (Mystep)objectInputStream.readObject();
+        
+        
         StochasticTester st = new StochasticTester(fsm,writer);
-
+        //StochasticTester st = new StochasticTester(fsm,writer,readerStep);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);
@@ -35,6 +53,9 @@ public class VanetFACS {
         st.setMonitor(vcm);
         ArrayList<MyTest> initial = st.generate(1, 4000);
         vcm.printReport();
+        System.out.println("test one");
+        objectOutputStream.writeObject(initial);
+        objectOutputStream.close();
         
         VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
         st.setMonitor(vcm2);

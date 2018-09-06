@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -10,7 +11,7 @@ import javax.sql.PooledConnection;
 import static sun.tools.java.Constants.DEC;
 
 
-public class Vehicle extends Entity {
+public class Vehicle extends Entity implements Serializable {
 	double autonomie;
 	double distance;
 	UUID id;

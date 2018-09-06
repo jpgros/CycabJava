@@ -1,6 +1,11 @@
 import nz.ac.waikato.modeljunit.Action;
 import nz.ac.waikato.modeljunit.FsmModel;
 
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -8,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.io.Serializable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,8 +21,12 @@ import java.util.Iterator;
  * Date: 20/03/2018
  * Time: 09:26
  */
-public class StochasticTester {
+public class StochasticTester implements Serializable{
 	public PrintWriter writer = null;
+	public PrintWriter writerStep = null;
+	public FileReader readerStep = null;
+	public FileOutputStream outser = null;   
+	public ObjectOutputStream objOutStr = null;
     /** FSM model that describes a probabilistic usage automaton */
     private FsmModel fsm;
     /** Actions declared in that FSM with their probabilities */
@@ -39,12 +49,38 @@ public class StochasticTester {
      * Constructor. Initializes the FSM  and writer, computes associated actionsAndProbabilities.
      * @param _fsm
      */
+    public StochasticTester(FsmModel _fsm, PrintWriter w, PrintWriter ws) {
+        fsm = _fsm;
+        actionsAndProbabilities = getActionTaggedMethods(fsm);
+        System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+        fsm.reset(true);
+        writer=w;
+        writerStep = ws;
+        writerStep.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+
+    }
+    
     public StochasticTester(FsmModel _fsm, PrintWriter w) {
         fsm = _fsm;
         actionsAndProbabilities = getActionTaggedMethods(fsm);
         System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
         fsm.reset(true);
         writer=w;
+        //writerStep.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+
+    }
+    
+    /**
+     * Constructor. Initializes the FSM  and writer, computes according to the input event file.
+     * @param _fsm
+     */
+    public StochasticTester(FsmModel _fsm, PrintWriter w, FileReader rs) {
+        fsm = _fsm;
+        actionsAndProbabilities = getActionTaggedMethods(fsm);
+        System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+        fsm.reset(true);
+        writer=w;
+        readerStep = rs;
     }
     public void setMonitor(VanetConformanceMonitor _vcm) {
         vcm = _vcm;
@@ -57,6 +93,8 @@ public class StochasticTester {
      * @return the set of test cases
      */
     public ArrayList<MyTest> generate(int nb, int length) {
+    	//BufferedReader inStream = new BufferedReader(readerStep);
+        String inString;
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         // for each of the resulting test cases
         for (int i=0; i < nb; i++) {
@@ -72,9 +110,30 @@ public class StochasticTester {
             do {
             	System.out.println("Step : " +j);
             	writer.println("Step : "+j);
-                // compute next step
-                MyStep newStep = computeNextStep();            
-                b = (newStep != null);
+            	 MyStep newStep;
+//            	if(readerStep==null) {
+	                // compute next step
+	                newStep = computeNextStep(); 
+	               // serialize(newStep,objOutStr);
+//	                try {
+//						objOutStr.writeObject(newStep);
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+	                //save the step in a file
+	                //serialize(newStep, objOutStr);
+//            	}
+//            	else {
+//            		//retrieve next step  
+//            		String line;
+//            		BufferedReader bufferedReader = new BufferedReader(readerStep);
+//        			line = bufferedReader.readLine();
+//        			//newStep = line;
+//        			//String
+//            	}
+            	b = (newStep != null);
+                //writerStep.println("My step : " + newStep.instance + ";" + newStep.meth + ";" + newStep.params);
                 if (b) {
                     currentTest.append(newStep);
                     
@@ -215,7 +274,7 @@ public class StochasticTester {
 /**
  * Simple class encapsulating a test as a sequence (ArrayList) of String representing action names. 
  */
-class MyTest implements Iterable<MyStep> {
+class MyTest implements Iterable<MyStep> ,Serializable{
 
     ArrayList<MyStep> steps;
     public MyTest() {
@@ -244,7 +303,7 @@ class MyTest implements Iterable<MyStep> {
 
 }
 
-class MyStep {
+class MyStep implements Serializable{
     Method meth;
     Object instance;
     Object[] params;
@@ -254,7 +313,18 @@ class MyStep {
         instance = _i;
         params = _p;
     }
+    public Method getMeth() {
+    	return meth;
+    }
+    public Object getInstance() {
+    	return instance;
+    }
+    public Object[] getParams() {
+    	return params;
+    }
+    
 
+    
     public void execute() throws InvocationTargetException, IllegalAccessException {
         meth.invoke(instance, params);
     }

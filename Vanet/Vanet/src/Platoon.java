@@ -1,11 +1,12 @@
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
-public class Platoon extends Entity { //implements Runnable {
+public class Platoon extends Entity implements Serializable{ //implements Runnable {
 	int consommationLeader = 2;
 	final static int NUMBER_VEHICLE_MAX = 5; //unused
 	final static double MINLEADERVALUE = 30;

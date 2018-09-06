@@ -7,6 +7,7 @@ import static java.util.UUID.*;
 
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.io.Serializable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,7 +15,7 @@ import java.io.PrintWriter;
  * Date: 13/04/2018
  * Time: 14:33
  */
-public class Road implements Iterable<Vehicle> {
+public class Road implements Serializable, Iterable<Vehicle> {
 	boolean tick =false;
     final static int MAX_CAPACITY = 5;
 	final static double FREQUENCYSTATION = 100;
