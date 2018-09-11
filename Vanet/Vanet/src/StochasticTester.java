@@ -13,6 +13,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.io.Serializable;
 
 /**
@@ -27,6 +29,8 @@ public class StochasticTester implements Serializable{
 	public FileReader readerStep = null;
 	public FileOutputStream outser = null;   
 	public ObjectOutputStream objOutStr = null;
+	public PrintWriter writerTest = null;
+	public ArrayList<SerializableTest> serializableTest;
     /** FSM model that describes a probabilistic usage automaton */
     private FsmModel fsm;
     /** Actions declared in that FSM with their probabilities */
@@ -70,6 +74,23 @@ public class StochasticTester implements Serializable{
 
     }
     
+    
+    /**
+     * Constructor. Initializes the FSM  and writer, computes associated actionsAndProbabilities.
+     * @param _fsm
+     */
+    public StochasticTester(FsmModel _fsm, PrintWriter w, PrintWriter wt,ArrayList<SerializableTest> st) {
+        fsm = _fsm;
+        actionsAndProbabilities = getActionTaggedMethods(fsm);
+        System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+        fsm.reset(true);
+        writer=w;
+        serializableTest=st;
+        writerTest = wt;
+        writer.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+
+    }
+        
     /**
      * Constructor. Initializes the FSM  and writer, computes according to the input event file.
      * @param _fsm
@@ -107,36 +128,17 @@ public class StochasticTester implements Serializable{
             MyTest currentTest = new MyTest();
             boolean b = true;
             // while limit has not been reached and there exists a next step
-            do {
+            
+            MyStep newStep;
+
+        	do {
             	System.out.println("Step : " +j);
             	writer.println("Step : "+j);
-            	 MyStep newStep;
-//            	if(readerStep==null) {
-	                // compute next step
-	                newStep = computeNextStep(); 
-	               // serialize(newStep,objOutStr);
-//	                try {
-//						objOutStr.writeObject(newStep);
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-	                //save the step in a file
-	                //serialize(newStep, objOutStr);
-//            	}
-//            	else {
-//            		//retrieve next step  
-//            		String line;
-//            		BufferedReader bufferedReader = new BufferedReader(readerStep);
-//        			line = bufferedReader.readLine();
-//        			//newStep = line;
-//        			//String
-//            	}
+	            newStep = computeNextStep();
             	b = (newStep != null);
                 //writerStep.println("My step : " + newStep.instance + ";" + newStep.meth + ";" + newStep.params);
                 if (b) {
                     currentTest.append(newStep);
-                    
                     j++;
                     if (vcm != null) { 
                         vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
@@ -145,13 +147,80 @@ public class StochasticTester implements Serializable{
                 //ticktrigger here
                 ((VanetFSM) fsm).getSUT().tickTrigger();
             }
-            while (j < length && b);
+            while (j < length && b);       		 
             // add computed test case to the result
             ret.add(currentTest);
         }
         return ret;
     }
+    
+    public ArrayList<MyTest> retrieve(int nb, int length) {
+        ArrayList<MyTest> ret = new ArrayList<MyTest>();
+        String inString;
+        int j=0;
+        boolean b;
+        MyStep newStep;
+        // for each of the resulting test cases
+		for(SerializableTest test : serializableTest) {
+	        // reset FSM exploration
+            fsm.reset(true);
+	        MyTest currentTest = new MyTest();
+			for(SerializableStep step : test.steps) {
+				j++;
+				
+				newStep = computeInputTest(step); 
+				System.out.println("Step : " +j + " " + newStep);
+            	writer.println("Step : "+j + " " + newStep);
+				b = (newStep != null);
+                //writerStep.println("My step : " + newStep.instance + ";" + newStep.meth + ";" + newStep.params);
+                if (b) {
+                    currentTest.append(newStep);
+                    if (vcm != null) { 
+                        vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
+                    }
+                }
+                //ticktrigger here
+                ((VanetFSM) fsm).getSUT().tickTrigger();
+			}
+			ret.add(currentTest);
+		}
+		return ret;
+    }
 
+    public void printInputTest(ArrayList<SerializableTest> testList) {
+    	writerTest.println("begin");
+    	for(SerializableTest test : testList) {
+    		for(SerializableStep step : test.steps) {
+    			writerTest.println(" step : "+step);
+    		}
+    	}
+    }
+   
+    public MyStep computeInputTest(SerializableStep step){
+    	 HashMap<Method, Double> actionsReady = getActivableActions(fsm);
+		 for (Method act : actionsReady.keySet()) {
+			 if(step.getMethName().contains(act.getName()) ) {
+				 try {
+					act.invoke(fsm);
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				 Method meth = act;
+				 MyStep myStep = new MyStep(meth, step.getInstance(),step.getParams());
+				 return myStep;
+			 }
+			 
+    	 }
+    	 return null;
+    		 
+    }
     
     /**
      * Computes the next step, by considering the activable actionsAndProbabilities and their associated probabilities.
@@ -170,6 +239,7 @@ public class StochasticTester implements Serializable{
         do {
         	sum = 0;
             rand = Math.random();
+
             for (Method act : actionsReady.keySet()) {
                 sum += actionsReady.get(act);
                 if (rand <= sum) {
@@ -196,6 +266,22 @@ public class StochasticTester implements Serializable{
 
         return null;
     }
+    
+//    private MyStep remakeNextStep(Method methKey) {
+//            String ret = null;
+//            double sum = 0;
+//            double rand = 0;
+//            HashMap<Method, Double> actionsReady = getActivableActions(fsm);
+//            Method act = actionsReady.g(methKey);
+//        for(Map.Entry<Method, Double>  keySet : actionsReady.entrySet()) {
+//        	double tot=keySet.getValue();
+//        	Method toto=keySet.getKey();
+//        	Method act1 = actionsReady.get(keySet.getKey());
+//        	double act2 = actionsReady.get(keySet.getValue());
+//        }
+//        
+//    	return null;
+//    }
 
     /**
      * Utility function: inspects the FSM and retrieves the Methods representing the actions with their associated probabilities.
@@ -302,6 +388,8 @@ class MyTest implements Iterable<MyStep> ,Serializable{
     }
 
 }
+
+
 
 class MyStep implements Serializable{
     Method meth;

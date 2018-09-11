@@ -21,12 +21,12 @@ public class VanetFSM implements FsmModel {
      * Automaton describing the FSM of a Cycab
      */
     Road sut;
-    PrintWriter writer = null;
-    FileReader vehicleReader =null;
-    FileReader platoonReader =null;
-    FileReader roadReader =null;
+    String writer = null;
+    String vehicleReader =null;
+    String platoonReader =null;
+    String roadReader =null;
     
-    public VanetFSM(PrintWriter w, FileReader vr, FileReader pr, FileReader rr) {
+    public VanetFSM(String w, String vr, String pr, String rr) {
         sut = new Road(w,vr,pr,rr);
         writer = w;
         vehicleReader=vr;

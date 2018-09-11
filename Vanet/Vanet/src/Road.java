@@ -21,12 +21,12 @@ public class Road implements Serializable, Iterable<Vehicle> {
 	final static double FREQUENCYSTATION = 100;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
-    PrintWriter writer = null;
-    FileReader vehicleReader = null;
-    FileReader platoonReader = null;
-    FileReader roadReader = null;
+    String writer = null;
+    String vehicleReader = null;
+    String platoonReader = null;
+    String roadReader = null;
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
-    public Road(PrintWriter w, FileReader vr, FileReader pr, FileReader rr) {
+    public Road(String w, String vr, String pr, String rr) {
     	writer = w;
     	vehicleReader=vr;
     	platoonReader=pr;
@@ -39,7 +39,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public int addVehicle(double _auto, double _distance) {
     	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this,writer,vehicleReader));
     	System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
-        writer.println("Vehicle created at index " + (allVehicles.size() - 1));
+		writer+="Vehicle created at index " + (allVehicles.size() - 1);
         return allVehicles.size() - 1;
     }
 
@@ -116,17 +116,17 @@ public class Road implements Serializable, Iterable<Vehicle> {
             if (v.getPlatoon() == null) {
             	x=v.getDisplayString() + " | ";
                 System.out.print(x);
-                writer.print(x);
+        		writer+=x;
             }
         }
         System.out.println();
-        writer.println();
+		writer+="";
     }
 
     public int removeVehicle(Vehicle v, String x) {
         allVehicles.remove(allVehicles.indexOf(v));
         System.out.println(x);
-        writer.println(x);
+		writer+=x;
         return allVehicles.size() -1;
     }
 

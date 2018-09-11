@@ -15,19 +15,14 @@ public class VanetMain {
 
 
 	public static void main(String[] args) {
-		PrintWriter writer=null;
-    	FileReader vehicleReader=null;
-    	FileReader platoonReader=null;
-    	FileReader roadReader=null;
-    	try {
-			writer = new PrintWriter("output.txt", "UTF-8");
-			vehicleReader = new FileReader("vehiclePolicies.txt");
-	    	platoonReader = new FileReader("platoonPolicies.txt");
-	    	roadReader = new FileReader("roadPolicies.txt"); 
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//    	PrintWriter writer = new PrintWriter("outputGenetic.txt", "UTF-8");
+//    	FileReader vehicleReader = new FileReader("vehiclePolicies.txt");
+//    	FileReader platoonReader = new FileReader("platoonPolicies.txt");
+//    	FileReader roadReader = new FileReader("platoonPolicies.txt"); 
+    	String writer="";
+    	String vehicleReader="";
+    	String platoonReader="";
+    	String roadReader="";
 		Road r = new Road(writer, vehicleReader,platoonReader,roadReader);
 		r.addVehicle(40, (int)(Math.random() * 1000));
 
@@ -41,15 +36,15 @@ public class VanetMain {
 			r.tick();
 			r.affiche();
 		}
-		writer.close();
-		try {
-			vehicleReader.close();
-			platoonReader.close();
-			roadReader.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
+//		writer.close();
+//		try {
+//			vehicleReader.close();
+//			platoonReader.close();
+//			roadReader.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}	
 		int low=0,medium=0,high =0;
 		FileReader reader=null;
 		try {

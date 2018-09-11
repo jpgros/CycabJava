@@ -21,19 +21,15 @@ public class VanetMonitoring {
 
 
     public static void main(String[] args) {
-    	PrintWriter writer=null;
-    	FileReader vehicleReader=null;
-    	FileReader platoonReader=null;
-    	FileReader roadReader=null;
-    	try {
-			writer = new PrintWriter("outputGenetic.txt", "UTF-8");
-			vehicleReader = new FileReader("vehiclePolicies.txt");
-	    	platoonReader = new FileReader("platoonPolicies.txt");
-	    	roadReader = new FileReader("platoonPolicies.txt"); 
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//    	PrintWriter writer = new PrintWriter("outputGenetic.txt", "UTF-8");
+//    	FileReader vehicleReader = new FileReader("vehiclePolicies.txt");
+//    	FileReader platoonReader = new FileReader("platoonPolicies.txt");
+//    	FileReader roadReader = new FileReader("platoonPolicies.txt"); 
+    	String writer="";
+    	String vehicleReader="";
+    	String platoonReader="";
+    	String roadReader="";
+
         VanetFSM fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);        
         ArrayList<VanetProperty> props = new ArrayList<VanetProperty>();
         props.add(new Property1());

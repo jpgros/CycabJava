@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,29 +33,61 @@ public class VanetFACS implements Serializable{
         FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         FileReader roadReader = new FileReader("./platoonPolicies.txt");
+        
+        //just for debug
+    	PrintWriter writerTest = new PrintWriter("./outputTestSer.txt", "UTF-8");
+    			
         String strWriter ="";
         String vhReader="";
         String plReader="";
         String rdReader="";
-
-        FsmModel fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);
+        FsmModel fsm = new VanetFSM(strWriter, vhReader, plReader, rdReader);
 
         //test input ser
         ObjectInputStream objectInputStream = new ObjectInputStream(inser);
-        //MyStep step =  (Mystep)objectInputStream.readObject();
         
+        //reading for input test
+        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
         
-        StochasticTester st = new StochasticTester(fsm,writer);
+        //reading existing test
+        StochasticTester st = new StochasticTester(fsm,writer, writerTest,testInput);
+        //writing a new test
+        //StochasticTester st = new StochasticTester(fsm,writer);
+        
         //StochasticTester st = new StochasticTester(fsm,writer,readerStep);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);
         st.setMonitor(vcm);
-        ArrayList<MyTest> initial = st.generate(1, 4000);
+        
+        //choice between generation and retriaving
+        //ArrayList<MyTest> initial = st.generate(1, 4000);
+        ArrayList<MyTest> initial = st.retrieve(1, 4000);
+        
+        
+        ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
+        ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();
+        
+        for(MyTest curTest : initial) {
+        	for(MyStep curStep : curTest ) {
+        		System.out.println("step : " + curStep);
+        	}
+        	}
+        
+        for(MyTest curTest : initial) {
+        	for(MyStep curStep : curTest ) {
+        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
+        		serializableArray.add(step);
+        	}
+        	SerializableTest test = new SerializableTest(serializableArray);
+        	testArraySer.add(test);
+        	
+        }
+        
         vcm.printReport();
         System.out.println("test one");
-        objectOutputStream.writeObject(initial);
+        objectOutputStream.writeObject(testArraySer);
         objectOutputStream.close();
         
         VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
@@ -76,7 +109,7 @@ public class VanetFACS implements Serializable{
         st.setMonitor(vcm5);
         ArrayList<MyTest> initial5 = st.generate(1, 400);
         vcm5.printReport();
-        
+        writer.print(strWriter);
         writerErr.close();
         writer.close();
         vehicleReader.close();
@@ -540,7 +573,64 @@ class r9p2 extends VanetProperty {
 	    	return "r9p2";
 	    }
 }
+class SerializableStep implements Serializable{
+	String meth;
+	Object instance;
+    Object[] params;
 
+    public SerializableStep(String _m, Object _i, Object[] _p) {
+        meth = _m;
+        instance = _i;
+        params = _p;
+    }
+    public String getMethName() {
+    	return meth;
+    }
+    public Object getInstance() {
+    	return instance;
+    }
+    public Object[] getParams() {
+    	return params;
+    }
+
+    public String toString() {
+        String ret = /*instance + "." +*/ meth + "(";
+        for (int i=0; i < params.length; i++) {
+            if (i > 0) {
+                ret += ",";
+            }
+            ret += params[i].toString();
+        }
+        return ret + ")";
+    }
+}
+ 
+ class SerializableTest implements Serializable{
+	 ArrayList<SerializableStep> steps;
+	    public SerializableTest(ArrayList<SerializableStep> s) {
+	    	steps= s;
+		}
+
+	    public void append(SerializableStep step) {
+	        steps.add(step);
+	    }
+
+	    public int size() {
+	        return steps.size();
+	    }
+
+	    public SerializableStep getStepAt(int i) {
+	        return steps.get(i);
+	    }
+
+	    public String toString() {
+	        return steps.toString();
+	    }
+
+	    public Iterator<SerializableStep> iterator() {
+	        return steps.iterator();
+	    }
+ }
 
 //class r6p1 extends VanetProperty {
 //	  @Override

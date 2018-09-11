@@ -22,10 +22,14 @@ public class VanetGenetic {
 
     public static void main(String[] args) throws Exception {
 
-    	PrintWriter writer = new PrintWriter("outputGenetic.txt", "UTF-8");
-    	FileReader vehicleReader = new FileReader("vehiclePolicies.txt");
-    	FileReader platoonReader = new FileReader("platoonPolicies.txt");
-    	FileReader roadReader = new FileReader("platoonPolicies.txt"); 
+//    	PrintWriter writer = new PrintWriter("outputGenetic.txt", "UTF-8");
+//    	FileReader vehicleReader = new FileReader("vehiclePolicies.txt");
+//    	FileReader platoonReader = new FileReader("platoonPolicies.txt");
+//    	FileReader roadReader = new FileReader("platoonPolicies.txt"); 
+    	String writer="";
+    	String vehicleReader="";
+    	String platoonReader="";
+    	String roadReader="";
         FsmModel fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);
         // initialize population using biased-random exploration of a FSM.
         StochasticTester st = new StochasticTester(fsm);

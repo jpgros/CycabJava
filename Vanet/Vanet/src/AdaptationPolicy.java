@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AdaptationPolicy {
+public class AdaptationPolicy implements Serializable{
 	ArrayList<Element> listPolicy= new ArrayList<Element>();
 	
 	public void addElement(Element elt) {
