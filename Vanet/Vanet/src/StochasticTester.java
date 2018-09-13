@@ -79,14 +79,13 @@ public class StochasticTester implements Serializable{
      * Constructor. Initializes the FSM  and writer, computes associated actionsAndProbabilities.
      * @param _fsm
      */
-    public StochasticTester(FsmModel _fsm, PrintWriter w, PrintWriter wt,ArrayList<SerializableTest> st) {
+    public StochasticTester(FsmModel _fsm, PrintWriter w, ArrayList<SerializableTest> st) {
         fsm = _fsm;
         actionsAndProbabilities = getActionTaggedMethods(fsm);
         System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
         fsm.reset(true);
         writer=w;
         serializableTest=st;
-        writerTest = wt;
         writer.println("Actions & Probabilities :\n" + actionsAndProbabilities);
 
     }

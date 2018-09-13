@@ -23,7 +23,8 @@ public class VanetMain {
     	String vehicleReader="";
     	String platoonReader="";
     	String roadReader="";
-		Road r = new Road(writer, vehicleReader,platoonReader,roadReader);
+        String writerLog ="";
+		Road r = new Road(writer, vehicleReader,platoonReader,roadReader, writerLog);
 		r.addVehicle(40, (int)(Math.random() * 1000));
 
 		r.addVehicle(40, (int)(Math.random() * 1000));

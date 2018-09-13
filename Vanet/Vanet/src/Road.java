@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import static java.util.UUID.*;
 
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,12 +27,18 @@ public class Road implements Serializable, Iterable<Vehicle> {
     String vehicleReader = null;
     String platoonReader = null;
     String roadReader = null;
+    String writerLog ="";
+    String vehicleLog="";
+    String platoonLog="";
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
-    public Road(String w, String vr, String pr, String rr) {
+    public Road(String w, String vr, String pr, String rr, String wl) {
     	writer = w;
     	vehicleReader=vr;
     	platoonReader=pr;
     	roadReader=rr;
+    	writerLog=wl;
+
+
     }
     public void reset() {
         allVehicles.clear();
@@ -71,6 +79,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
         for (int i=0; i < allVehicles.size(); i++) {
         	 Vehicle v = allVehicles.get(i);
              v.updateVehicleVariables();
+             vehicleLog += v.autonomie + ";"+ v.distance+";"+v.getStatus() + "\n";
         }
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
@@ -92,7 +101,9 @@ public class Road implements Serializable, Iterable<Vehicle> {
             }
         }
 
-        
+        writerLog += vehicleLog + platoonLog + "End of turn \n";
+        vehicleLog="";
+        platoonLog="";
     }
     public void tickTrigger() {
     	tick=false;

@@ -29,8 +29,9 @@ public class VanetMonitoring {
     	String vehicleReader="";
     	String platoonReader="";
     	String roadReader="";
+        String writerLog ="";
 
-        VanetFSM fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader);        
+        VanetFSM fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader, writerLog);        
         ArrayList<VanetProperty> props = new ArrayList<VanetProperty>();
         props.add(new Property1());
         props.add(new Property2());

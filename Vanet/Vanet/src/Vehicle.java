@@ -360,7 +360,11 @@ public class Vehicle extends Entity implements Serializable {
 			return autonomie*(DEC_DISTANCE/DEC_ENERGY);
 		}
 	}
-
+	public String getStatus() {
+		if(isLeader()) return "Leader";
+		else if(myPlatoon==null) return "Solo";
+		else return "Platooned";
+	}
 
 	public boolean isLeader() {
 		if(this.myPlatoon !=null) {

@@ -25,13 +25,14 @@ public class VanetFSM implements FsmModel {
     String vehicleReader =null;
     String platoonReader =null;
     String roadReader =null;
-    
-    public VanetFSM(String w, String vr, String pr, String rr) {
-        sut = new Road(w,vr,pr,rr);
+    String writerLog=null;
+    public VanetFSM(String w, String vr, String pr, String rr, String wl) {
         writer = w;
         vehicleReader=vr;
         platoonReader=pr;
         roadReader=rr;
+        writerLog=wl;
+        sut = new Road(w,vr,pr,rr,wl);
     }
 
     public String getState() {
