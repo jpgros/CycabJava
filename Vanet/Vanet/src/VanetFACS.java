@@ -2,8 +2,10 @@
 import nz.ac.waikato.modeljunit.FsmModel;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -24,98 +26,43 @@ import java.util.Iterator;
  */
 
 public class VanetFACS implements Serializable{
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {    	
     	Date date = new Date() ;
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
-
-    	FileOutputStream outser = new FileOutputStream("output.ser");
-    	ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
-    	FileInputStream inser = new FileInputStream("input.ser");
+    	PrintWriter writerLog = new PrintWriter("./logs/log"+ dateFormat.format(date) +".txt", "UTF-8");    	    	
     	PrintWriter writer = new PrintWriter("./outputGenetic.txt", "UTF-8");
-        PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8");
-        //FileReader readerStep = new FileReader("./inputSteps.txt"); 
+        PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8"); 
         FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         FileReader platoonReader = new FileReader("./platoonPolicies.txt");
-        FileReader roadReader = new FileReader("./platoonPolicies.txt");
-        PrintWriter writerLog = new PrintWriter("./logs/log"+ dateFormat.format(date) +".txt", "UTF-8");
-
+        FileReader roadReader = new FileReader("./platoonPolicies.txt");        
            			
         String strWriter ="";
         String vhReader="";
         String plReader="";
         String rdReader="";
         String strLog="";
-        FsmModel fsm = new VanetFSM(strWriter, vhReader, plReader, rdReader, strLog);
-
-      
-        //reading for input test
-        //ObjectInputStream objectInputStream = new ObjectInputStream(inser);
-        //ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
-        //StochasticTester st = new StochasticTester(fsm,writer,testInput);
-       
-        //OR writing a new test
-        StochasticTester st = new StochasticTester(fsm,writer);
-        
+        FsmModel fsm = new VanetFSM(strWriter, vhReader, plReader, rdReader, strLog);       
+               
         //StochasticTester st = new StochasticTester(fsm,writer,readerStep);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
-        setRulesForAPM(apm,writer);
-        VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);
-        st.setMonitor(vcm);
+        setRulesForAPM(apm,writer);       
+        VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         
-        //choice between generation and retriaving
-        ArrayList<MyTest> initial = st.generate(1, 4000);
+        //choice between generation and retrieving
+        ArrayList<MyTest> initial=retrieveTest(fsm,  writer,vcm, writerLog);
+        //generatetest(fsm, writer, vcm, apm, writerErr);
+        
         strLog=((VanetFSM) fsm).getSUT().writerLog;
         writerLog.print(strLog);
-        //ArrayList<MyTest> initial = st.retrieve(1, 4000);
-        
-        
-        ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
-        ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();
-        
-        //convertir initial in a serializable list and writing it
-        for(MyTest curTest : initial) {
-        	for(MyStep curStep : curTest ) {
-        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
-        		serializableArray.add(step);
-        	}
-        	SerializableTest test = new SerializableTest(serializableArray);
-        	testArraySer.add(test);
-        }        
-        objectOutputStream.writeObject(testArraySer);
-        objectOutputStream.close();
-        vcm.printReport();
-        
-        VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
-        st.setMonitor(vcm2);
-        ArrayList<MyTest> initial2 = st.generate(1, 400);
-        vcm2.printReport();
-        
-        VanetConformanceMonitor vcm3 = new VanetConformanceMonitor(apm, writerErr);
-        st.setMonitor(vcm3);
-        ArrayList<MyTest> initial3 = st.generate(1, 400);
-        vcm3.printReport();
-        
-        VanetConformanceMonitor vcm4 = new VanetConformanceMonitor(apm, writerErr);
-        st.setMonitor(vcm4);
-        ArrayList<MyTest> initial4 = st.generate(1, 400);
-        vcm4.printReport();
-        
-        VanetConformanceMonitor vcm5 = new VanetConformanceMonitor(apm, writerErr);
-        st.setMonitor(vcm5);
-        ArrayList<MyTest> initial5 = st.generate(1, 400);
-        vcm5.printReport();
         writer.print(strWriter);
-        //writerLog.print(strWriter);
         writerErr.close();
         writer.close();
         vehicleReader.close();
         platoonReader.close();
         roadReader.close();
         //objectInputStream.close();
-        //writerLog.print(strLog);
         //writerLog.close();
-
     }
 
     public static void setRulesForAPM(AdaptationPolicyModel a, PrintWriter writer) {
@@ -185,10 +132,104 @@ public class VanetFACS implements Serializable{
         // quitforstation |----> low
 
     }
+    
+    public static ArrayList<MyTest> retrieveTest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm, PrintWriter writerLog){
+    	ArrayList<MyTest> initial=null;
+    	FileInputStream inser;
+		try {
+			inser = new FileInputStream("input.ser");
+			ObjectInputStream objectInputStream = new ObjectInputStream(inser);
+	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
+	        System.out.println("testinput" +testInput);
+	        StochasticTester st   = new StochasticTester(fsm,writer, testInput);
+	        objectInputStream.close();
+			st.setMonitor(vcm); 
+	        initial = st.retrieve();
+	        String strLog=((VanetFSM) fsm).getSUT().writerLog;
+	        writerLog.print(strLog);  
+	        vcm.printReport();			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	//reading for input test
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return initial;
+    }
+    
+    public static void generatetest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm,AdaptationPolicyModel apm,PrintWriter writerErr) {
+    	//attention risque d incomptatibilite nbstep 
+        ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
+        ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();
+    	StochasticTester st   = new StochasticTester(fsm,writer);
+		        
+		try {
+			FileOutputStream outser = new FileOutputStream("output.ser");
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
+			st.setMonitor(vcm); 
+			
+			ArrayList<MyTest> initial = st.generate(2, 400);
+			System.out.println("initial :"+initial.size());
+			vcm.printReport();
+	        
+	        VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
+	        st.setMonitor(vcm2);
+	        for(MyTest test : st.generate(1, 400)){
+	        	initial.add(test);
+	        }
+	        System.out.println("initial :"+initial.size());
+			vcm2.printReport();
+	        
+	        VanetConformanceMonitor vcm3 = new VanetConformanceMonitor(apm, writerErr);
+	        st.setMonitor(vcm3);
+	        for(MyTest test : st.generate(1, 400)){
+	        	initial.add(test);
+	        }
 
+	        System.out.println("initial :"+initial.size());
+	        vcm3.printReport();
+	        
+	        VanetConformanceMonitor vcm4 = new VanetConformanceMonitor(apm, writerErr);
+	        st.setMonitor(vcm4);
+	        for(MyTest test : st.generate(1, 400)){
+	        	initial.add(test);
+	        }
+	        vcm4.printReport();
+	        
+	        VanetConformanceMonitor vcm5 = new VanetConformanceMonitor(apm, writerErr);
+	        for(MyTest test : st.generate(1, 4000)){
+	        	initial.add(test);
+	        }
+
+			vcm5.printReport();
+			
+	        //convertir initial in a serializable list and writing it
+	        for(MyTest curTest : initial) {
+	        	for(MyStep curStep : curTest ) {
+	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
+	        		serializableArray.add(step);
+	        	}
+	        	SerializableTest test = new SerializableTest(serializableArray);
+	        	testArraySer.add(test);
+	        	serializableArray.clear();
+	        }        
+	        objectOutputStream.writeObject(testArraySer);
+	        objectOutputStream.close();    
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+    }
 }
-
-
 
 class r1p1 extends VanetProperty {
 	PrintWriter writer =null;
@@ -607,9 +648,11 @@ class SerializableStep implements Serializable{
 }
  
  class SerializableTest implements Serializable{
-	 ArrayList<SerializableStep> steps;
+	 ArrayList<SerializableStep> steps = new ArrayList<SerializableStep>();
 	    public SerializableTest(ArrayList<SerializableStep> s) {
-	    	steps= s;
+	    	for(SerializableStep step : s) {
+	    		steps.add(step);
+	    	}
 		}
 
 	    public void append(SerializableStep step) {

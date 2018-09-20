@@ -53,16 +53,6 @@ public class StochasticTester implements Serializable{
      * Constructor. Initializes the FSM  and writer, computes associated actionsAndProbabilities.
      * @param _fsm
      */
-    public StochasticTester(FsmModel _fsm, PrintWriter w, PrintWriter ws) {
-        fsm = _fsm;
-        actionsAndProbabilities = getActionTaggedMethods(fsm);
-        System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
-        fsm.reset(true);
-        writer=w;
-        writerStep = ws;
-        writerStep.println("Actions & Probabilities :\n" + actionsAndProbabilities);
-
-    }
     
     public StochasticTester(FsmModel _fsm, PrintWriter w) {
         fsm = _fsm;
@@ -153,22 +143,25 @@ public class StochasticTester implements Serializable{
         return ret;
     }
     
-    public ArrayList<MyTest> retrieve(int nb, int length) {
+    public ArrayList<MyTest> retrieve() {
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         String inString;
-        int j=0;
+        int j=0,k=0;
         boolean b;
         MyStep newStep;
         // for each of the resulting test cases
 		for(SerializableTest test : serializableTest) {
+			System.out.println("test:" +test);
+			k++;
 	        // reset FSM exploration
             fsm.reset(true);
 	        MyTest currentTest = new MyTest();
 			for(SerializableStep step : test.steps) {
+				System.out.print("step :" +step);
 				j++;
 				
 				newStep = computeInputTest(step); 
-				System.out.println("Step : " +j + " " + newStep);
+				System.out.println("Test : " + k +" Step : " +j + " " + newStep);
             	writer.println("Step : "+j + " " + newStep);
 				b = (newStep != null);
                 //writerStep.println("My step : " + newStep.instance + ";" + newStep.meth + ";" + newStep.params);
@@ -181,6 +174,8 @@ public class StochasticTester implements Serializable{
                 //ticktrigger here
                 ((VanetFSM) fsm).getSUT().tickTrigger();
 			}
+			j=0;
+			System.out.println("");
 			ret.add(currentTest);
 		}
 		return ret;

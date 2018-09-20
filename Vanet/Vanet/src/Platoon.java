@@ -204,7 +204,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		created=false;
 		lastReconf=null;
 		if(vehiclesList==null) road.platoonLog+="0 \n";
-		else road.platoonLog+= vehiclesList.size() + "\n";
+		else road.platoonLog+= vehiclesList.size() + "id: "+ id + "\n";
 	}
 	
 	public void tickTriggerM1() { //always get lower priority
