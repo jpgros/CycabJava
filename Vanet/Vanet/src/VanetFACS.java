@@ -195,19 +195,19 @@ public class VanetFACS implements Serializable{
 	        System.out.println("initial :"+initial.size());
 	        vcm3.printReport();
 	        
-	        VanetConformanceMonitor vcm4 = new VanetConformanceMonitor(apm, writerErr);
-	        st.setMonitor(vcm4);
-	        for(MyTest test : st.generate(1, 400)){
-	        	initial.add(test);
-	        }
-	        vcm4.printReport();
-	        
-	        VanetConformanceMonitor vcm5 = new VanetConformanceMonitor(apm, writerErr);
-	        for(MyTest test : st.generate(1, 4000)){
-	        	initial.add(test);
-	        }
-
-			vcm5.printReport();
+//	        VanetConformanceMonitor vcm4 = new VanetConformanceMonitor(apm, writerErr);
+//	        st.setMonitor(vcm4);
+//	        for(MyTest test : st.generate(1, 400)){
+//	        	initial.add(test);
+//	        }
+//	        vcm4.printReport();
+//	        
+//	        VanetConformanceMonitor vcm5 = new VanetConformanceMonitor(apm, writerErr);
+//	        for(MyTest test : st.generate(1, 400)){
+//	        	initial.add(test);
+//	        }
+//
+//			vcm5.printReport();
 			
 	        //convertir initial in a serializable list and writing it
 	        for(MyTest curTest : initial) {

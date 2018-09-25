@@ -26,6 +26,7 @@ public class VanetConformanceMonitor {
 
     public void printReport() {
         er.dump();
+        er.stat();
     }
 
 }

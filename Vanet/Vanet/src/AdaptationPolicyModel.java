@@ -1,10 +1,14 @@
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.sun.tools.internal.ws.wsdl.document.soap.SOAPStyle;
 
 /**
  * Created with IntelliJ IDEA.
@@ -178,9 +182,81 @@ class ExecutionReport {
     	map2.put(PolicyName.UPGRADERELAY, 0);
     	//map2.put(PolicyName.RUN, 0);
     }
+    public boolean containsElt(ArrayList<Element> array, Element elt) {
+    	for(Element loopElt : array) {
+    		if(loopElt.name == elt.name && loopElt.priority == elt.priority && loopElt.vehicle == elt.vehicle ) return true;
+    	}
+    	
+    	return false;
+    }
+    public void stat() {
+       	ArrayList<Element> prevElig = new ArrayList<Element>();
+       	ArrayList<ArrayList<Element>> eligSorted = new ArrayList<ArrayList<Element>>() ;
+       	ArrayList<Element> tmpList = new ArrayList<Element>();
+       	for (Integer step : steps.keySet()) {
+	        ArrayList<Element> elt = steps.get(step).getFirst();       
+	        ArrayList<Element> actualElig = new ArrayList<Element>();
+	        tmpList.clear();
+	        //removing elts that are no longer eligible
+	        System.out.println("prev Elig " + prevElig);
+	        for(Element singleElt : prevElig) {
+	        	if(!containsElt(elt, singleElt)) {
+	        		tmpList.add(singleElt);
+	        		System.out.println("elt adding : " + elt + "singleElt " +singleElt);
+	        	}
+	        	else {
+	        		System.out.println("BINGO");
+	        		System.out.println("elt " + elt + "singleElt " + singleElt);
+	        	}
+	        	
+	        }
+	        System.out.println("tmp list equals prevElig " + tmpList.equals(prevElig));
+	        for(Element singleElt : tmpList) {
+	        	prevElig.remove(singleElt);
+	        }
+	        
+	        
+	        // adding new eligible elts
+	        for(Element singleElt : elt) {
+	        	if(!containsElt(prevElig,singleElt)) {
+	        		prevElig.add(singleElt);
+	        		actualElig.add(singleElt);
+	        	}
+	        }
+	        System.out.println("prev Elig " + prevElig);
+	        eligSorted.add(actualElig);
+	        
+    	}
+    	try {
+			
+			PrintWriter writerElig2 = new PrintWriter("./outputeligSorted.txt", "UTF-8"); 
+			PrintWriter writerelig = new PrintWriter("./outputelig.txt", "UTF-8");
+			writerelig.print("oyo");
+			for (Integer step : steps.keySet()) {
+	    		writerelig.println("elig brut :  " + steps.get(step).getFirst());
+	    		
+	    	}
+			for(ArrayList<Element> eltelig : eligSorted) {
+				writerElig2.println(("elig trie : " + eltelig));
+			}
+			writerelig.close();
+			writerElig2.close();
+    	} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+    	
+    }
+    
     public void dump() {
     	Map<PolicyName, Integer> eligibleMap = new HashMap<PolicyName, Integer>();
     	Map<PolicyName, Integer> actualMap = new HashMap<PolicyName, Integer>();
+    	
+    	//eligible map were successive eligible reconfigurations are suppressed
     	int eligLow=0;
     	int eligMed=0;
     	int eligHigh=0;
@@ -202,6 +278,7 @@ class ExecutionReport {
             System.out.println(x);
             //writerErr.println(x);
             ArrayList<Element> elt = steps.get(step).getFirst();
+
             ArrayList<Element> elt2 = steps.get(step).getSecond();
             x ="Eligible reconfigurations: " + elt;
             System.out.println(x);
@@ -287,11 +364,10 @@ class ExecutionReport {
     	x = "Eligible versus actual reconfigurations :";
     	System.out.println(x);
     	writerErr.println(x);
-    	 Iterator it = eligibleMap.entrySet().iterator();
-    	 Iterator it2 = actualMap.entrySet().iterator();
+    	Iterator it = eligibleMap.entrySet().iterator();
+    	Iterator it2 = actualMap.entrySet().iterator();
 
-    	    while (it.hasNext()) {
- 
+    	    while (it.hasNext()) { 
     	        Map.Entry pair = (Map.Entry)it.next();
     	        System.out.print(pair.getKey() + " = " + pair.getValue());
     	        it.remove(); // avoids a ConcurrentModificationException
@@ -328,6 +404,7 @@ class ExecutionReport {
 //    		writerErr.println(x);
 //    		i++;
 //    	}
+    	    
     }
     public boolean containsReconf(Element e1, ArrayList<Element> array) {
     	for(int i =0; i< array.size(); i++) {
