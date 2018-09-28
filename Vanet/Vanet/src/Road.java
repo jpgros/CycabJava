@@ -40,6 +40,15 @@ public class Road implements Serializable, Iterable<Vehicle> {
 
 
     }
+    public String getStringWriter() {
+    	return writer;
+    }
+    public void setStringWriter(String s) {
+    	writer = s;
+    }
+    public void addStringWriter(String s) {
+    	writer += s;
+    }
     public void reset() {
         allVehicles.clear();
     }

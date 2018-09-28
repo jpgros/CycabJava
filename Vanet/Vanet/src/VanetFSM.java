@@ -34,7 +34,12 @@ public class VanetFSM implements FsmModel {
         writerLog=wl;
         sut = new Road(w,vr,pr,rr,wl);
     }
-
+    public String getStringWriter() {
+    	return sut.getStringWriter();
+    }
+    public void addStringWriter(String s) {
+    	sut.setStringWriter(sut.getStringWriter()+ s);
+    }
     public String getState() {
         return sut.toString();
     }
@@ -127,5 +132,6 @@ public class VanetFSM implements FsmModel {
         }
         return new Object[]{ sut }; // should not happen
     }
+
 }
 

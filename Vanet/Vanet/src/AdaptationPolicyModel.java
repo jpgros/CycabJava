@@ -44,27 +44,6 @@ public class AdaptationPolicyModel {
                     er.notifyStepAfter(compteur, v.myPlatoon.lastReconf,lastTriggeredReconf);
                 }
             }
-            
-//            while(sut.lastReconfList.size()>0) { //if a platoon get deleted, the last reconf is retrieved here
-//            	Element elt = sut.lastReconfList.remove(0);
-//
-//            	if(elt!=null) {
-//            		System.out.println("lastrecfonfounded");
-//            		if(lastTriggeredReconf!=null) {
-//            			System.out.println("lastreconftriggered founded");
-//            		if(!lastTriggeredReconf.equals(elt)) {
-//            			System.out.println("same last reconfs");
-//		            	lastTriggeredReconf=null;
-//		            	System.out.println("elt = " +elt.priority);
-//		            	sut.writer.println("elt = " +elt.priority);
-//		            	er.notifyStepAfter(compteur, elt,lastTriggeredReconf);
-//		            	System.out.println("Retrieved last reconf of platoon before deletion");
-//		            	sut.writer.println("Retrieved last reconf of platoon before deletion");
-//		            	compteur++; 
-//	            	}
-//            		}
-//            	}
-//           }
         }
         compteur++;
     }
@@ -104,7 +83,6 @@ class Rule {
     public boolean matches(Road sut, Vehicle v, ExecutionReport er) {
 
         try {
-
             TP.setCurrentVehicle(v);
             TP.match(sut);
             er.notifyTP(this, v, TP);
@@ -121,9 +99,11 @@ class Rule {
 }
 
 class ExecutionReport {
-
+	ArrayList<ArrayList<Element>> eligSorted = new ArrayList<ArrayList<Element>>() ;
+	HashMap<Element,Integer> actualCountedMap = new HashMap<Element,Integer>();
+	HashMap<Element,Integer> eligibleSortedCountedMap = new HashMap<Element,Integer>();
+	HashMap<Element,Integer> eligibleNotSortedCountedMap = new HashMap<Element,Integer>();
     HashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>> steps = new LinkedHashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>>();
-    
     HashMap<PropertyAutomaton,Integer> occurrences = new HashMap<PropertyAutomaton, Integer>();
     PrintWriter writerErr =null;
     boolean property =true;
@@ -189,69 +169,7 @@ class ExecutionReport {
     	
     	return false;
     }
-    public void stat() {
-       	ArrayList<Element> prevElig = new ArrayList<Element>();
-       	ArrayList<ArrayList<Element>> eligSorted = new ArrayList<ArrayList<Element>>() ;
-       	ArrayList<Element> tmpList = new ArrayList<Element>();
-       	for (Integer step : steps.keySet()) {
-	        ArrayList<Element> elt = steps.get(step).getFirst();       
-	        ArrayList<Element> actualElig = new ArrayList<Element>();
-	        tmpList.clear();
-	        //removing elts that are no longer eligible
-	        System.out.println("prev Elig " + prevElig);
-	        for(Element singleElt : prevElig) {
-	        	if(!containsElt(elt, singleElt)) {
-	        		tmpList.add(singleElt);
-	        		System.out.println("elt adding : " + elt + "singleElt " +singleElt);
-	        	}
-	        	else {
-	        		System.out.println("BINGO");
-	        		System.out.println("elt " + elt + "singleElt " + singleElt);
-	        	}
-	        	
-	        }
-	        System.out.println("tmp list equals prevElig " + tmpList.equals(prevElig));
-	        for(Element singleElt : tmpList) {
-	        	prevElig.remove(singleElt);
-	        }
-	        
-	        
-	        // adding new eligible elts
-	        for(Element singleElt : elt) {
-	        	if(!containsElt(prevElig,singleElt)) {
-	        		prevElig.add(singleElt);
-	        		actualElig.add(singleElt);
-	        	}
-	        }
-	        System.out.println("prev Elig " + prevElig);
-	        eligSorted.add(actualElig);
-	        
-    	}
-    	try {
-			
-			PrintWriter writerElig2 = new PrintWriter("./outputeligSorted.txt", "UTF-8"); 
-			PrintWriter writerelig = new PrintWriter("./outputelig.txt", "UTF-8");
-			writerelig.print("oyo");
-			for (Integer step : steps.keySet()) {
-	    		writerelig.println("elig brut :  " + steps.get(step).getFirst());
-	    		
-	    	}
-			for(ArrayList<Element> eltelig : eligSorted) {
-				writerElig2.println(("elig trie : " + eltelig));
-			}
-			writerelig.close();
-			writerElig2.close();
-    	} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-    	
-    }
-    
+
     public void dump() {
     	Map<PolicyName, Integer> eligibleMap = new HashMap<PolicyName, Integer>();
     	Map<PolicyName, Integer> actualMap = new HashMap<PolicyName, Integer>();
@@ -405,6 +323,83 @@ class ExecutionReport {
 //    		i++;
 //    	}
     	    
+    }
+    public void sortEligibleSteps() {
+       	ArrayList<Element> prevElig = new ArrayList<Element>();
+       	
+       	ArrayList<Element> tmpList = new ArrayList<Element>();
+       	for (Integer step : steps.keySet()) {
+	        ArrayList<Element> elt = steps.get(step).getFirst();       
+	        ArrayList<Element> actualElig = new ArrayList<Element>();
+	        tmpList.clear();
+	        
+	        for(Element singleElt : prevElig) {
+	        	if(!containsElt(elt, singleElt)) {
+	        		tmpList.add(singleElt);
+	        	}	        	
+	        }
+	        for(Element singleElt : tmpList) {
+	        	prevElig.remove(singleElt);
+	        }
+	        // adding new eligible elts
+	        for(Element singleElt : elt) {
+	        	if(!containsElt(prevElig,singleElt)) {
+	        		prevElig.add(singleElt);
+	        		actualElig.add(singleElt);
+	        	}
+	        }
+	        eligSorted.add(actualElig);	        
+    	}      
+    	
+    }
+    public void stats() {
+    	Integer value;
+    	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
+    		Element elt = pair.second.get(0);
+    		ArrayList<Element> elts= new ArrayList<Element>();
+    		for(Element eligElt : pair.first) {
+    			value = eligibleNotSortedCountedMap.get(eligElt);
+    			if(value==null) {
+    				eligibleNotSortedCountedMap.put(eligElt, 1);
+    			}
+    			else {
+    				eligibleNotSortedCountedMap.put(eligElt, ++value);
+    			}
+    		}
+    		value = actualCountedMap.get(elt);
+    		if(value==null) {
+    			actualCountedMap.put(elt, 1);
+    		}
+    		else {
+    			actualCountedMap.put(elt, ++value);
+    		}
+    	}
+    	System.out.println("Counted actual map :");
+    	for(Map.Entry<Element,Integer> map : actualCountedMap.entrySet()) {
+    		System.out.println(" key " + map.getKey() + " value "+ map.getValue());
+    	}
+    	
+    	for(ArrayList<Element> arrayElt : eligSorted) {
+    		for(Element elt : arrayElt) {
+    			value =(Integer)(eligibleSortedCountedMap.get(elt));
+    			if(value ==null) {
+    				eligibleSortedCountedMap.put(elt, 1);
+    			}
+    			else {
+    				eligibleSortedCountedMap.put(elt, ++value);
+    			}
+    		}
+    	}
+    	
+    	System.out.println("Counted eligible map :");
+    	for(Map.Entry<Element,Integer> map : eligibleSortedCountedMap.entrySet()) {
+    		System.out.println(" key " + map.getKey() + " value "+ map.getValue());
+    	}
+    	
+    	System.out.println("Counted unsorted eligible map :");
+    	for(Map.Entry<Element,Integer> map : eligibleNotSortedCountedMap.entrySet()) {
+    		System.out.println(" key " + map.getKey() + " value "+ map.getValue());
+    	}
     }
     public boolean containsReconf(Element e1, ArrayList<Element> array) {
     	for(int i =0; i< array.size(); i++) {
