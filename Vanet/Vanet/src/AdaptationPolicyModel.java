@@ -49,6 +49,10 @@ public class AdaptationPolicyModel {
     }
 }
 
+/**
+ * @author jpgros
+ *
+ */
 class Rule {
 
     VanetProperty TP;
@@ -81,7 +85,6 @@ class Rule {
 
 
     public boolean matches(Road sut, Vehicle v, ExecutionReport er) {
-
         try {
             TP.setCurrentVehicle(v);
             TP.match(sut);
@@ -96,6 +99,17 @@ class Rule {
         }
         return false;
     }
+    
+    public boolean matchTP(Road sut) {
+        try {
+        		TP.match(sut);
+        		return true;
+        		        }
+        catch (PropertyFailedException pfe) {
+            
+        }
+        return false;
+    }
 }
 
 class ExecutionReport {
@@ -104,7 +118,8 @@ class ExecutionReport {
 	HashMap<Element,Integer> eligibleSortedCountedMap = new HashMap<Element,Integer>();
 	HashMap<Element,Integer> eligibleNotSortedCountedMap = new HashMap<Element,Integer>();
     HashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>> steps = new LinkedHashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>>();
-    HashMap<PropertyAutomaton,Integer> occurrences = new HashMap<PropertyAutomaton, Integer>();
+    HashMap<PropertyAutomaton,Integer> occurrencesTP = new HashMap<PropertyAutomaton, Integer>();
+    HashMap<PropertyAutomaton,Integer> occurrencesConfig = new HashMap<PropertyAutomaton, Integer>();
     PrintWriter writerErr =null;
     boolean property =true;
     public ExecutionReport(PrintWriter w) {
@@ -112,20 +127,20 @@ class ExecutionReport {
     }
     
     public void notifyConfig(Rule rule, Vehicle v, PropertyAutomaton tp) {
-        if (occurrences.get(tp) == null) {
-            occurrences.put(tp, 1);
+        if (occurrencesConfig.get(tp) == null) {
+            occurrencesConfig.put(tp, 1);
         }
         else {
-            occurrences.put(tp, occurrences.get(tp) + 1);
+            occurrencesConfig.put(tp, occurrencesConfig.get(tp) + 1);
         }
     }
 
     public void notifyTP(Rule rule, Vehicle v, PropertyAutomaton tp) {
-        if (occurrences.get(tp) == null) {
-            occurrences.put(tp, 1);
+        if (occurrencesTP.get(tp) == null) {
+            occurrencesTP.put(tp, 1);
         }
         else {
-            occurrences.put(tp, occurrences.get(tp) + 1);
+            occurrencesTP.put(tp, occurrencesTP.get(tp) + 1);
         }
     }
     //eligible reconf
@@ -399,6 +414,11 @@ class ExecutionReport {
     	System.out.println("Counted unsorted eligible map :");
     	for(Map.Entry<Element,Integer> map : eligibleNotSortedCountedMap.entrySet()) {
     		System.out.println(" key " + map.getKey() + " value "+ map.getValue());
+    	}
+    	
+    	System.out.println("occurrencesTP :");
+    	for(Map.Entry<PropertyAutomaton,Integer> rule :occurrencesTP.entrySet()) {
+    		System.out.println("key " + rule.getKey().toString() + " value " + rule.getValue());
     	}
     }
     public boolean containsReconf(Element e1, ArrayList<Element> array) {

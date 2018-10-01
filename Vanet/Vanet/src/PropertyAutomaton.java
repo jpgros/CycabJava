@@ -1,6 +1,7 @@
 import com.sun.tools.javac.util.Pair;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,6 +10,7 @@ import java.util.HashMap;
  * Time: 13:35
  */
 public interface PropertyAutomaton<SUT> {
+	public String name=null;
     public int getState();
     public String toString();
     public void reset();
@@ -24,7 +26,26 @@ abstract class VanetProperty implements PropertyAutomaton<Road> {
     public void setCurrentVehicle(Vehicle v) {
         currentVehicle = v;
     }
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+   @Override
+   public boolean equals(Object obj) {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      PropertyAutomaton elt = (PropertyAutomaton) obj;
+      if (this.name == elt.name ) { //
+    	  return true;
+      }
+      else {
+    	  return false;
+      }
+   }
     @Override
     public int getState() {
         return state;

@@ -259,7 +259,7 @@ class r1p1 extends VanetProperty {
     	writer = w;
     }
     public String toString(){
-    	return "r1p1";
+    	return "TP upgrade Relay";
     }
 }
 
@@ -315,7 +315,7 @@ class r2p1 extends VanetProperty {
         return 0;
     }
     public String toString(){
-    	return "r2p1";
+    	return "TP relay";
     }
 }
 
@@ -385,7 +385,7 @@ class r4p1 extends VanetProperty {
 	        return 0;
 	    }
 	  public String toString(){
-	    	return "r4p1";
+	    	return "TP Quit platoon HIGH";
 	    }
 }
 
@@ -416,7 +416,7 @@ class r5p1 extends VanetProperty {
 	        return 0;
 	    }
 	  public String toString(){
-	    	return "r5p1";
+	    	return "TP QuitPlatoon LOW";
 	    }
 }
 
@@ -453,7 +453,7 @@ class r6p1 extends VanetProperty {
 	        return 0;
 	    }
 	  public String toString(){
-	    	return "r6p1";
+	    	return "TP QuitFailure HIGH";
 	    }
 }
 
@@ -499,7 +499,7 @@ class r7p1 extends VanetProperty {
 	        return 0;
 	    }
 	  public String toString(){
-	    	return "r7p1";
+	    	return "QuitForStation HIGH";
 	    }
 }
 
@@ -545,7 +545,7 @@ class r8p1 extends VanetProperty {
 	        return 0;
 	    }
 	  public String toString(){
-	    	return "r8p1";
+	    	return "TP QuitForStation MEDIUM";
 	    }
 }
 
@@ -583,7 +583,7 @@ class r9p1 extends VanetProperty {
 	    	}
 	    	else if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) >= (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
 	        	writer.println("Config KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
-	        	throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to qit for station");
+	        	throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
 	        }
 	        else {
 	        	writer.println("Config OK for quitStas LOW");
@@ -591,7 +591,7 @@ class r9p1 extends VanetProperty {
 	        return 0;
 	    }
 	  public String toString(){
-	    	return "r9p1";
+	    	return "TP QuitForStation LOW";
 	    }
 }
 
@@ -602,19 +602,20 @@ class r9p2 extends VanetProperty {
 		 writer = w;
 	 }
 	 @Override
-	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.road.distanceStation[0] > 100) { //>= to have mutant
-	        	writer.println("TP KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
-	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
-	        }
-	        else {
-	        	writer.println("TP OK for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
-	        }
-	        return 0;
-	    }
-	 	public String toString(){
-	    	return "r9p2";
-	    }
+    public double match(Road sut) throws PropertyFailedException {
+        if ( currentVehicle.road.distanceStation[0] > 100) { //>= to have mutant
+        	writer.println("TP KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
+        }
+        else {
+        	writer.println("TP OK for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+        }
+        return 0;
+    }
+	
+ 	public String toString(){
+    	return "r9p2";
+    }
 }
 class SerializableStep implements Serializable{
 	String meth;
