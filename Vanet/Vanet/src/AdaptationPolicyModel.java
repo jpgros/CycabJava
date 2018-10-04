@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sun.tools.internal.ws.wsdl.document.soap.SOAPStyle;
 
@@ -88,7 +89,10 @@ class Rule {
         try {
             TP.setCurrentVehicle(v);
             TP.match(sut);
-            er.notifyTP(this, v, TP);
+            TP.setPriority(prio);
+            TP.setName(reconf);
+            Element e = new Element(this.reconf, this.prio, v);
+            er.notifyTP(e);
             config.setCurrentVehicle(v);
             config.match(sut);
             er.notifyConfig(this, v, TP);
@@ -118,8 +122,9 @@ class ExecutionReport {
 	HashMap<Element,Integer> eligibleSortedCountedMap = new HashMap<Element,Integer>();
 	HashMap<Element,Integer> eligibleNotSortedCountedMap = new HashMap<Element,Integer>();
     HashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>> steps = new LinkedHashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>>();
-    HashMap<PropertyAutomaton,Integer> occurrencesTP = new HashMap<PropertyAutomaton, Integer>();
+    HashMap<Element,Integer> occurrencesTP = new HashMap<Element, Integer>();
     HashMap<PropertyAutomaton,Integer> occurrencesConfig = new HashMap<PropertyAutomaton, Integer>();
+    int nb=0;
     PrintWriter writerErr =null;
     boolean property =true;
     public ExecutionReport(PrintWriter w) {
@@ -135,13 +140,16 @@ class ExecutionReport {
         }
     }
 
-    public void notifyTP(Rule rule, Vehicle v, PropertyAutomaton tp) {
-        if (occurrencesTP.get(tp) == null) {
-            occurrencesTP.put(tp, 1);
+    public void notifyTP(Element e) { //Rule rule, Vehicle v, VanetProperty tp) {
+    	Integer value;
+		value = (Integer)(occurrencesTP.get(e));
+		if (value == null) {
+            occurrencesTP.put(e, 1);
         }
         else {
-            occurrencesTP.put(tp, occurrencesTP.get(tp) + 1);
+            occurrencesTP.put(e, value + 1);
         }
+        nb++;
     }
     //eligible reconf
     public void notifyStepBefore(int i, Rule r, Vehicle v) {
@@ -177,13 +185,13 @@ class ExecutionReport {
     	map2.put(PolicyName.UPGRADERELAY, 0);
     	//map2.put(PolicyName.RUN, 0);
     }
-    public boolean containsElt(ArrayList<Element> array, Element elt) {
-    	for(Element loopElt : array) {
-    		if(loopElt.name == elt.name && loopElt.priority == elt.priority && loopElt.vehicle == elt.vehicle ) return true;
-    	}
-    	
-    	return false;
-    }
+//    public boolean containsElt(ArrayList<Element> array, Element elt) {
+//    	for(Element loopElt : array) {
+//    		if(loopElt.name == elt.name && loopElt.priority == elt.priority && loopElt.vehicle == elt.vehicle ) return true;
+//    	}
+//    	
+//    	return false;
+//    }
 
     public void dump() {
     	Map<PolicyName, Integer> eligibleMap = new HashMap<PolicyName, Integer>();
@@ -349,7 +357,7 @@ class ExecutionReport {
 	        tmpList.clear();
 	        
 	        for(Element singleElt : prevElig) {
-	        	if(!containsElt(elt, singleElt)) {
+	        	if(! elt.contains(singleElt)) {
 	        		tmpList.add(singleElt);
 	        	}	        	
 	        }
@@ -358,7 +366,7 @@ class ExecutionReport {
 	        }
 	        // adding new eligible elts
 	        for(Element singleElt : elt) {
-	        	if(!containsElt(prevElig,singleElt)) {
+	        	if(!elt.contains(singleElt)) {
 	        		prevElig.add(singleElt);
 	        		actualElig.add(singleElt);
 	        	}
@@ -370,24 +378,27 @@ class ExecutionReport {
     public void stats() {
     	Integer value;
     	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
-    		Element elt = pair.second.get(0);
-    		ArrayList<Element> elts= new ArrayList<Element>();
-    		for(Element eligElt : pair.first) {
-    			value = eligibleNotSortedCountedMap.get(eligElt);
-    			if(value==null) {
-    				eligibleNotSortedCountedMap.put(eligElt, 1);
-    			}
-    			else {
-    				eligibleNotSortedCountedMap.put(eligElt, ++value);
-    			}
-    		}
-    		value = actualCountedMap.get(elt);
-    		if(value==null) {
-    			actualCountedMap.put(elt, 1);
-    		}
-    		else {
-    			actualCountedMap.put(elt, ++value);
-    		}
+			//filling actual map
+    		if(pair.second.size()>0) {
+				Element elt = pair.second.get(0);
+				value = actualCountedMap.get(elt);
+				if(value==null) {
+					actualCountedMap.put(elt, 1);
+				}
+				else {
+					actualCountedMap.put(elt, ++value);
+				}
+			}
+    		//filling eligible map
+				for(Element eligElt : pair.first) {
+					value = eligibleNotSortedCountedMap.get(eligElt);
+					if(value==null) {
+						eligibleNotSortedCountedMap.put(eligElt, 1);
+					}
+					else {
+						eligibleNotSortedCountedMap.put(eligElt, ++value);
+					}
+				}
     	}
     	System.out.println("Counted actual map :");
     	for(Map.Entry<Element,Integer> map : actualCountedMap.entrySet()) {
@@ -417,9 +428,10 @@ class ExecutionReport {
     	}
     	
     	System.out.println("occurrencesTP :");
-    	for(Map.Entry<PropertyAutomaton,Integer> rule :occurrencesTP.entrySet()) {
-    		System.out.println("key " + rule.getKey().toString() + " value " + rule.getValue());
+    	for(Map.Entry<Element,Integer> rule :occurrencesTP.entrySet()) {
+    		System.out.println("name " + rule.getKey().getName() + " vehicle "+ rule.getKey().getVehicle()+ " priority "+ rule.getKey().getPriority()+" value " + rule.getValue());
     	}
+    	System.out.println("size : " + nb);
     }
     public boolean containsReconf(Element e1, ArrayList<Element> array) {
     	for(int i =0; i< array.size(); i++) {

@@ -24,7 +24,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
     String writer = null;
-    String vehicleReader = null;
+    //String vehicleReader = null;
     String platoonReader = null;
     String roadReader = null;
     String writerLog ="";
@@ -33,7 +33,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
     public Road(String w, String vr, String pr, String rr, String wl) {
     	writer = w;
-    	vehicleReader=vr;
+    	//vehicleReader=vr;
     	platoonReader=pr;
     	roadReader=rr;
     	writerLog=wl;
@@ -49,12 +49,23 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public void addStringWriter(String s) {
     	writer += s;
     }
+    
+    public String getStringWriterLog() {
+    	return writer;
+    }
+    public void setStringWriterLog(String s) {
+    	writer = s;
+    }
+    public void addStringWriterLog(String s) {
+    	writerLog += s;
+    }
+    
     public void reset() {
         allVehicles.clear();
     }
 
     public int addVehicle(double _auto, double _distance) {
-    	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null, this,writer,vehicleReader));
+    	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null,this));
     	System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
 		writer+="Vehicle created at index " + (allVehicles.size() - 1);
         return allVehicles.size() - 1;
@@ -86,12 +97,9 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public void tick() {
     	tick=true;
         for (int i=0; i < allVehicles.size(); i++) {
-        	 Vehicle v = allVehicles.get(i);
-             v.updateVehicleVariables();
-             vehicleLog += v.autonomie + ";"+ v.distance+";"+v.getStatus() + "\n";
-        }
-        for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
+            v.updateVehicleVariables();
+            vehicleLog += v.autonomie + ";"+ v.distance+";"+v.getStatus() + "\n";
             v.tick();
             if(v.distance <=10) {
                 if(v.myPlatoon!=null) {
@@ -109,19 +117,20 @@ public class Road implements Serializable, Iterable<Vehicle> {
                 v.getPlatoon().tick();
             }
         }
-
-        writerLog += vehicleLog + platoonLog + "End of turn \n";
+        addStringWriterLog(vehicleLog + platoonLog);
         vehicleLog="";
         platoonLog="";
     }
     public void tickTrigger() {
-    	tick=false;
     	for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
             	v.getPlatoon().tickTrigger();
             }
         }
-        updateDistStas();
+    	if(tick) { 
+    		updateDistStas(); 	
+    		tick =false;
+    	}
     }
 
 
@@ -140,7 +149,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
             }
         }
         System.out.println();
-		writer+="";
+		writer+="\n \n";
     }
 
     public int removeVehicle(Vehicle v, String x) {

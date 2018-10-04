@@ -19,8 +19,7 @@ public class Vehicle extends Entity implements Serializable {
 	ArrayList<Entity> vehiclePlatoonList;
 	Platoon myPlatoon = null;
 	Road road = null;
-	String writer = null;
-	String read = null;
+	//String read = null;
 	BufferedReader reader = null;
 	
 	final double DEC_ENERGY = 1 + Math.random() / 5;
@@ -41,13 +40,11 @@ public class Vehicle extends Entity implements Serializable {
 //	final static double VLOW_BATTERY = 5;
 	
 	
-	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r, String w, String read) {
+	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r) {
 		this.autonomie = autonomie;
 		this.distance = distance;
 		this.id = id;
 		this.road=r;
-		this.writer=w;
-		this.read=read;
 //		this.reader= new BufferedReader(this.read);
 	}
 
@@ -195,7 +192,7 @@ public class Vehicle extends Entity implements Serializable {
 	public void createPlatoon(Vehicle v) {
 		// TODO -- adaptation policy
 		if (true) {
-			Platoon platoon = new Platoon(this, writer,this.road, v);
+			Platoon platoon = new Platoon(this,this.road, v);
 		}
 	}
 	public void removePlatoonFromList() {
@@ -212,14 +209,14 @@ public class Vehicle extends Entity implements Serializable {
 		this.distance -= 10;
 		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
 		if(this.distance < 0 ) {
-			x = "Error : Distance left negative !";
-			System.out.println(x);
-			writer+=x;
+			x = "Error : Distance left negative !" +"\n";
+			System.out.print(x);
+			road.addStringWriter(x);
 		}
 		else if( this.autonomie < 0){
-			x = "Error : Battery left negative !";
-			System.out.println(x);
-			writer+=x;
+			x = "Error : Battery left negative !"+"\n";
+			System.out.print(x);
+			road.addStringWriter(x);
 		}
 	}
 	public void tick() {
@@ -231,80 +228,86 @@ public class Vehicle extends Entity implements Serializable {
 			// distance < seuil --> quitte le peloton
 			if(distance < VLOW_DIST) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.HIGH, this);
-				x = "Event : vehicle " + this.getId() + " is very close from destination [VLOW_DIST]";
-				System.out.println(x);
-				writer+=x;
+				x = "Event : vehicle " + this.getId() + " is very close from destination [VLOW_DIST]"+"\n";
+				System.out.print(x);
+				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt);
-				writer+=" nb policies :" + myPlatoon.policies.listPolicy.size();
+				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 			}
 			else if(distance < LOW_DIST) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.LOW, this);
-				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]";
-				System.out.println(x);
-				writer+=x;
+				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]"+"\n";
+				System.out.print(x);
+				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt);
-				writer+=" nb policies :" + myPlatoon.policies.listPolicy.size();
+				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 			}
 			if(autonomie< LOW_BATTERY) {
 				Element elt = new Element(PolicyName.QUITFAILURE, Priority.HIGH, this);
-				x = "Event : vehicle " + this.getId() + " is low on energy [LOW]";
-				System.out.println(x);
-				writer+=x;
+				x = "Event : vehicle " + this.getId() + " is low on energy [LOW]"+"\n";
+				System.out.print(x);
+				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt);
-				writer+=" nb policies :" + myPlatoon.policies.listPolicy.size();
+				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 
 			}
 			if (this == myPlatoon.leader && this.getMinValue() < LOW_LEADER_DIST) { // (autonomie < LOW_LEADER_BATTERY || distance < LOW_LEADER_DIST )) {
-				x = "Event : vehicle " + this.getId() + " should relay soon [HIGH]";
-				System.out.println(x);
-				writer+=x;
+				x = "Event : vehicle " + this.getId() + " should relay soon [HIGH]"+"\n";
+				System.out.print(x);
+				road.addStringWriter(x);
 				Element elt = new Element(PolicyName.RELAY, Priority.HIGH, this);
 				myPlatoon.policies.addElement(elt);
-				writer+=" minvalue :" + this.getMinValue();
+				road.addStringWriter(" minvalue :" + this.getMinValue()+"\n");
 
+			}if(true) {
+				road.addStringWriter("auto");
+				road.addStringWriter(this.getAutonomieDistance() -10.0 + " " +(road.distanceStation[0] + " " + road.distanceStation[1]) + "VERSUS");
+				road.addStringWriter(this.getAutonomieTick()-1.0 + " " + this.getTwoNextStationsTicks());
 			}
 			if((this.getAutonomieDistance() -10.0)< (road.distanceStation[0] +road.distanceStation[1])){ //keep a margin of 10 
-				x = "Event : vehicle " + this.getId() + " is taking next station stop [NEXT_STATION]";
-				System.out.println(x);
-				writer+=x;
+				//if(this.getAutonomieTick()-1.0 < this.getTwoNextStationsTicks()) { equivalent condition
+				System.out.println("test condition");
+				x = "Event : vehicle " + this.getId() + " is taking next station stop [NEXT_STATION]"+"\n";
+				System.out.print(x);
+				road.addStringWriter(x);
 				if(road.distanceStation[0] < 50) { //verifying adding priority does nto causes bugs
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [HIGH]";
 					System.out.println(x);
-					writer+=x;
+					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.HIGH, this);
 					myPlatoon.policies.addElement(elt);
-					writer+=this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1];
-					writer+=" nb policies :" + myPlatoon.policies.listPolicy.size();
+					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
+					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 				}
 				else if(road.distanceStation[0] < 70) { //road.distanceStation[0] >= 8 && 
-					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]";
-					System.out.println(x);
-					writer+=x;
+					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]"+"\n";
+					System.out.print(x);
+					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.MEDIUM, this);
 					myPlatoon.policies.addElement(elt);
-					writer+=this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1];
-					writer+=" nb policies :" + myPlatoon.policies.listPolicy.size();
+					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
+					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 				}
 				else if(road.distanceStation[0] <= 100) {
-					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [LOW]";
-					System.out.println(x);
-					writer+=x;
+					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [LOW]"+"\n";
+					System.out.print(x);
+					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.LOW, this);
 					myPlatoon.policies.addElement(elt);
-					writer+=this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1];
-					writer+=" nb policies :" + myPlatoon.policies.listPolicy.size();
+					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
+					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 				}
 				else {
-					x = "Error : Should not happen QuitToStation policy problem " + road.distanceStation[0];
-					System.out.println(x);
-					writer+=x;
+					x = "Error : Should not happen QuitToStation policy problem " + road.distanceStation[0]+"\n";
+					System.out.print(x);
+					road.addStringWriter(x);
 				}
 			}
-			writer+="nb vehicles"+ myPlatoon.vehiclesList.size() + "minval " + this.getMinValue()/DEC_LEADER+ "leader min val " +myPlatoon.leader.getMinValue();
+			road.addStringWriter("nb vehicles"+ myPlatoon.vehiclesList.size() + "minval " + this.getMinValue()/DEC_LEADER+ "leader min val " +myPlatoon.leader.getMinValue()+"\n");
 			if(!this.isLeader() && myPlatoon.vehiclesList.size()>=3 && ((this.getMinValue()/DEC_LEADER)> myPlatoon.leader.getMinValue())) {
 				Element elt = new Element(PolicyName.UPGRADERELAY, Priority.MEDIUM, this);
 				myPlatoon.policies.addElement(elt);
-				writer+=" nb policies :" + myPlatoon.policies.listPolicy.size();
+				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 			}
 			
 			//leader ask platoon to choose wich adaptation policy to choose
@@ -315,8 +318,8 @@ public class Vehicle extends Entity implements Serializable {
 		}
 		else {
 			if ((getAutonomieDistance() -10.0)< (road.distanceStation[0] +road.distanceStation[1]) && road.distanceStation[0] < 11) {
-				x = "Event : vehicle " + this.getId() + " is refilling [REFILL] and getAutonomyvalue gives : " + getAutonomieDistance();
-				writer+=x;
+				x = "Event : vehicle " + this.getId() + " is refilling [REFILL] and getAutonomyvalue gives : " + getAutonomieDistance()+"\n";
+				road.addStringWriter(x);
 				refill();	
 			}
 		}
@@ -351,6 +354,14 @@ public class Vehicle extends Entity implements Serializable {
 //	}
 	public double getDistanceTick() {
 		return distance/DEC_DISTANCE;
+	}
+	
+	public double getTwoNextStationsTicks() {
+		return (road.distanceStation[0] + road.distanceStation[1])/DEC_DISTANCE;
+	}
+	public double getAutonomieTick() {
+		if(isLeader()) return autonomie/DEC_LEADER; 
+		else return autonomie/DEC_ENERGY;
 	}
 	public double getAutonomieDistance() {
 		if(isLeader()) {

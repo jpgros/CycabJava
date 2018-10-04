@@ -49,8 +49,8 @@ public class VanetFACS implements Serializable{
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
-        generatetest(fsm, writer, vcm, apm, writerErr);
+        ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
+        //generatetest(fsm, writer, vcm, apm, writerErr);
         
         strLog=((VanetFSM) fsm).getSUT().getStringWriter();
         writerLog.print(strLog);
@@ -138,7 +138,7 @@ public class VanetFACS implements Serializable{
     	ArrayList<MyTest> initial=null;
     	FileInputStream inser;
 		try {
-			inser = new FileInputStream("input.ser");
+			inser = new FileInputStream("inputTestbatneg.ser");
 			ObjectInputStream objectInputStream = new ObjectInputStream(inser);
 	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
 	        System.out.println("testinput" +testInput);
@@ -175,26 +175,26 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			st.setMonitor(vcm); 
 			
-			ArrayList<MyTest> initial = st.generate(2, 400);
+			ArrayList<MyTest> initial = st.generate(1, 4000);
 			System.out.println("initial :"+initial.size());
 			vcm.printReport();
 	        
-	        VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
-	        st.setMonitor(vcm2);
-	        for(MyTest test : st.generate(1, 400)){
-	        	initial.add(test);
-	        }
-	        System.out.println("initial :"+initial.size());
-			vcm2.printReport();
-	        
-	        VanetConformanceMonitor vcm3 = new VanetConformanceMonitor(apm, writerErr);
-	        st.setMonitor(vcm3);
-	        for(MyTest test : st.generate(1, 400)){
-	        	initial.add(test);
-	        }
-
-	        System.out.println("initial :"+initial.size());
-	        vcm3.printReport();
+//	        VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
+//	        st.setMonitor(vcm2);
+//	        for(MyTest test : st.generate(1, 400)){
+//	        	initial.add(test);
+//	        }
+//	        System.out.println("initial :"+initial.size());
+//			vcm2.printReport();
+//	        
+//	        VanetConformanceMonitor vcm3 = new VanetConformanceMonitor(apm, writerErr);
+//	        st.setMonitor(vcm3);
+//	        for(MyTest test : st.generate(1, 400)){
+//	        	initial.add(test);
+//	        }
+//
+//	        System.out.println("initial :"+initial.size());
+//	        vcm3.printReport();
 	        
 //	        VanetConformanceMonitor vcm4 = new VanetConformanceMonitor(apm, writerErr);
 //	        st.setMonitor(vcm4);
@@ -399,6 +399,7 @@ class r4p2 extends VanetProperty {
 	 	public String toString(){
 	    	return "r4p2";
 	    }
+
 }
 
 class r5p1 extends VanetProperty {

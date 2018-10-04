@@ -15,20 +15,35 @@ public interface PropertyAutomaton<SUT> {
     public String toString();
     public void reset();
     public double match(SUT o) throws PropertyFailedException;
+    public PolicyName getName();
+    public void setName(PolicyName s);
+
+
 }
 
 abstract class VanetProperty implements PropertyAutomaton<Road> {
-
+	protected PolicyName name=null;
     protected int state = 0;
-
+    protected Priority priority=null;
     protected Vehicle currentVehicle = null;
 
     public void setCurrentVehicle(Vehicle v) {
         currentVehicle = v;
     }
+    public void setPriority(Priority p) {
+    	priority=p;
+    }
+
+    public void setName(PolicyName s) {
+    	name =s;
+    }
+
+    public PolicyName getName() {
+        return name;
+    }
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(name, currentVehicle, priority);
     }
    @Override
    public boolean equals(Object obj) {
@@ -38,14 +53,21 @@ abstract class VanetProperty implements PropertyAutomaton<Road> {
          return false;
       if (getClass() != obj.getClass())
          return false;
-      PropertyAutomaton elt = (PropertyAutomaton) obj;
-      if (this.name == elt.name ) { //
+      VanetProperty elt = (VanetProperty) obj;
+      if (this.name == elt.name && this.currentVehicle== elt.currentVehicle && this.priority == elt.priority) { //
     	  return true;
       }
       else {
     	  return false;
       }
    }
+   public Vehicle getVehicle(){
+	   return currentVehicle;
+   }
+   public Priority getPriority() {
+	   return priority;
+   }
+   
     @Override
     public int getState() {
         return state;
