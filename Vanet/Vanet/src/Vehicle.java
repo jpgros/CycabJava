@@ -259,10 +259,6 @@ public class Vehicle extends Entity implements Serializable {
 				myPlatoon.policies.addElement(elt);
 				road.addStringWriter(" minvalue :" + this.getMinValue()+"\n");
 
-			}if(true) {
-				road.addStringWriter("auto");
-				road.addStringWriter(this.getAutonomieDistance() -10.0 + " " +(road.distanceStation[0] + " " + road.distanceStation[1]) + "VERSUS");
-				road.addStringWriter(this.getAutonomieTick()-1.0 + " " + this.getTwoNextStationsTicks());
 			}
 			if((this.getAutonomieDistance() -10.0)< (road.distanceStation[0] +road.distanceStation[1])){ //keep a margin of 10 
 				//if(this.getAutonomieTick()-1.0 < this.getTwoNextStationsTicks()) { equivalent condition
