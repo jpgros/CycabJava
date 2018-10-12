@@ -3,6 +3,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -123,6 +124,9 @@ class ExecutionReport {
 	HashMap<Element,Integer> eligibleNotSortedCountedMap = new HashMap<Element,Integer>();
     HashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>> steps = new LinkedHashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>>();
     HashMap<Element,Integer> occurrencesTP = new HashMap<Element, Integer>();
+    HashSet<MiniElement> miniOccurrencesTP = new HashSet<MiniElement>();
+    HashSet<MiniElement> possibleMiniOccurrencesTP = new HashSet<MiniElement>();
+    HashSet<MiniElement> untriggeredMiniOccurrencesTP = new HashSet<MiniElement>();
     HashMap<PropertyAutomaton,Integer> occurrencesConfig = new HashMap<PropertyAutomaton, Integer>();
     int nb=0;
     PrintWriter writerErr =null;
@@ -143,6 +147,14 @@ class ExecutionReport {
     public void notifyTP(Element e) { //Rule rule, Vehicle v, VanetProperty tp) {
     	Integer value;
 		value = (Integer)(occurrencesTP.get(e));
+    	MiniElement miniElt = new MiniElement(e.name,e.priority);
+		
+		if (value == null) {
+            miniOccurrencesTP.add(miniElt);
+        }
+		else {
+            miniOccurrencesTP.add(miniElt);
+        }
 		if (value == null) {
             occurrencesTP.put(e, 1);
         }
@@ -375,8 +387,10 @@ class ExecutionReport {
     	}      
     	
     }
-    public void stats() {
+    public void stats() throws FileNotFoundException, UnsupportedEncodingException {
+    	PrintWriter writeStats = new PrintWriter("./stats.txt", "UTF-8"); 
     	Integer value;
+    	String x="";
     	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
 			//filling actual map
     		if(pair.second.size()>0) {
@@ -400,10 +414,7 @@ class ExecutionReport {
 					}
 				}
     	}
-    	System.out.println("Counted actual map :");
-    	for(Map.Entry<Element,Integer> map : actualCountedMap.entrySet()) {
-    		System.out.println(" key " + map.getKey() + " value "+ map.getValue());
-    	}
+
     	
     	for(ArrayList<Element> arrayElt : eligSorted) {
     		for(Element elt : arrayElt) {
@@ -417,21 +428,95 @@ class ExecutionReport {
     		}
     	}
     	
+    	//creating frequencies array based on actual reconf versus TP conditions
+    	HashMap<Element,Double> frequenciesOccTPMap = new HashMap<Element,Double>();
+    	Integer val=0;
+    	Double freq=0.0;
+    	for(Map.Entry<Element, Integer> elt: occurrencesTP.entrySet()) {
+    		val=actualCountedMap.get(elt.getKey()); 
+    		if(val!=null) {
+    			freq = (((Double)(double)(val))/((Double)(double)(elt.getValue())))*100.0;
+    			System.out.println("freq "+ freq + " " + (Double)(double)(val) );
+    			frequenciesOccTPMap.put(elt.getKey(), freq);
+    		}
+    		else {
+    			frequenciesOccTPMap.put(elt.getKey(), 0.0);
+    		}
+    	}
+    	
+    	//creating frequencies array based on actual reconf versus elig reocnf (not sorted ones)
+    	HashMap<Element,Double> frequenciesActuEligMap = new HashMap<Element,Double>();
+    	val=0;
+    	freq=0.0;
+    	for(Map.Entry<Element, Integer> elt: eligibleNotSortedCountedMap.entrySet()) {
+    		val= actualCountedMap.get(elt.getKey()); 
+    		if(val!=null) {
+    			freq = (((Double)(double)(val))/((Double)(double)(elt.getValue())))*100.0;
+    			System.out.println("freq "+ freq + " " + (Double)(double)(val) );
+    			frequenciesActuEligMap.put(elt.getKey(), freq);
+    		}
+    		else {
+    			frequenciesActuEligMap.put(elt.getKey(), 0.0);
+    		}
+    	}
+    	    	
+    	System.out.println("Counted actual map :");
+    	for(Map.Entry<Element,Integer> map : actualCountedMap.entrySet()) {
+    		x= " key " + map.getKey() + " value "+ map.getValue();
+    		System.out.println(x);
+    		writeStats.println(x);
+    	}
     	System.out.println("Counted eligible map :");
     	for(Map.Entry<Element,Integer> map : eligibleSortedCountedMap.entrySet()) {
-    		System.out.println(" key " + map.getKey() + " value "+ map.getValue());
+    		x= " key " + map.getKey() + " value "+ map.getValue();
+    		System.out.println(x);
+    		writeStats.println(x);
     	}
     	
     	System.out.println("Counted unsorted eligible map :");
     	for(Map.Entry<Element,Integer> map : eligibleNotSortedCountedMap.entrySet()) {
-    		System.out.println(" key " + map.getKey() + " value "+ map.getValue());
+    		x= " key " + map.getKey() + " value "+ map.getValue();
+    		System.out.println(x);
+    		writeStats.println(x);
     	}
     	
     	System.out.println("occurrencesTP :");
     	for(Map.Entry<Element,Integer> rule :occurrencesTP.entrySet()) {
-    		System.out.println("name " + rule.getKey().getName() + " vehicle "+ rule.getKey().getVehicle()+ " priority "+ rule.getKey().getPriority()+" value " + rule.getValue());
+    		x= "name " + rule.getKey().getName() + " vehicle "+ rule.getKey().getVehicle()+ " priority "+ rule.getKey().getPriority()+" value " + rule.getValue();
+    		System.out.println(x);
+    		writeStats.println(x);
     	}
     	System.out.println("size : " + nb);
+    	
+    	for(Map.Entry<Element,Double> map : frequenciesOccTPMap.entrySet()){
+    		x= " key " + map.getKey() + " value "+ map.getValue();
+    		System.out.println(x);
+    		writeStats.println(x);
+    	}
+    	writeStats.println("--------------------------------------------------------");
+    	for(Map.Entry<Element,Double> map : frequenciesActuEligMap.entrySet()){
+    		x= " key " + map.getKey() + " value "+ map.getValue();
+    		System.out.println(x);
+    		writeStats.println(x);
+    	}
+    	
+    	//detecting which TP was not triggered
+    	for (PolicyName pol : PolicyName.values()) {
+    		  for(Priority prio : Priority.values()) {
+    			  MiniElement miniElt = new MiniElement(pol,prio);
+    			  possibleMiniOccurrencesTP.add(miniElt);
+    		  }
+    		}
+    	for(MiniElement miniElt : possibleMiniOccurrencesTP) {
+    		if(!miniOccurrencesTP.contains(miniElt)) {
+    			untriggeredMiniOccurrencesTP.add(miniElt);
+    		}
+    	}
+    	writeStats.println("untrigerred TP");
+    	for(MiniElement miniElt : untriggeredMiniOccurrencesTP) {
+    		writeStats.println(miniElt.name + " " + miniElt.priority);
+    	}
+    	writeStats.close();
     }
     public boolean containsReconf(Element e1, ArrayList<Element> array) {
     	for(int i =0; i< array.size(); i++) {

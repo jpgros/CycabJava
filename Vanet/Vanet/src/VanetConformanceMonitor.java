@@ -1,4 +1,6 @@
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,12 +24,21 @@ public class VanetConformanceMonitor {
 
     public void notify(MyStep newStep, Road sut) {
         apm.match(sut, er);
+        sut.setStepName(newStep.meth.getName());
     }
 
     public void printReport() {
         er.dump();
         er.sortEligibleSteps();
-        er.stats();
+        try {
+			er.stats();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
 }

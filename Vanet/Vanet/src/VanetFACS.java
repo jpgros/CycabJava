@@ -52,9 +52,8 @@ public class VanetFACS implements Serializable{
         ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
         //generatetest(fsm, writer, vcm, apm, writerErr);
         
-        strLog=((VanetFSM) fsm).getSUT().getStringWriter();
-        writerLog.print(strLog);
-        writer.println(" strLog Begins : " +strLog); //to change
+        strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
+        writer.println(" strLog Begins : "); 
         writer.print(strWriter);
         
         writerErr.close();
@@ -138,7 +137,7 @@ public class VanetFACS implements Serializable{
     	ArrayList<MyTest> initial=null;
     	FileInputStream inser;
 		try {
-			inser = new FileInputStream("inputTestbatneg.ser");
+			inser = new FileInputStream("input.ser");
 			ObjectInputStream objectInputStream = new ObjectInputStream(inser);
 	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
 	        System.out.println("testinput" +testInput);
@@ -175,7 +174,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			st.setMonitor(vcm); 
 			
-			ArrayList<MyTest> initial = st.generate(1, 4000);
+			ArrayList<MyTest> initial = st.generate(1, 400);
 			System.out.println("initial :"+initial.size());
 			vcm.printReport();
 	        

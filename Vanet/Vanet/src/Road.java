@@ -30,6 +30,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
     String writerLog ="";
     String vehicleLog="";
     String platoonLog="";
+    String roadLog="";
+    String stepName="";
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
     public Road(String w, String vr, String pr, String rr, String wl) {
     	writer = w;
@@ -39,6 +41,9 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	writerLog=wl;
 
 
+    }
+    public void setStepName(String s) {
+    	stepName=s;
     }
     public String getStringWriter() {
     	return writer;
@@ -51,10 +56,10 @@ public class Road implements Serializable, Iterable<Vehicle> {
     }
     
     public String getStringWriterLog() {
-    	return writer;
+    	return writerLog;
     }
     public void setStringWriterLog(String s) {
-    	writer = s;
+    	writerLog = s;
     }
     public void addStringWriterLog(String s) {
     	writerLog += s;
@@ -99,7 +104,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.updateVehicleVariables();
-            vehicleLog += v.autonomie + ";"+ v.distance+";"+v.getStatus() + "\n";
+            vehicleLog +="Vehicle;"+v.getId() + ";"+ v.distance+";"+v.autonomie +";"+v.getStatus() + "\n";
             v.tick();
             if(v.distance <=10) {
                 if(v.myPlatoon!=null) {
@@ -117,9 +122,11 @@ public class Road implements Serializable, Iterable<Vehicle> {
                 v.getPlatoon().tick();
             }
         }
-        addStringWriterLog(vehicleLog + platoonLog);
+        roadLog += "Station;"+distanceStation[0]+";"+stepName+"\n";
+        addStringWriterLog(roadLog+ platoonLog+ vehicleLog );
         vehicleLog="";
         platoonLog="";
+        roadLog="";
     }
     public void tickTrigger() {
     	for (Vehicle v : allVehicles) {
