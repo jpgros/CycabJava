@@ -2,6 +2,7 @@ import nz.ac.waikato.modeljunit.Action;
 import nz.ac.waikato.modeljunit.FsmModel;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,9 +14,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+
+import javax.security.auth.callback.TextInputCallback;
+
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,13 +37,15 @@ public class StochasticTester implements Serializable{
 	public ObjectOutputStream objOutStr = null;
 	public PrintWriter writerTest = null;
 	public ArrayList<SerializableTest> serializableTest;
+	public LinkedList<VanetProperty> properties = new LinkedList<VanetProperty>();
+	private LinkedList<VanetProperty> props;
     /** FSM model that describes a probabilistic usage automaton */
     private FsmModel fsm;
     /** Actions declared in that FSM with their probabilities */
     private HashMap<Method, Double> actionsAndProbabilities;
 
     private VanetConformanceMonitor vcm = null;
-
+    String propertiesOutput="";
     /**
      * Constructor. Initializes the FSM and computes associated actionsAndProbabilities.
      * @param _fsm
@@ -95,14 +103,31 @@ public class StochasticTester implements Serializable{
     public void setMonitor(VanetConformanceMonitor _vcm) {
         vcm = _vcm;
     }
-
+    public void init() {
+        properties.add(new Property1());
+        properties.add(new Property2());
+        properties.add(new Property3());
+        properties.add(new Property4());
+        properties.add(new Property5());
+    }
+    public void deinit(PrintWriter propertiesWriter) {
+        HashMap<Vehicle, ArrayList<Triple>> p3Log =properties.get(2).forEachVehicle;
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p3Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        propertiesWriter.close();
+    }
     /**
      * Generates a set of test cases (object MyTest).
      * @param nb number of test cases to generate
      * @param length maximal size of the test cases
      * @return the set of test cases
+     * @throws UnsupportedEncodingException 
+     * @throws FileNotFoundException 
      */
-    public ArrayList<MyTest> generate(int nb, int length) {
+    public ArrayList<MyTest> generate(int nb, int length,PrintWriter propertiesWriter) throws FileNotFoundException, UnsupportedEncodingException {
     	//BufferedReader inStream = new BufferedReader(readerStep);
         String inString;
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
@@ -117,12 +142,11 @@ public class StochasticTester implements Serializable{
             MyTest currentTest = new MyTest();
             boolean b = true;
             // while limit has not been reached and there exists a next step
-            
             MyStep newStep;
 
         	do {
-            	System.out.println("Step : " +j);
-            	writer.println("Step : "+j);
+            	//System.out.println("Step : " +j);
+            	//writer.println("Step : "+j);
 	            newStep = computeNextStep();
             	b = (newStep != null);
                 //writerStep.println("My step : " + newStep.instance + ";" + newStep.meth + ";" + newStep.params);
@@ -132,6 +156,16 @@ public class StochasticTester implements Serializable{
                     if (vcm != null) { 
                         vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
                     }
+                    // TODO :if newstep !=tick
+                    for(VanetProperty prop : properties) {
+                    try {
+						prop.match(((VanetFSM) fsm).getSUT());
+					} catch (PropertyFailedException e) {
+						propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                    }
                 }
                 //ticktrigger here
                 ((VanetFSM) fsm).getSUT().tickTrigger();
@@ -140,9 +174,12 @@ public class StochasticTester implements Serializable{
             // add computed test case to the result
             ret.add(currentTest);
         }
+        propertiesWriter.print(propertiesOutput);
+       // propertiesWriter.close();
         return ret;
     }
     
+    //retrieve the list of input steps and notify them to the SUT
     public ArrayList<MyTest> retrieve() {
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         String inString;
@@ -151,18 +188,15 @@ public class StochasticTester implements Serializable{
         MyStep newStep;
         // for each of the resulting test cases
 		for(SerializableTest test : serializableTest) {
-			System.out.println("test:" +test);
 			k++;
 	        // reset FSM exploration
             fsm.reset(true);
 	        MyTest currentTest = new MyTest();
 			for(SerializableStep step : test.steps) {
-				System.out.print("step :" +step);
 				j++;
 				
-				newStep = computeInputTest(step); 
-				System.out.println("Test : " + k +" Step : " +j + " " + newStep);
-            	writer.println("Step : "+j + " " + newStep);
+				newStep = computeInputTest(step);
+            	//writer.println("Step : "+j + " " + newStep);
 				b = (newStep != null);
                 //writerStep.println("My step : " + newStep.instance + ";" + newStep.meth + ";" + newStep.params);
                 if (b) {
@@ -175,7 +209,6 @@ public class StochasticTester implements Serializable{
                 ((VanetFSM) fsm).getSUT().tickTrigger();
 			}
 			j=0;
-			System.out.println("");
 			ret.add(currentTest);
 		}
 		return ret;

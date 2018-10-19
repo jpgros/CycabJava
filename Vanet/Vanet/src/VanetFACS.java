@@ -16,7 +16,12 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+
+import org.apache.commons.collections15.iterators.EntrySetMapIterator;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,7 +39,7 @@ public class VanetFACS implements Serializable{
         PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8"); 
         FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         FileReader platoonReader = new FileReader("./platoonPolicies.txt");
-        FileReader roadReader = new FileReader("./platoonPolicies.txt");        
+        FileReader roadReader = new FileReader("./platoonPolicies.txt");   
            			
         String strWriter ="";
         String vhReader="";
@@ -42,16 +47,18 @@ public class VanetFACS implements Serializable{
         String rdReader="";
         String strLog="";
         FsmModel fsm = new VanetFSM(strWriter, vhReader, plReader, rdReader, strLog);       
-               
+        
+
+        
+        
         //StochasticTester st = new StochasticTester(fsm,writer,readerStep);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
-        //generatetest(fsm, writer, vcm, apm, writerErr);
-        
+        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
+        generatetest(fsm, writer, vcm, writerErr);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
@@ -163,19 +170,20 @@ public class VanetFACS implements Serializable{
 		return initial;
     }
     
-    public static void generatetest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm,AdaptationPolicyModel apm,PrintWriter writerErr) {
+    public static void generatetest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm,PrintWriter writerErr) {
     	//attention risque d incomptatibilite nbstep 
         ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
         ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();
     	StochasticTester st   = new StochasticTester(fsm,writer);
-		        
+		st.init();      
 		try {
 			FileOutputStream outser = new FileOutputStream("output.ser");
+			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			st.setMonitor(vcm); 
-			
-			ArrayList<MyTest> initial = st.generate(1, 400);
-			System.out.println("initial :"+initial.size());
+			String outProp="";
+			ArrayList<MyTest> initial = st.generate(1, 400,propertiesWriter);
+			st.deinit(propertiesWriter);
 			vcm.printReport();
 	        
 //	        VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
@@ -221,6 +229,7 @@ public class VanetFACS implements Serializable{
 	        }        
 	        objectOutputStream.writeObject(testArraySer);
 	        objectOutputStream.close();    
+	        st.deinit(propertiesWriter);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

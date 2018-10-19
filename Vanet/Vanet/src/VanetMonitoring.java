@@ -198,6 +198,4 @@ public class VanetMonitoring {
         }
         return activableOnes;
     }
-
-
 }

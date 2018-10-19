@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class Road implements Serializable, Iterable<Vehicle> {
 	boolean tick =false;
+	int stepNb=0;
     final static int MAX_CAPACITY = 5;
 	final static double FREQUENCYSTATION = 100;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
@@ -100,21 +101,25 @@ public class Road implements Serializable, Iterable<Vehicle> {
 
 
     public void tick() {
+    	stepNb++;
     	tick=true;
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.updateVehicleVariables();
-            vehicleLog +="Vehicle;"+v.getId() + ";"+ v.distance+";"+v.autonomie +";"+v.getStatus() + "\n";
+            vehicleLog +="Vehicle;"+v.getId() + ";"+ v.distance+";"+v.autonomie +";"+v.getStatus();
             v.tick();
             if(v.distance <=10) {
-                if(v.myPlatoon!=null) {
+                if(v.myPlatoon!=null) { 
                     removeVehicle(v, "Error : vehicle: "+ v.id+ " reached distance but is inside platoon, removed anyway ");
                 }
                 else {
+                	vehicleLog += ";quitRoad";
+                	System.out.println("totototo"+ vehicleLog);
                     removeVehicle(v, "Event : vehicle: "+ v.id+ " reached distance and quitting successfully the road ");
                 }
                 i--;
             }
+            vehicleLog+="\n";
         }
         affiche();
         for (Vehicle v : allVehicles) {
