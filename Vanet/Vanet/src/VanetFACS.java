@@ -47,22 +47,18 @@ public class VanetFACS implements Serializable{
         String rdReader="";
         String strLog="";
         FsmModel fsm = new VanetFSM(strWriter, vhReader, plReader, rdReader, strLog);       
-        
 
-        
-        
         //StochasticTester st = new StochasticTester(fsm,writer,readerStep);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
-        generatetest(fsm, writer, vcm, writerErr);
+        ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
+        //generatetest(fsm, writer, vcm, writerErr);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
-        
         writerErr.close();
         writer.close();
         vehicleReader.close();
@@ -144,14 +140,18 @@ public class VanetFACS implements Serializable{
     	ArrayList<MyTest> initial=null;
     	FileInputStream inser;
 		try {
+	        ((VanetFSM) fsm).getValues();     
 			inser = new FileInputStream("input.ser");
+			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectInputStream objectInputStream = new ObjectInputStream(inser);
 	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
 	        System.out.println("testinput" +testInput);
 	        StochasticTester st   = new StochasticTester(fsm,writer, testInput);
+	        st.init();
 	        objectInputStream.close();
 			st.setMonitor(vcm); 
-	        initial = st.retrieve();
+	        initial = st.retrieve(propertiesWriter);
+	        st.deinit(propertiesWriter);
 	        String strLog=((VanetFSM) fsm).getSUT().writerLog;
 	        writerLog.print(strLog);  
 	        vcm.printReport();			
@@ -177,12 +177,15 @@ public class VanetFACS implements Serializable{
     	StochasticTester st   = new StochasticTester(fsm,writer);
 		st.init();      
 		try {
+	        ((VanetFSM) fsm).getValues();     
+
 			FileOutputStream outser = new FileOutputStream("output.ser");
 			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			st.setMonitor(vcm); 
-			String outProp="";
+			System.out.println("DOOONE");
 			ArrayList<MyTest> initial = st.generate(1, 400,propertiesWriter);
+			System.out.println("DONE");
 			st.deinit(propertiesWriter);
 			vcm.printReport();
 	        
@@ -226,10 +229,10 @@ public class VanetFACS implements Serializable{
 	        	SerializableTest test = new SerializableTest(serializableArray);
 	        	testArraySer.add(test);
 	        	serializableArray.clear();
-	        }        
+	        }    
+	        //((VanetFSM) fsm).printValues();
 	        objectOutputStream.writeObject(testArraySer);
 	        objectOutputStream.close();    
-	        st.deinit(propertiesWriter);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

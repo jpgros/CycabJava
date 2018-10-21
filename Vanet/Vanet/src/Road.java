@@ -170,8 +170,32 @@ public class Road implements Serializable, Iterable<Vehicle> {
 		writer+=x;
         return allVehicles.size() -1;
     }
-
-
+    public int getLowestVehicleBattery(){
+    	double min =100;
+    	int index=0;
+    	int i=0;
+    	for(Vehicle v : allVehicles) {
+    		if(v.autonomie<min&& v.myPlatoon!=null) {
+    			min =v.autonomie;
+    			index=i;
+    		}
+    		i++;
+    	}
+    	return index;
+    }
+    public int getHighestVehicleBattery(){
+    	double max =0;
+    	int index=0;
+    	int i=0;
+    	for(Vehicle v : allVehicles) {
+    		if(v.autonomie<max) {
+    			max =v.autonomie;
+    			index=i;
+    		}
+    		i++;
+    	}
+    	return index;
+    }
 
     public void updateDistStas(){
 		distanceStation[0]-=10;

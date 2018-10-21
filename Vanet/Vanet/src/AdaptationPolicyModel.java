@@ -148,13 +148,8 @@ class ExecutionReport {
     	Integer value;
 		value = (Integer)(occurrencesTP.get(e));
     	MiniElement miniElt = new MiniElement(e.name,e.priority);
-		
-		if (value == null) {
-            miniOccurrencesTP.add(miniElt);
-        }
-		else {
-            miniOccurrencesTP.add(miniElt);
-        }
+
+        miniOccurrencesTP.add(miniElt);
 		if (value == null) {
             occurrencesTP.put(e, 1);
         }

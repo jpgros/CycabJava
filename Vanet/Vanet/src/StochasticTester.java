@@ -134,6 +134,7 @@ public class StochasticTester implements Serializable{
         // for each of the resulting test cases
         for (int i=0; i < nb; i++) {
             System.out.println("== Generating test #" + i + " ==");
+
             // initialize step counter
             int j=0;
             // reset FSM exploration
@@ -145,6 +146,8 @@ public class StochasticTester implements Serializable{
             MyStep newStep;
 
         	do {
+            	System.out.println("step "+ j);
+
             	//System.out.println("Step : " +j);
             	//writer.println("Step : "+j);
 	            newStep = computeNextStep();
@@ -170,7 +173,7 @@ public class StochasticTester implements Serializable{
                 //ticktrigger here
                 ((VanetFSM) fsm).getSUT().tickTrigger();
             }
-            while (j < length && b);       		 
+            while (j < length && b);       		
             // add computed test case to the result
             ret.add(currentTest);
         }
@@ -180,7 +183,7 @@ public class StochasticTester implements Serializable{
     }
     
     //retrieve the list of input steps and notify them to the SUT
-    public ArrayList<MyTest> retrieve() {
+    public ArrayList<MyTest> retrieve(PrintWriter propertiesWriter) {
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         String inString;
         int j=0,k=0;
@@ -205,12 +208,22 @@ public class StochasticTester implements Serializable{
                         vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
                     }
                 }
+                for(VanetProperty prop : properties) {
+                try {
+					prop.match(((VanetFSM) fsm).getSUT());
+				} catch (PropertyFailedException e) {
+					propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                }
                 //ticktrigger here
                 ((VanetFSM) fsm).getSUT().tickTrigger();
 			}
 			j=0;
 			ret.add(currentTest);
 		}
+		propertiesWriter.print(propertiesOutput);
 		return ret;
     }
 

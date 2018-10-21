@@ -34,7 +34,7 @@ public class VanetGenetic {
         FsmModel fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader, writerLog);
         // initialize population using biased-random exploration of a FSM.
         StochasticTester st = new StochasticTester(fsm);
-        ArrayList<MyTest> initial = st.generate(10, 50);
+        ArrayList<MyTest> initial=null;// = st.generate(10, 50);
         for (MyTest mt : initial) {
             double[] fits = new double[mt.size()];
             double min = replayAndEvaluateTest(fsm, mt, fits);
