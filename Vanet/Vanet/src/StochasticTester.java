@@ -12,6 +12,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -111,12 +112,54 @@ public class StochasticTester implements Serializable{
         properties.add(new Property5());
     }
     public void deinit(PrintWriter propertiesWriter) {
-        HashMap<Vehicle, ArrayList<Triple>> p3Log =properties.get(2).forEachVehicle;
+        HashMap<Vehicle, ArrayList<Triple>> p1Log =properties.get(0).forEachVehicleProp;
+        HashMap<Vehicle, ArrayList<Triple>> p2Log =properties.get(1).forEachVehicleProp;
+        HashMap<Vehicle, ArrayList<Triple>> p3Log =properties.get(2).forEachVehicleProp;
+        HashMap<Vehicle, ArrayList<Triple>> p4Log =properties.get(3).forEachVehicleProp;
+        HashMap<Vehicle, ArrayList<Triple>> p5Log =properties.get(4).forEachVehicleProp;
+        propertiesWriter.println("prop1");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p1Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        propertiesWriter.println("prop2");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p2Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        propertiesWriter.println("prop3");
         for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p3Log.entrySet()) {
         	for(Triple line : vlList.getValue()) {
         		propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
         	}
         }
+        propertiesWriter.println("prop4");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p4Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        propertiesWriter.println("prop5");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p4Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        double coverage=0.0;
+        for(VanetProperty vProp : properties) {
+        	for(int i = 0; i<3; i++)
+        	{
+        	    for(int j = 0; j<2; j++)
+        	    {
+        	     if(vProp.transitionsMade[i][j]) 	 coverage += 1.0;
+        	    }
+        	}
+        	//propertiesWriter.println(Arrays.stream(vProp.transitionsMade).allMatch(s -> s.equals(vProp.transitionsMade[0])));
+        }
+        coverage = (coverage/(30))*100;
+        propertiesWriter.println("coverage props :" + coverage + "%");
         propertiesWriter.close();
     }
     /**
@@ -160,18 +203,18 @@ public class StochasticTester implements Serializable{
                         vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
                     }
                     // TODO :if newstep !=tick
-                    for(VanetProperty prop : properties) {
-                    try {
-						prop.match(((VanetFSM) fsm).getSUT());
-					} catch (PropertyFailedException e) {
-						propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-                    }
                 }
                 //ticktrigger here
                 ((VanetFSM) fsm).getSUT().tickTrigger();
+                for(VanetProperty prop : properties) {
+                try {
+					prop.match(((VanetFSM) fsm).getSUT());
+				} catch (PropertyFailedException e) {
+					propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                }
             }
             while (j < length && b);       		
             // add computed test case to the result

@@ -27,7 +27,12 @@ abstract class VanetProperty implements PropertyAutomaton<Road> {
     protected int state = 0;
     protected Priority priority=null;
     protected Vehicle currentVehicle = null;
-    protected HashMap<Vehicle, ArrayList<Triple>> forEachVehicle = new HashMap<Vehicle, ArrayList<Triple>>();
+    protected HashMap<Vehicle, ArrayList<Triple>> forEachVehicleProp = new HashMap<Vehicle, ArrayList<Triple>>();
+    protected boolean [][] transitionsMade = new boolean[][]{
+    	  { false, true},
+    	  { false,false},
+    	  { false,false},
+    	  };
     public void setCurrentVehicle(Vehicle v) {
         currentVehicle = v;
     }
@@ -117,14 +122,61 @@ class Property1 extends VanetProperty {
     // Toujours un leader dans le peloton
 
     public double match(Road sut) throws PropertyFailedException {
-        for (Vehicle v : sut.allVehicles) {
-            if (v.myPlatoon != null) {
-                if (v.myPlatoon.leader == null) {
-                    throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " does not have a leader.");
-                }
+    	
+    	double scoreV, ret = -1;
+        for (Vehicle v : sut) {
+            if (!forEachVehicleProp.keySet().contains(v)) {
+            	Triple t = new Triple(0, "init",sut.stepNb);
+            	ArrayList<Triple> alp = new ArrayList<Triple>();
+            	alp.add(t);
+                forEachVehicleProp.put(v, alp);
             }
+            ArrayList<Triple> alpTmp =forEachVehicleProp.get(v);
+            switch ((Integer)(alpTmp.get(alpTmp.size()-1).state)) {
+                case 0:
+                    if (v.myPlatoon != null) {
+                    	Triple t = new Triple(1, "joinPl", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                        transitionsMade[0][0]=true;
+                    }
+                    else {
+                     	transitionsMade[0][1]=true; // not 0->2 but 0->0 : ysed to take less space
+                	}
+                    break;
+                case 2://not in platoon or just created
+                    if (v.myPlatoon != null) {
+                    	Triple t = new Triple(1, "joinPl", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                        transitionsMade[2][0]=true;
+                    }
+                    else {
+                    	transitionsMade[2][1]=true;
+                    }
+                    break;
+                case 1: //in platoon
+                    if (v.myPlatoon == null) {
+                    	Triple t = new Triple(2, "quitPl", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                        transitionsMade[1][0]=true;
+                        // vehicle out of the platoon
+                    }
+                    else if (v.myPlatoon !=null) {
+                    	transitionsMade[1][1]=true;
+                    }
+                    else  if (v.myPlatoon.leader == null) {
+                        throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " does not have a leader.");
+                    }
+                    break;
+            }
+            alpTmp =forEachVehicleProp.get(v);
+            scoreV = 2 - (Integer)(alpTmp.get(alpTmp.size()-1).state);
+            // returns the minimal value of all
+            ret = (ret == -1 || scoreV < ret) ? scoreV : ret;
         }
-        return 0;
+        return ret;
     }
     @Override 
     public String toString() {
@@ -138,14 +190,60 @@ class Property2 extends VanetProperty {
 
     // Au moins 2 VL dans le peloton
     public double match(Road sut) throws PropertyFailedException {
-        for (Vehicle v : sut.allVehicles) {
-            if (v.myPlatoon != null) {
-                if (v.myPlatoon.vehiclesList.size() < 2) {
-                    throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " has less than 2 vehicles.");
-                }
-            }
-        }
-        return 0;
+    	 double scoreV, ret = -1;
+         for (Vehicle v : sut) {
+             if (!forEachVehicleProp.keySet().contains(v)) {
+             	Triple t = new Triple(0, "init",sut.stepNb);
+             	ArrayList<Triple> alp = new ArrayList<Triple>();
+             	alp.add(t);
+                 forEachVehicleProp.put(v, alp);
+             }
+             ArrayList<Triple> alpTmp =forEachVehicleProp.get(v);
+             switch ((Integer)(alpTmp.get(alpTmp.size()-1).state)) {
+                 case 0:
+                     if (v.myPlatoon != null) {
+                      	Triple t = new Triple(1, "joinPl", sut.stepNb);
+                      	alpTmp.add(t);
+                          forEachVehicleProp.put(v, alpTmp);
+                          transitionsMade[0][0]=true;
+                      }
+                     else {
+                      	transitionsMade[0][1]=true; // not 0->2 but 0->0 : ysed to take less space
+                 	 }
+                      break;
+                 case 2://not in platoon or just created
+                     if (v.myPlatoon != null) {
+                     	Triple t = new Triple(1, "joinPl", sut.stepNb);
+                     	alpTmp.add(t);
+                         forEachVehicleProp.put(v, alpTmp);
+                         transitionsMade[2][0]=true;
+                     }
+                     else {
+                    	 transitionsMade[2][1]=true;
+                     }
+                     break;
+                 case 1: //in platoon
+                     if (v.myPlatoon == null) {
+                     	Triple t = new Triple(2, "quitPl", sut.stepNb);
+                     	alpTmp.add(t);
+                         forEachVehicleProp.put(v, alpTmp);
+                         transitionsMade[1][1]=true;
+                         // vehicle out of the platoon
+                     }
+                     else if(v.myPlatoon !=null){
+                    	 transitionsMade[1][0]=true;
+                     }
+                     else if (v.myPlatoon.vehiclesList.size() < 2) {
+                         throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " has less than 2 vehicles.");
+                     }
+                     break;
+             }
+             alpTmp =forEachVehicleProp.get(v);
+             scoreV = 2 - (Integer)(alpTmp.get(alpTmp.size()-1).state);
+             // returns the minimal value of all
+             ret = (ret == -1 || scoreV < ret) ? scoreV : ret;
+         }
+         return ret;
     }
     @Override 
     public String toString() {
@@ -162,28 +260,47 @@ class Property3 extends VanetProperty {
     public double match(Road sut) throws PropertyFailedException {
         double ret = -1;
         for (Vehicle v : sut) {
-            if (!forEachVehicle.keySet().contains(v)) {
+            if (!forEachVehicleProp.keySet().contains(v)) {
             	Triple t = new Triple(0, "init",sut.stepNb);
             	ArrayList<Triple> alp = new ArrayList<Triple>();
             	alp.add(t);
-                forEachVehicle.put(v, alp);
+                forEachVehicleProp.put(v, alp);
             }
-        	ArrayList<Triple> alpTmp =forEachVehicle.get(v);
+        	ArrayList<Triple> alpTmp =forEachVehicleProp.get(v);
             switch ((Integer)(alpTmp.get(alpTmp.size()-1).state)) {
                 case 0:
+                    if (v.myPlatoon != null) {
+                    	Triple t = new Triple(1, "JoinPl", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                        transitionsMade[0][0]=true;
+                    }
+                    else {
+                     	transitionsMade[0][1]=true; // not 0->2 but 0->0 : ysed to take less space
+                	 }
+                    break;
                 case 2:
                     if (v.myPlatoon != null) {
                     	Triple t = new Triple(1, "JoinPl", sut.stepNb);
                     	alpTmp.add(t);
-                        forEachVehicle.put(v, alpTmp);
-                    } else break;
+                        forEachVehicleProp.put(v, alpTmp);
+                        transitionsMade[2][0]=true;
+
+                    } else {
+                    	transitionsMade[2][1]=true;
+                    }break;
                 case 1:
                     if (v.myPlatoon == null) { 
                         // vehicle out of the platoon
                     	Triple t = new Triple(2, "QuitPl", sut.stepNb);
                     	alpTmp.add(t);
-                        forEachVehicle.put(v, alpTmp);
-                    } else if (v.autonomie < 10 || v.distance == 0) {
+                        forEachVehicleProp.put(v, alpTmp);
+                        transitionsMade[1][1]=true;
+                    }
+                    else if(v.myPlatoon!=null) {
+                    	transitionsMade[1][0]=true;
+                    }
+                    else if (v.autonomie < 0 || v.distance == 0) {
                         throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination.");
                     }
                     break;
@@ -211,30 +328,59 @@ class Property3 extends VanetProperty {
 class Property4 extends VanetProperty {
 
     // For each vehicle: After relay(v) always battery > 33 until vehicle downgraded
-    HashMap<Vehicle, Integer> forEachVehicle = new HashMap<Vehicle, Integer>();
 
     public double match(Road sut) throws PropertyFailedException {
         double scoreV, ret = -1;
         for (Vehicle v : sut) {
-            if (!forEachVehicle.keySet().contains(v)) {
-                forEachVehicle.put(v, 0);
+            if (!forEachVehicleProp.keySet().contains(v)) {
+            	Triple t = new Triple(0, "init",sut.stepNb);
+            	ArrayList<Triple> alp = new ArrayList<Triple>();
+            	alp.add(t);
+                forEachVehicleProp.put(v, alp);
             }
-            switch (forEachVehicle.get(v)) {
-                case 0: //how it initiates ? same behavior as case 2 ?
+            ArrayList<Triple> alpTmp =forEachVehicleProp.get(v);
+            switch ((Integer)(alpTmp.get(alpTmp.size()-1).state)) {
+                case 0: 
+                	if (v.myPlatoon != null && v.myPlatoon.leader == v) {
+                    	Triple t = new Triple(1, "Elected", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                    	transitionsMade[0][0]=true;
+                    }
+                	else {
+                     	transitionsMade[0][1]=true; // not 0->2 but 0->0 : ysed to take less space
+                	}
+                    break;
                 case 2:
                     if (v.myPlatoon != null && v.myPlatoon.leader == v) {
-                        forEachVehicle.put(v, 1);
-                    } else break;
+                    	Triple t = new Triple(1, "Elected", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                    	transitionsMade[2][0]=true;
+
+                    } else {
+                    	transitionsMade[2][1]=true;
+                    }
+                    break;
                 case 1:
                     if (v.myPlatoon == null || v.myPlatoon.leader != v) {
+                    	Triple t = new Triple(2, "Downgraded", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                    	transitionsMade[1][1]=true;
                         // vehicle out of the platoon
-                        forEachVehicle.put(v, 2);
-                    } else if (v.autonomie < 33) {
+                    }
+                    else if(v.myPlatoon!=null && v.myPlatoon.leader==v) {
+                    	transitionsMade[1][0]=true;
+
+                    }
+                    else if (v.autonomie < v.LOW_LEADER_BATTERY-3.0) {
                         throw new PropertyFailedException(this, "Vehicle " + v.id + " has a too low autonomy for being leader.");
                     }
                     break;
             }
-            scoreV = 2 - forEachVehicle.get(v);
+            alpTmp =forEachVehicleProp.get(v);
+            scoreV = 2 - (Integer)(alpTmp.get(alpTmp.size()-1).state);
             // returns the minimal value of all
             ret = (ret == -1 || scoreV < ret) ? scoreV : ret;
 
@@ -252,31 +398,60 @@ class Property4 extends VanetProperty {
 class Property5 extends VanetProperty {
 
     // For each vehicle: Never refill when inPlatoon
-    HashMap<Vehicle, Integer> forEachVehicle = new HashMap<Vehicle, Integer>();
 
     public double match(Road sut) throws PropertyFailedException {
         double scoreV, ret = -1;
         for (Vehicle v : sut) {
-            if (!forEachVehicle.keySet().contains(v)) {
-                forEachVehicle.put(v, 0);
+            if (!forEachVehicleProp.keySet().contains(v)) {
+            	Triple t = new Triple(0, "init",sut.stepNb);
+            	ArrayList<Triple> alp = new ArrayList<Triple>();
+            	alp.add(t);
+                forEachVehicleProp.put(v, alp);
             }
-            switch (forEachVehicle.get(v)) {
-                case 0: //not in platoon or just created
+            ArrayList<Triple> alpTmp =forEachVehicleProp.get(v);
+            switch ((Integer)(alpTmp.get(alpTmp.size()-1).state)) {
+                case 0:
+                	 if (v.myPlatoon != null) {
+                     	Triple t = new Triple(2, "joinPl", sut.stepNb);
+                     	alpTmp.add(t);
+                         forEachVehicleProp.put(v, alpTmp);
+                       	transitionsMade[0][0]=true;
+
+                     }
+                	 else {
+                     	transitionsMade[0][1]=true; // not 0->2 but 0->0 : ysed to take less space
+                	 }
+                     break;
+                case 2://not in platoon
                     if (v.myPlatoon != null) {
-                        forEachVehicle.put(v, 1);
+                    	Triple t = new Triple(1, "joinPl", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                    	transitionsMade[2][0]=true;
+                    }
+                    else {
+                    	transitionsMade[2][1]=true;
                     }
                     break;
                 case 1: //in platoon
                     if (v.myPlatoon == null) {
+                    	Triple t = new Triple(1, "quitPl", sut.stepNb);
+                    	alpTmp.add(t);
+                        forEachVehicleProp.put(v, alpTmp);
+                    	transitionsMade[1][1]=true;
                         // vehicle out of the platoon
-                        forEachVehicle.put(v, 2); //2 and not 0 because of the score ?
-                    } else if (v.autonomie == 100) {
+                    }
+                    else if(v.myPlatoon!=null) {
+                    	transitionsMade[1][0]=true;
+                    }
+                    else if (v.autonomie == 100) {
                         throw new PropertyFailedException(this, "Vehicle " + v.id + " should not refill while in platoon.");
                         // verify this property
                     }
                     break;
             }
-            scoreV = 2 - forEachVehicle.get(v);
+            alpTmp =forEachVehicleProp.get(v);
+            scoreV = 2 - (Integer)(alpTmp.get(alpTmp.size()-1).state);
             // returns the minimal value of all
             ret = (ret == -1 || scoreV < ret) ? scoreV : ret;
         }

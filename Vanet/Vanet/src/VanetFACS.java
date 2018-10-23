@@ -54,8 +54,8 @@ public class VanetFACS implements Serializable{
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
-        //generatetest(fsm, writer, vcm, writerErr);
+        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
+        generatetest(fsm, writer, vcm, writerErr);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
@@ -182,10 +182,13 @@ public class VanetFACS implements Serializable{
 			FileOutputStream outser = new FileOutputStream("output.ser");
 			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
-			st.setMonitor(vcm); 
-			System.out.println("DOOONE");
-			ArrayList<MyTest> initial = st.generate(1, 400,propertiesWriter);
-			System.out.println("DONE");
+			st.setMonitor(vcm);
+			ArrayList<MyTest> initial=null;
+			//for(int i= 10; i < 10000; i*=10) {
+				//for(int j= 1; j < 1000; j*=10) {
+					initial = st.generate(1,5000,propertiesWriter);
+			//	}
+			//}
 			st.deinit(propertiesWriter);
 			vcm.printReport();
 	        

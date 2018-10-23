@@ -9,7 +9,7 @@ import java.util.UUID;
 public class Platoon extends Entity implements Serializable{ //implements Runnable {
 	int consommationLeader = 2;
 	final static int NUMBER_VEHICLE_MAX = 5; //unused
-	final static double MINLEADERVALUE = 30;
+	final static double MINLEADERVALUE = 33;
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     ArrayList<Vehicle> nextLeaderList = new ArrayList<Vehicle>();
     UUID id;
@@ -454,18 +454,22 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	}
 	
 	public void relay() {
-		if(!nextLeaderList.isEmpty()){
-			road.addStringWriter("actual leader id " +leader.getId() + "next leader " + nextLeaderList.get(0).getId());
-			if(leader.getId()==nextLeaderList.get(0).getId()) {
-				nextLeaderList.remove(0);
-			}
-		}
+//		if(!nextLeaderList.isEmpty()){
+//			if(leader.getId()==nextLeaderList.get(0).getId()) {
+//				nextLeaderList.remove(0);
+//			}
+//		}
 		if(!nextLeaderList.isEmpty()) {
 			//System.out.print("Leader vehicle "+ leader.getId());
-			this.leader = nextLeaderList.remove(0);
-			//System.out.println(" replaced by elected " + leader.getId());
-			//writer.print("Leader vehicle "+ leader.getId());
-			road.addStringWriter("replaced by elected " + this.leader.getId());
+			if(nextLeaderList.get(0).autonomie >= leader.LOW_LEADER_BATTERY) {
+				road.addStringWriter("actual leader id " +leader.getId() + "next leader " + nextLeaderList.get(0).getId());
+				this.leader = nextLeaderList.remove(0);
+			}
+			else {
+				System.out.println("No better vehicle available, Platoon deleted");
+				road.addStringWriter("No better vehicle available, Platoon deleted");
+				deletePlatoon();
+			}
 		}
 		
 		else { // remove platoon

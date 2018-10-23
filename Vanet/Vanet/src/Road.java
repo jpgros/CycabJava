@@ -79,8 +79,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
 
     public boolean join(int i, int j) {
         if (i != j && allVehicles.get(i).getPlatoon() == null) {
-            allVehicles.get(i).join(allVehicles.get(j));
-            return allVehicles.get(i).getPlatoon() != null;
+            return allVehicles.get(i).join(allVehicles.get(j))&& allVehicles.get(i).getPlatoon() != null;
         }
         return false;
     }

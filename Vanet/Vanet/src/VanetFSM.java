@@ -166,11 +166,11 @@ public class VanetFSM implements FsmModel {
           //  int j = (i + start) % sut.nbVehiclesOnRoad();
         int j = sut.getHighestVehicleBattery();
         int k=sut.allVehicles.size()-1;
-        while(( !(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)) || k==j) &&k >=0) {
+        while(( !(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)) || k==j) &&k >0) {
         	k--;
         }
         if(k>=0 ){
-        	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
+        	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k)+ " vehicle one auto"+ sut.allVehicles.get(j).autonomie);
         	//indexjoined.add(k);
         	return new Object[]{ sut, j, k };
         }
