@@ -54,8 +54,8 @@ public class VanetFACS implements Serializable{
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog);
-        generatetest(fsm, writer, vcm, writerErr);
+        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog,apm);
+        generatetest(fsm, writer, vcm, writerErr, writerLog,apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
@@ -64,6 +64,7 @@ public class VanetFACS implements Serializable{
         vehicleReader.close();
         platoonReader.close();
         roadReader.close();
+        writerLog.close();
         //objectInputStream.close();
         //writerLog.close();
     }
@@ -136,7 +137,7 @@ public class VanetFACS implements Serializable{
 
     }
     
-    public static ArrayList<MyTest> retrieveTest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm, PrintWriter writerLog){
+    public static ArrayList<MyTest> retrieveTest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm, PrintWriter writerLog,AdaptationPolicyModel apm){
     	ArrayList<MyTest> initial=null;
     	FileInputStream inser;
 		try {
@@ -170,7 +171,7 @@ public class VanetFACS implements Serializable{
 		return initial;
     }
     
-    public static void generatetest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm,PrintWriter writerErr) {
+    public static void generatetest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm,PrintWriter writerErr, PrintWriter writerLog,AdaptationPolicyModel apm) {
     	//attention risque d incomptatibilite nbstep 
         ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
         ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();
@@ -183,13 +184,32 @@ public class VanetFACS implements Serializable{
 			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			st.setMonitor(vcm);
-			ArrayList<MyTest> initial=null;
-			//for(int i= 10; i < 10000; i*=10) {
-				//for(int j= 1; j < 1000; j*=10) {
-					initial = st.generate(1,5000,propertiesWriter);
-			//	}
+			ArrayList<MyTest> initial=new ArrayList<MyTest>();
+			ArrayList<MyTest> testsLoop=null;
+			String strLog="";
+			//for(int i= 50; i < 501; i*=10) {
+				for(int j= 0; j < 2; j++) {
+					testsLoop=st.generate(1,2500,propertiesWriter,strLog);
+					writerLog.print(strLog);
+					initial.addAll(testsLoop);
+					strLog=((VanetFSM) fsm).getSUT().writerLog;
+			        writerLog.print(strLog); 
+			        strLog="";
+					st.deinit(propertiesWriter);
+					System.out.println("testsloop" + testsLoop.get(0).size() +" initial " + initial.get(j).size());
+					double cpt=0;;
+					for(Rule r : apm.rules) {
+						cpt+=r.coverage;
+						System.out.println("rule "+ r.reconf + " " + r.coverage + " " + r.prio);
+						r.coverage=0.0;
+					}
+					cpt = (cpt/apm.rules.size())*100.0;
+					propertiesWriter.print("rules " + cpt);
+					cpt = 0;
+					//writerLog.print("coverage done " + j);
+				}
 			//}
-			st.deinit(propertiesWriter);
+			propertiesWriter.close();
 			vcm.printReport();
 	        
 //	        VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
@@ -258,14 +278,16 @@ class r1p1 extends VanetProperty {
             throw new PropertyFailedException(this, "Vehicle not in platoon");
         }
         else if (currentVehicle.myPlatoon.leader == currentVehicle) {
-            throw new PropertyFailedException(this, "Vehicle alredy leader");
+            throw new PropertyFailedException(this, "Vehicle already leader");
         }
         else if(currentVehicle.myPlatoon.created) {
             throw new PropertyFailedException(this, "Cannot upgrade a vehicle just after a platoon creation");
 
         }
         else {
-        	writer.println("Config upgraderelay OK for vehicle "+ currentVehicle.getId());
+        	String x ="Config upgraderelay OK for vehicle "+ currentVehicle.getId();
+        	System.out.println(x);
+        	writer.println(x);
         }
         return 0;
     }
@@ -289,7 +311,9 @@ class r1p2 extends VanetProperty {
 
     
     else {
-    	writer.println("TP upgraderelay OK for vehicle min value "+ currentVehicle.getMinValue()/currentVehicle.DEC_LEADER + "leader minvalue "+ currentVehicle.myPlatoon.leader.getMinValue());
+    	String x="TP upgraderelay OK for vehicle min value "+ currentVehicle.getMinValue()/currentVehicle.DEC_LEADER + "leader minvalue "+ currentVehicle.myPlatoon.leader.getMinValue();
+    	System.out.println(x);
+    	writer.println(x);
 
     }
     return 0;
@@ -324,7 +348,9 @@ class r2p1 extends VanetProperty {
 //        	throw new PropertyFailedException(this, "Vehicle not leader");
 //        }
         else {
-        	writer.println("Config relay OK for vehicle "+ currentVehicle.id);
+        	String x ="Config relay OK for vehicle "+ currentVehicle.id;
+        	System.out.println(x);
+        	writer.println(x);
         }
         return 0;
     }
@@ -348,7 +374,9 @@ class r2p2 extends VanetProperty {
         
     
 	   else {
-	    	writer.println("TP relay OK for vehicle "+ currentVehicle.id + "minval " + currentVehicle.getMinValueLeader());
+		   String x="TP relay OK for vehicle "+ currentVehicle.id + "minval " + currentVehicle.getMinValueLeader();
+		   System.out.println(x);
+		   writer.println(x);
 	    }
         return 0;
     }

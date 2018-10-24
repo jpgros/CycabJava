@@ -35,6 +35,7 @@ public class AdaptationPolicyModel {
     	   for (Rule r : rules) {
                for (Vehicle v : sut.allVehicles) {
                    if (r.matches(sut, v, er)) {
+                	   r.coverage = r.coverage>0.5 ? r.coverage : 0.5;
                        er.notifyStepBefore(compteur, r, v);
                    }
                }
@@ -43,6 +44,9 @@ public class AdaptationPolicyModel {
         if (compteur > 0) {
             for (Vehicle v : sut.allVehicles) {
                 if (v.myPlatoon != null && v.myPlatoon.leader == v && v.myPlatoon.lastReconf != null) {
+                	for(Rule r : rules) {
+                		if(v.myPlatoon.lastReconf.name == r.reconf) r.coverage=1.0;
+                	}
                     er.notifyStepAfter(compteur, v.myPlatoon.lastReconf,lastTriggeredReconf);
                 }
             }
@@ -58,6 +62,18 @@ public class AdaptationPolicyModel {
 class Rule {
 
     VanetProperty TP;
+    int state=0;
+    double coverage=0.0;
+//    public boolean [][] transitionsConfig = new boolean[][]{
+//  	  { false,false,false,false},
+//  	  { false,false,false,false},
+//  	  { false,false,false,false},
+//	  { false,false,false,false},
+//      };    
+//	  public boolean [][] transitionsTP = new boolean[][]{
+//		  { false, false},
+//		  { false,false},
+//		  };
     VanetProperty config;
     PolicyName reconf;
     Priority prio;
@@ -223,7 +239,7 @@ class ExecutionReport {
     			lastStep++;
     		}
     		x = "*** Step " + step;
-            System.out.println(x);
+            //System.out.println(x);
             //writerErr.println(x);
             ArrayList<Element> elt = steps.get(step).getFirst();
 

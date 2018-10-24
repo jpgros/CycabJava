@@ -50,7 +50,9 @@ public class Vehicle extends Entity implements Serializable {
 
 	public void refill() {
 		if(this.myPlatoon==null) {
-			System.out.println("Refill vehicle " + id);
+			String x="Refill vehicle " + id;
+			//System.out.println();
+			road.addStringWriter(x);
 			this.autonomie =100;
 		}
 		else {
@@ -166,7 +168,8 @@ public class Vehicle extends Entity implements Serializable {
 	
 	public void quitPlatoon(/*UUID idPlatoon*/) {
 		if (myPlatoon != null) {
-			System.out.println("vehicle " + this.getId() + " force-quitted platoon "+ this.getPlatoon().id  );
+			//System.out.println
+			road.addStringWriter("vehicle " + this.getId() + " force-quitted platoon "+ this.getPlatoon().id  );
 			myPlatoon.deleteVehicle(this);
 		}
 	}
@@ -232,7 +235,7 @@ public class Vehicle extends Entity implements Serializable {
 			if(distance < VLOW_DIST) {
 				Element elt = new Element(PolicyName.QUITFAILURE, Priority.HIGH, this);
 				x = "Event : vehicle " + this.getId() + " is very close from destination [VLOW_DIST]"+"\n";
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt);
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
@@ -240,7 +243,7 @@ public class Vehicle extends Entity implements Serializable {
 			else if(distance < LOW_DIST) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.LOW, this);
 				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]"+"\n";
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt);
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
@@ -248,30 +251,29 @@ public class Vehicle extends Entity implements Serializable {
 			if(autonomie< LOW_BATTERY) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.HIGH, this);
 				x = "Event : vehicle " + this.getId() + " is low on energy [LOW]"+"\n";
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt);
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 
 			}
-			if (this == myPlatoon.leader && (this.getMinValue() < LOW_LEADER_DIST || this.getAutonomie() < LOW_LEADER_BATTERY)) { // (autonomie < LOW_LEADER_BATTERY || distance < LOW_LEADER_DIST )) {
+			if (this == myPlatoon.leader && (this.getMinValueLeader() <= LOW_LEADER_DIST)){ 
+				//this.getMinValue() <= LOW_LEADER_DIST || this.getAutonomie() < LOW_LEADER_BATTERY)) {
 				x = "Event : vehicle " + this.getId() + " should relay soon [HIGH]"+"\n";
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				Element elt = new Element(PolicyName.RELAY, Priority.HIGH, this);
 				myPlatoon.policies.addElement(elt);
 				road.addStringWriter(" minvalue :" + this.getMinValue()+"\n");
-
 			}
 			if(isTakingNextStation()){ //keep a margin of 10 
 				//if(this.getAutonomieTick()-1.0 < this.getTwoNextStationsTicks()) { equivalent condition
-				System.out.println("test condition");
 				x = "Event : vehicle " + this.getId() + " is taking next station stop [NEXT_STATION]"+"\n";
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				if(road.distanceStation[0] < 50) { //verifying adding priority does nto causes bugs
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [HIGH]";
-					System.out.println(x);
+					//System.out.println(x);
 					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.HIGH, this);
 					myPlatoon.policies.addElement(elt);
@@ -280,7 +282,7 @@ public class Vehicle extends Entity implements Serializable {
 				}
 				else if(road.distanceStation[0] < 70) { //road.distanceStation[0] >= 8 && 
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]"+"\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.MEDIUM, this);
 					myPlatoon.policies.addElement(elt);
@@ -289,7 +291,7 @@ public class Vehicle extends Entity implements Serializable {
 				}
 				else if(road.distanceStation[0] <= 100) {
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [LOW]"+"\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, Priority.LOW, this);
 					myPlatoon.policies.addElement(elt);
@@ -298,10 +300,10 @@ public class Vehicle extends Entity implements Serializable {
 				}
 				else {
 					x = "Error : Should not happen QuitToStation policy problem " + road.distanceStation[0]+"\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 				}
-			}
+			}									
 			road.addStringWriter("nb vehicles"+ myPlatoon.vehiclesList.size() + "minval " + this.getMinValue()/DEC_LEADER+ "leader min val " +myPlatoon.leader.getMinValue()+"\n");
 			if(!this.isLeader() && myPlatoon.vehiclesList.size()>=3 && ((this.getMinValue()/DEC_LEADER)> myPlatoon.leader.getMinValue())) {
 				Element elt = new Element(PolicyName.UPGRADERELAY, Priority.MEDIUM, this);

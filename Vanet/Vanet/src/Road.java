@@ -72,7 +72,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
 
     public int addVehicle(double _auto, double _distance) {
     	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null,this));
-    	System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
+    	//System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
 		writer+="Vehicle created at index " + (allVehicles.size() - 1);
         return allVehicles.size() - 1;
     }
@@ -113,7 +113,6 @@ public class Road implements Serializable, Iterable<Vehicle> {
                 }
                 else {
                 	vehicleLog += ";quitRoad";
-                	System.out.println("totototo"+ vehicleLog);
                     removeVehicle(v, "Event : vehicle: "+ v.id+ " reached distance and quitting successfully the road ");
                 }
                 i--;
@@ -155,17 +154,17 @@ public class Road implements Serializable, Iterable<Vehicle> {
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() == null) {
             	x=v.getDisplayString() + " | ";
-                System.out.print(x);
+                //System.out.print(x);
         		writer+=x;
             }
         }
-        System.out.println();
+        //System.out.println();
 		writer+="\n \n";
     }
 
     public int removeVehicle(Vehicle v, String x) {
         allVehicles.remove(allVehicles.indexOf(v));
-        System.out.println(x);
+        //System.out.println(x);
 		writer+=x;
         return allVehicles.size() -1;
     }
@@ -187,7 +186,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	int index=0;
     	int i=0;
     	for(Vehicle v : allVehicles) {
-    		if(v.autonomie<max) {
+    		if(v.autonomie>max) {
     			max =v.autonomie;
     			index=i;
     		}

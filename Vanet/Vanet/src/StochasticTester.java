@@ -153,14 +153,19 @@ public class StochasticTester implements Serializable{
         	{
         	    for(int j = 0; j<2; j++)
         	    {
+        	    	System.out.print(vProp.transitionsMade[i][j]);
         	     if(vProp.transitionsMade[i][j]) 	 coverage += 1.0;
-        	    }
+        	    }System.out.println("");
         	}
+	    System.out.println("");
+
+    System.out.println("");
+
         	//propertiesWriter.println(Arrays.stream(vProp.transitionsMade).allMatch(s -> s.equals(vProp.transitionsMade[0])));
         }
         coverage = (coverage/(30))*100;
         propertiesWriter.println("coverage props :" + coverage + "%");
-        propertiesWriter.close();
+        //propertiesWriter.close();
     }
     /**
      * Generates a set of test cases (object MyTest).
@@ -170,14 +175,14 @@ public class StochasticTester implements Serializable{
      * @throws UnsupportedEncodingException 
      * @throws FileNotFoundException 
      */
-    public ArrayList<MyTest> generate(int nb, int length,PrintWriter propertiesWriter) throws FileNotFoundException, UnsupportedEncodingException {
+    public ArrayList<MyTest> generate(int nb, int length,PrintWriter propertiesWriter, String log) throws FileNotFoundException, UnsupportedEncodingException {
     	//BufferedReader inStream = new BufferedReader(readerStep);
         String inString;
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         // for each of the resulting test cases
         for (int i=0; i < nb; i++) {
             System.out.println("== Generating test #" + i + " ==");
-
+            log+= "== Generating test #" + i + " ==";
             // initialize step counter
             int j=0;
             // reset FSM exploration
@@ -189,8 +194,8 @@ public class StochasticTester implements Serializable{
             MyStep newStep;
 
         	do {
-            	System.out.println("step "+ j);
-
+            	//System.out.println("step "+ j);
+            	log += "step " +j; 
             	//System.out.println("Step : " +j);
             	//writer.println("Step : "+j);
 	            newStep = computeNextStep();

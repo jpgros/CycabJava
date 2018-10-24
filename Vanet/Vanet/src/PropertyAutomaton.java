@@ -254,7 +254,7 @@ class Property2 extends VanetProperty {
 
 class Property3 extends VanetProperty {
 
-    // For each vehicle:  After joinPlatoon Always v.battery > 10 && v.distance > 0 until quitting platoon
+    // For each vehicle:  After joinPlatoon Always v.battery > 0 && v.distance > 0 until quitting platoon
 
 
     public double match(Road sut) throws PropertyFailedException {

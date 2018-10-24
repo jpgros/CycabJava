@@ -69,27 +69,27 @@ public class VanetFSM implements FsmModel {
     		battery.add(Double.parseDouble(sCurrentLine));
     		sCurrentLine = br.readLine();
     	}
-        sCurrentLine = br.readLine();
-        while(!sCurrentLine.contains("indexJoined")) {
-        	System.out.println(sCurrentLine);
+        while ((sCurrentLine = br.readLine()) != null){
         	distance.add(Double.parseDouble(sCurrentLine));
-        	sCurrentLine = br.readLine();
-    	}
-        sCurrentLine = br.readLine();
-        while(!sCurrentLine.contains("indexKicked")){
-        	indexjoined.add((int)(Double.parseDouble(sCurrentLine)));
-        	sCurrentLine = br.readLine();
         }
-    	while ((sCurrentLine = br.readLine()) != null){
-    		indexKicked.add((int)(Double.parseDouble(sCurrentLine)));
-    	}       
+        
+//        sCurrentLine = br.readLine();
+//        while(!sCurrentLine.contains("indexJoined")) {
+//        	distance.add(Double.parseDouble(sCurrentLine));
+//        	sCurrentLine = br.readLine();
+//    	}
+//        sCurrentLine = br.readLine();
+//        while(!sCurrentLine.contains("indexKicked")){
+//        	indexjoined.add((int)(Double.parseDouble(sCurrentLine)));
+//        	sCurrentLine = br.readLine();
+//        }
+//    	while ((sCurrentLine = br.readLine()) != null){
+//    		indexKicked.add((int)(Double.parseDouble(sCurrentLine)));
+//    	}       
     	vehicleReader.close();
 //    	for(Double elt: distance) {
 //    		System.out.println("dist : " +elt);
 //    	}
-    	for(Double elt: battery) {
-    		System.out.println("bat : " +elt);
-    	}
 //    	for(Integer elt: indexjoined) {
 //    		System.out.println("indexjoin : " +elt);
 //    	}

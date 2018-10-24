@@ -44,7 +44,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			eligibleLeader(v);
 			v.setPlatoon(this);
 		}
-		System.out.println("Platoon created " + id);
+		//System.out.println("Platoon created " + id);
 		road.addStringWriter("Platoon created " + id);
 	}
 
@@ -67,7 +67,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			if(minValue>= nextLeaderList.get(i).getMinValue()) {
 				nextLeaderList.add(i, v);
 				x = "vehicle " + v.id+ " added to leader list";
-				System.out.println(x);
+				//System.out.println(x);
 				road.addStringWriter(x);
 				break;
 			}
@@ -75,7 +75,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		if (minValue > MINLEADERVALUE){
 			nextLeaderList.add(nextLeaderList.size(),v);
 			x = "vehicle " + v.id+ " added at the end of leader list \n";
-			System.out.println(x);
+			//System.out.println(x);
 			road.addStringWriter(x);
 		}
 	}
@@ -148,7 +148,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			if(lastReconf.name == PolicyName.RELAY) {
 				this.relay();
 				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 //				x = "Replaced by " + this.leader.getId();
 //
@@ -159,7 +159,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
 				this.upgradeRelay(lastReconf.vehicle);
 				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
@@ -167,7 +167,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				if(lastReconf.vehicle == leader) {
 					relay();
 					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter=6;
 				}
@@ -175,25 +175,25 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				switch (lastReconf.name) {
 				case QUITFAILURE:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=3;
 					break;
 				case QUITFORSTATION:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=5;
 					break;
 				case QUITPLATOON:
 					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x); // or distance reached
+					//System.out.print(x); // or distance reached
 					road.addStringWriter(x);
 					//tickCounter+=4;
 					break;
 				default:
 					x= "Error, policy name not verified properly"+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					break;
 				}
@@ -220,14 +220,14 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			if(lastReconf.name == PolicyName.RELAY) {
 				this.relay();
 				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
 			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
 				this.upgradeRelay(lastReconf.vehicle);
 				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
@@ -235,7 +235,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				if(lastReconf.vehicle == leader) {
 					relay();
 					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter=6;
 				}
@@ -243,25 +243,25 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				switch (lastReconf.name) {
 				case QUITFAILURE:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=3;
 					break;
 				case QUITFORSTATION:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=5;
 					break;
 				case QUITPLATOON:
 					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x); // or distance reached
+					//System.out.print(x); // or distance reached
 					road.addStringWriter(x);
 					//tickCounter+=4;
 					break;
 				default:
 					x= "Error, policy name not verified properly"+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					break;
 				}
@@ -280,14 +280,14 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			if(lastReconf.name == PolicyName.RELAY) {
 				this.relay();
 				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
 			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
 				this.upgradeRelay(lastReconf.vehicle);
 				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
@@ -295,7 +295,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				if(lastReconf.vehicle == leader) {
 					relay();
 					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter=6;
 				}
@@ -303,25 +303,25 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				switch (lastReconf.name) {
 				case QUITFAILURE:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=3;
 					break;
 				case QUITFORSTATION:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=5;
 					break;
 				case QUITPLATOON:
 					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x); // or distance reached
+					//System.out.print(x); // or distance reached
 					road.addStringWriter(x);
 					//tickCounter+=4;
 					break;
 				default:
 					x= "Error, policy name not verified properly"+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					break;
 				}
@@ -340,14 +340,14 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			if(lastReconf.name == PolicyName.RELAY) {
 				this.relay();
 				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
 			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
 				this.upgradeRelay(lastReconf.vehicle);
 				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
@@ -355,7 +355,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				if(lastReconf.vehicle == leader) {
 					relay();
 					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter=6;
 				}
@@ -363,25 +363,25 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				switch (lastReconf.name) {
 				case QUITFAILURE:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=3;
 					break;
 				case QUITFORSTATION:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=5;
 					break;
 				case QUITPLATOON:
 					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x); // or distance reached
+					//System.out.print(x); // or distance reached
 					road.addStringWriter(x);
 					//tickCounter+=4;
 					break;
 				default:
 					x= "Error, policy name not verified properly"+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					break;
 				}
@@ -402,14 +402,14 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			if(lastReconf.name == PolicyName.RELAY) {
 				this.relay();
 				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
 			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
 				this.upgradeRelay(lastReconf.vehicle);
 				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				System.out.print(x);
+				//System.out.print(x);
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
@@ -417,7 +417,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				if(lastReconf.vehicle == leader) {
 					relay();
 					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter=6;
 				}
@@ -425,25 +425,25 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				switch (lastReconf.name) {
 				case QUITFAILURE:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=3;
 					break;
 				case QUITFORSTATION:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					//tickCounter+=5;
 					break;
 				case QUITPLATOON:
 					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					System.out.print(x); // or distance reached
+					//System.out.print(x); // or distance reached
 					road.addStringWriter(x);
 					//tickCounter+=4;
 					break;
 				default:
 					x= "Error, policy name not verified properly"+ "\n";
-					System.out.print(x);
+					//System.out.print(x);
 					road.addStringWriter(x);
 					break;
 				}
@@ -466,14 +466,14 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				this.leader = nextLeaderList.remove(0);
 			}
 			else {
-				System.out.println("No better vehicle available, Platoon deleted");
+				//System.out.println("No better vehicle available, Platoon deleted");
 				road.addStringWriter("No better vehicle available, Platoon deleted");
 				deletePlatoon();
 			}
 		}
 		
 		else { // remove platoon
-			System.out.println("No better vehicle available, Platoon deleted");
+			//System.out.println("No better vehicle available, Platoon deleted");
 			road.addStringWriter("No better vehicle available, Platoon deleted");
 			deletePlatoon();
             /*
@@ -512,7 +512,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	
 	public void deletePlatoon() {
 		if(vehiclesList.size()>=1) {
-			System.out.println("Deleting platoon ");
+			//System.out.println("Deleting platoon ");
 			road.addStringWriter("Deleting platoon" + this.vehiclesList+ "\n");
 			//vehiclesList.get(0).removePlatoonFromList();
 			//road.lastReconfList.add(this.lastReconf);
@@ -574,7 +574,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		if (vehiclesList.size() < NUMBER_VEHICLE_MAX) {
 			vehiclesList.add(v);
 			v.setPlatoon(this);
-			System.out.println("Vehicle " + v + " joined platoon" + this);
+			//System.out.println("Vehicle " + v + " joined platoon" + this);
 			road.addStringWriter("Vehicle " + v + " joined platoon" + this+ "\n");
 		}
 	}
@@ -584,17 +584,18 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	}
 	
 	public void affiche() {
-	    System.out.print("[");
+	    //System.out.print("[");
+	    road.addStringWriter("[");
 	    for (int i=0; i < vehiclesList.size(); i++) {
 	        if (i > 0) {
-	            System.out.print(" | ");
+	            //System.out.print(" | ");
 				road.addStringWriter(" | ");
             }
-	        System.out.print(vehiclesList.get(i).getDisplayString());
+	        //System.out.print(vehiclesList.get(i).getDisplayString());
 			road.addStringWriter(vehiclesList.get(i).getDisplayString());
         }
-        System.out.println("]");
-	    System.out.println("Policy: " + policies);
+        //System.out.println("]");
+	    //System.out.println("Policy: " + policies);
 		road.addStringWriter("]+ \n");
 		road.addStringWriter("Policy: " + policies +" nb "+ policies.listPolicy.size()+ "\n");
     }
