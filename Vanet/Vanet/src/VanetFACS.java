@@ -188,25 +188,20 @@ public class VanetFACS implements Serializable{
 			ArrayList<MyTest> testsLoop=null;
 			String strLog="";
 			//for(int i= 50; i < 501; i*=10) {
-				for(int j= 0; j < 2; j++) {
-					testsLoop=st.generate(1,2500,propertiesWriter,strLog);
+				for(int j= 0; j < 4; j++) {
+					testsLoop=st.generate(1,2500,propertiesWriter,strLog,apm);
+					System.out.println("OKgen");
 					writerLog.print(strLog);
 					initial.addAll(testsLoop);
 					strLog=((VanetFSM) fsm).getSUT().writerLog;
 			        writerLog.print(strLog); 
 			        strLog="";
 					st.deinit(propertiesWriter);
-					System.out.println("testsloop" + testsLoop.get(0).size() +" initial " + initial.get(j).size());
-					double cpt=0;;
-					for(Rule r : apm.rules) {
-						cpt+=r.coverage;
-						System.out.println("rule "+ r.reconf + " " + r.coverage + " " + r.prio);
+					for(Rule r :apm.rules) {
 						r.coverage=0.0;
 					}
-					cpt = (cpt/apm.rules.size())*100.0;
-					propertiesWriter.print("rules " + cpt);
-					cpt = 0;
 					//writerLog.print("coverage done " + j);
+					//propertiesWriter.println("coverage rules :" + "100" + "%" + "at step:" );
 				}
 			//}
 			propertiesWriter.close();

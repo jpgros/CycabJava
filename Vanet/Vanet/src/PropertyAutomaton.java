@@ -104,7 +104,6 @@ class PropertyCoveredException extends Exception {
     public PropertyCoveredException( String msg) {
         super(msg);
     }
-
 }
 
 /**

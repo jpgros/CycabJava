@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Element{
+public class Element implements Serializable {
 	PolicyName name;
 	Priority priority;
 	Vehicle vehicle;

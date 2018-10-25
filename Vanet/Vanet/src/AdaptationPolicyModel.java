@@ -30,8 +30,10 @@ public class AdaptationPolicyModel {
     }
 
     int compteur = 0;
-
-    public void match(Road sut, ExecutionReport er) {
+    public ArrayList<Rule> getRules() {
+    	return rules;
+    }
+    public void match(Road sut, ExecutionReport er) throws RuleCoveredException{
     	   for (Rule r : rules) {
                for (Vehicle v : sut.allVehicles) {
                    if (r.matches(sut, v, er)) {
@@ -51,6 +53,19 @@ public class AdaptationPolicyModel {
                 }
             }
         }
+        
+        double cpt=0;
+		for(Rule r : rules) {
+			cpt+=r.coverage;
+		}
+		cpt = (cpt/rules.size())*100.0;
+		
+		if(cpt == 100.0) {
+			throw new RuleCoveredException("Rules covered, \n");
+    	}
+		
+		cpt = 0;
+		
         compteur++;
     }
 }
@@ -131,8 +146,13 @@ class Rule {
         }
         return false;
     }
-}
 
+}
+class RuleCoveredException extends Exception {
+    public RuleCoveredException(String msg) {
+        super(msg);
+    }
+}
 class ExecutionReport {
 	ArrayList<ArrayList<Element>> eligSorted = new ArrayList<ArrayList<Element>>() ;
 	HashMap<Element,Integer> actualCountedMap = new HashMap<Element,Integer>();
