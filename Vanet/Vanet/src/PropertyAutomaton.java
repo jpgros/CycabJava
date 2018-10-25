@@ -100,6 +100,13 @@ class PropertyFailedException extends Exception {
 
 }
 
+class PropertyCoveredException extends Exception {
+    public PropertyCoveredException( String msg) {
+        super(msg);
+    }
+
+}
+
 /**
  X  Toujours un leader dans le peloton
  X  Au moins 2 VL dans le peloton

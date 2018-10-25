@@ -70,8 +70,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
         allVehicles.clear();
     }
 
-    public int addVehicle(double _auto, double _distance) {
-    	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null,this));
+    public int addVehicle(double _auto, double _distance, double decAuto) {
+    	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null,this, decAuto));
     	//System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
 		writer+="Vehicle created at index " + (allVehicles.size() - 1);
         return allVehicles.size() - 1;

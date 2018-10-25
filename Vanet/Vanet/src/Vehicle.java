@@ -22,8 +22,8 @@ public class Vehicle extends Entity implements Serializable {
 	//String read = null;
 	BufferedReader reader = null;
 	
-	final double DEC_ENERGY = 1 + Math.random() / 5;
-	final double DEC_LEADER = DEC_ENERGY * 1.2;
+	final double DEC_ENERGY; // = 1 + Math.random() / 5;
+	final double DEC_LEADER;// = DEC_ENERGY * 1.2;
 	final double DEC_DISTANCE = 10;
 	final static double LOW_LEADER_DIST = 200;
 	final static double LOW_DIST = 200;
@@ -40,11 +40,13 @@ public class Vehicle extends Entity implements Serializable {
 //	final static double VLOW_BATTERY = 5;
 	
 	
-	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r) {
+	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r, double decAuto) {
 		this.autonomie = autonomie;
 		this.distance = distance;
 		this.id = id;
 		this.road=r;
+		this.DEC_ENERGY=decAuto;
+		DEC_LEADER= DEC_ENERGY * 1.2;
 //		this.reader= new BufferedReader(this.read);
 	}
 

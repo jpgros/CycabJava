@@ -23,10 +23,10 @@ public class VanetMain {
 		Priority p1 = Priority.HIGH;
 		Priority p3 = Priority.HIGH;
 		Priority p2 =Priority.LOW;
-		Vehicle v1 = new Vehicle(50.0, 400.0, randomUUID(), null, null);
-		Vehicle v2 = new Vehicle(50.0, 400.0, randomUUID(), null, null);
-		Vehicle v3 = new Vehicle(50.0, 400.0, randomUUID(), null, null);
-		Vehicle v4 = new Vehicle(50.0, 400.0, randomUUID(), null, null);
+		Vehicle v1 = new Vehicle(50.0, 400.0, randomUUID(), null, null, 1.0);
+		Vehicle v2 = new Vehicle(50.0, 400.0, randomUUID(), null, null, 1.0);
+		Vehicle v3 = new Vehicle(50.0, 400.0, randomUUID(), null, null, 1.0);
+		Vehicle v4 = new Vehicle(50.0, 400.0, randomUUID(), null, null, 1.0);
 		
 		Element e1 = new Element(n1, p1, v1);
 		//Element e2 = new Element(n1, p2, v2);

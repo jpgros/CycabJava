@@ -111,7 +111,72 @@ public class StochasticTester implements Serializable{
         properties.add(new Property4());
         properties.add(new Property5());
     }
-    public void deinit(PrintWriter propertiesWriter) {
+
+    public void checkProperties(PrintWriter propertiesWriter,int nbSteps, int stepNumber)  throws PropertyCoveredException{
+
+        HashMap<Vehicle, ArrayList<Triple>> p1Log =properties.get(0).forEachVehicleProp;
+        HashMap<Vehicle, ArrayList<Triple>> p2Log =properties.get(1).forEachVehicleProp;
+        HashMap<Vehicle, ArrayList<Triple>> p3Log =properties.get(2).forEachVehicleProp;
+        HashMap<Vehicle, ArrayList<Triple>> p4Log =properties.get(3).forEachVehicleProp;
+        HashMap<Vehicle, ArrayList<Triple>> p5Log =properties.get(4).forEachVehicleProp;
+        //propertiesWriter.println("prop1");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p1Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		//propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        //propertiesWriter.println("prop2");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p2Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		//propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        //propertiesWriter.println("prop3");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p3Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		//propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        //propertiesWriter.println("prop4");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p4Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		//propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        //propertiesWriter.println("prop5");
+        for(Map.Entry<Vehicle,ArrayList<Triple>> vlList : p4Log.entrySet()) {
+        	for(Triple line : vlList.getValue()) {
+        		//propertiesWriter.println(line.state + ";"+ line.transition+";"+ line.step);
+        	}
+        }
+        double coverage=0.0;
+        for(VanetProperty vProp : properties) {
+        	for(int i = 0; i<3; i++)
+        	{
+        	    for(int j = 0; j<2; j++)
+        	    {
+        	     if(vProp.transitionsMade[i][j]) 	 coverage += 1.0;
+        	    }
+        	}
+        	//propertiesWriter.println(Arrays.stream(vProp.transitionsMade).allMatch(s -> s.equals(vProp.transitionsMade[0])));
+        }
+        coverage = (coverage/(30))*100;
+
+    	if(coverage == 100.0) {
+    		depopList(nbSteps,stepNumber);
+    		propertiesWriter.println("coverage props :" + coverage + "%" + "at step:" + stepNumber);
+    		throw new PropertyCoveredException("Properties covered, step  " + stepNumber+" terminated\n");
+    	}
+        //propertiesWriter.close();
+    }
+    public void depopList(int nbSteps, int stepNumber) {
+        for(int i = ((VanetFSM) fsm).addedVehicles; i<nbSteps; i++) { // in order to be even for the next executions when the attributes of vehicles are read in file
+        	((VanetFSM) fsm).battery.remove(0);
+        	((VanetFSM) fsm).decBattery.remove(0);
+        	((VanetFSM) fsm).distance.remove(0);
+    	}
+    }
+    public void deinit(PrintWriter propertiesWriter){
         HashMap<Vehicle, ArrayList<Triple>> p1Log =properties.get(0).forEachVehicleProp;
         HashMap<Vehicle, ArrayList<Triple>> p2Log =properties.get(1).forEachVehicleProp;
         HashMap<Vehicle, ArrayList<Triple>> p3Log =properties.get(2).forEachVehicleProp;
@@ -155,11 +220,9 @@ public class StochasticTester implements Serializable{
         	    {
         	    	System.out.print(vProp.transitionsMade[i][j]);
         	     if(vProp.transitionsMade[i][j]) 	 coverage += 1.0;
-        	    }System.out.println("");
-        	}
-	    System.out.println("");
-
-    System.out.println("");
+        	     vProp.transitionsMade[i][j]=false;
+        	    }
+        	}vProp.transitionsMade[0][1]=true;
 
         	//propertiesWriter.println(Arrays.stream(vProp.transitionsMade).allMatch(s -> s.equals(vProp.transitionsMade[0])));
         }
@@ -214,10 +277,20 @@ public class StochasticTester implements Serializable{
                 for(VanetProperty prop : properties) {
                 try {
 					prop.match(((VanetFSM) fsm).getSUT());
+					checkProperties(propertiesWriter,((VanetFSM) fsm).addedVehicles, j);
 				} catch (PropertyFailedException e) {
 					propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					depopList(((VanetFSM) fsm).addedVehicles, j);
+					ret.add(currentTest);
+					return ret;
+				} catch (PropertyCoveredException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					depopList(((VanetFSM) fsm).addedVehicles, j);
+					ret.add(currentTest);
+					return ret;
 				}
                 }
             }
@@ -245,7 +318,7 @@ public class StochasticTester implements Serializable{
 	        MyTest currentTest = new MyTest();
 			for(SerializableStep step : test.steps) {
 				j++;
-				
+				System.out.println("step :"+step.toString());
 				newStep = computeInputTest(step);
             	//writer.println("Step : "+j + " " + newStep);
 				b = (newStep != null);

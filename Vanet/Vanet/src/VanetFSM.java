@@ -24,12 +24,14 @@ public class VanetFSM implements FsmModel {
      * Automaton describing the FSM of a Cycab
      */
     Road sut;
+    int addedVehicles=0;
     String writer = null;
     String vehicleReader =null;
     String platoonReader =null;
     String roadReader =null;
     String writerLog=null;
     ArrayList<Double> battery = new ArrayList<Double>();
+    ArrayList<Double> decBattery = new ArrayList<Double>();
     ArrayList<Double> distance = new ArrayList<Double>();
     ArrayList<Integer> indexjoined = new ArrayList<Integer>();
     ArrayList<Integer> indexKicked = new ArrayList<Integer>();
@@ -65,8 +67,13 @@ public class VanetFSM implements FsmModel {
         String[] splits;
         sCurrentLine = br.readLine();
         sCurrentLine = br.readLine();
-        while(!sCurrentLine.contains("Distance")) {
+        while(!sCurrentLine.contains("DecAuto")) {
     		battery.add(Double.parseDouble(sCurrentLine));
+    		sCurrentLine = br.readLine();
+    	}
+        sCurrentLine = br.readLine();
+        while(!sCurrentLine.contains("Distance")) {
+    		decBattery.add(Double.parseDouble(sCurrentLine));
     		sCurrentLine = br.readLine();
     	}
         while ((sCurrentLine = br.readLine()) != null){
@@ -132,14 +139,16 @@ public class VanetFSM implements FsmModel {
     public double addVehicleProba() { return sut.nbVehiclesOnRoad() == 0 ? 1 : 0.05; }
     @Action
     public Object[] addVehicle() {
+    	addedVehicles++;
         double auto = battery.remove(0); 
         		//(int) (Math.random() * 10) + 20;
         //battery.add(auto);
         double dist = distance.remove(0); 
         		//(int)(Math.random() * 5000) + 1000;
         //distance.add(dist);
-        sut.addVehicle(auto, dist);
-        return new Object[]{ sut, auto, dist };
+        double decAuto = decBattery.remove(0);
+        sut.addVehicle(auto, dist, decAuto);
+        return new Object[]{ sut, auto, dist, decAuto };
     }
 
     public void tickTrigger(){
