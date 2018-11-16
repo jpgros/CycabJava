@@ -214,6 +214,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	public void tickTriggerM1() { //always get lower priority
 		String x = "";
 		if(policies.listPolicy.size()>0) {
+			System.out.println("list " + policies.listPolicy+ "taking " +policies.listPolicy.get(policies.listPolicy.size()-1));
 			lastReconf = policies.listPolicy.remove(policies.listPolicy.size()-1);
 			policies.listPolicy.clear();
 		
@@ -395,7 +396,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		String x = "";
 		double proba  = Math.random();
 	    
-		if(policies.listPolicy.size()>0 && proba >=0.05) { //here
+		if(policies.listPolicy.size()>0 && proba >=0.95) { //here
 			lastReconf = policies.listPolicy.remove(0);
 			policies.listPolicy.clear();
 		
@@ -452,7 +453,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		created=false;
 		//lastReconf=null; mutant removes this line
 	}
-	
+	public void relayMutant() {
+		this.leader=null;
+	}
 	public void relay() {
 //		if(!nextLeaderList.isEmpty()){
 //			if(leader.getId()==nextLeaderList.get(0).getId()) {

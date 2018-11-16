@@ -162,7 +162,9 @@ class Property1 extends VanetProperty {
                     }
                     break;
                 case 1: //in platoon
-                    if (v.myPlatoon == null) {
+
+
+                     if (v.myPlatoon == null) {
                     	Triple t = new Triple(2, "quitPl", sut.stepNb);
                     	alpTmp.add(t);
                         forEachVehicleProp.put(v, alpTmp);
@@ -171,9 +173,9 @@ class Property1 extends VanetProperty {
                     }
                     else if (v.myPlatoon !=null) {
                     	transitionsMade[1][1]=true;
-                    }
-                    else  if (v.myPlatoon.leader == null) {
-                        throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " does not have a leader.");
+                        if (v.myPlatoon.leader == null) {
+                            throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " does not have a leader.");
+                        }
                     }
                     break;
             }
@@ -229,7 +231,9 @@ class Property2 extends VanetProperty {
                      }
                      break;
                  case 1: //in platoon
-                     if (v.myPlatoon == null) {
+
+
+                    if (v.myPlatoon == null) {
                      	Triple t = new Triple(2, "quitPl", sut.stepNb);
                      	alpTmp.add(t);
                          forEachVehicleProp.put(v, alpTmp);
@@ -238,9 +242,9 @@ class Property2 extends VanetProperty {
                      }
                      else if(v.myPlatoon !=null){
                     	 transitionsMade[1][0]=true;
-                     }
-                     else if (v.myPlatoon.vehiclesList.size() < 2) {
-                         throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " has less than 2 vehicles.");
+                         if (v.myPlatoon.vehiclesList.size() < 2) {
+                             throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " has less than 2 vehicles.");
+                         }
                      }
                      break;
              }
@@ -296,6 +300,7 @@ class Property3 extends VanetProperty {
                     	transitionsMade[2][1]=true;
                     }break;
                 case 1:
+
                     if (v.myPlatoon == null) { 
                         // vehicle out of the platoon
                     	Triple t = new Triple(2, "QuitPl", sut.stepNb);
@@ -305,10 +310,12 @@ class Property3 extends VanetProperty {
                     }
                     else if(v.myPlatoon!=null) {
                     	transitionsMade[1][0]=true;
+                        if (v.autonomie < 0 || v.distance == 0) {
+                            throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination.");
+                        }
                     }
-                    else if (v.autonomie < 0 || v.distance == 0) {
-                        throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination.");
-                    }
+
+
                     break;
             }
             // returns the minimal value of all 
@@ -369,6 +376,7 @@ class Property4 extends VanetProperty {
                     }
                     break;
                 case 1:
+
                     if (v.myPlatoon == null || v.myPlatoon.leader != v) {
                     	Triple t = new Triple(2, "Downgraded", sut.stepNb);
                     	alpTmp.add(t);
@@ -378,11 +386,12 @@ class Property4 extends VanetProperty {
                     }
                     else if(v.myPlatoon!=null && v.myPlatoon.leader==v) {
                     	transitionsMade[1][0]=true;
+                        if (v.autonomie < v.LOW_LEADER_BATTERY-3.0) {
+                        	System.out.println("auto" +v.autonomie + "le" + v.myPlatoon.leader + "me" + v);
+                            throw new PropertyFailedException(this, "Vehicle " + v.id + " has a too low autonomy for being leader.");
+                        }
+                    }
 
-                    }
-                    else if (v.autonomie < v.LOW_LEADER_BATTERY-3.0) {
-                        throw new PropertyFailedException(this, "Vehicle " + v.id + " has a too low autonomy for being leader.");
-                    }
                     break;
             }
             alpTmp =forEachVehicleProp.get(v);
@@ -440,7 +449,8 @@ class Property5 extends VanetProperty {
                     }
                     break;
                 case 1: //in platoon
-                    if (v.myPlatoon == null) {
+
+                	 if (v.myPlatoon == null) {
                     	Triple t = new Triple(1, "quitPl", sut.stepNb);
                     	alpTmp.add(t);
                         forEachVehicleProp.put(v, alpTmp);
@@ -449,11 +459,12 @@ class Property5 extends VanetProperty {
                     }
                     else if(v.myPlatoon!=null) {
                     	transitionsMade[1][0]=true;
+//                   	 if (v.autonomie == 100) {
+//                         throw new PropertyFailedException(this, "Vehicle " + v.id + " should not refill while in platoon.");
+//                         // verify this property
+//                     }
                     }
-                    else if (v.autonomie == 100) {
-                        throw new PropertyFailedException(this, "Vehicle " + v.id + " should not refill while in platoon.");
-                        // verify this property
-                    }
+                   
                     break;
             }
             alpTmp =forEachVehicleProp.get(v);

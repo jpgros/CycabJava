@@ -33,7 +33,7 @@ public class AdaptationPolicyModel {
     public ArrayList<Rule> getRules() {
     	return rules;
     }
-    public void match(Road sut, ExecutionReport er) throws RuleCoveredException{
+    public double match(Road sut, ExecutionReport er) {
     	   for (Rule r : rules) {
                for (Vehicle v : sut.allVehicles) {
                    if (r.matches(sut, v, er)) {
@@ -54,19 +54,13 @@ public class AdaptationPolicyModel {
             }
         }
         
-        double cpt=0;
+        double cpt=0.0;
 		for(Rule r : rules) {
 			cpt+=r.coverage;
 		}
-		cpt = (cpt/rules.size())*100.0;
-		
-		if(cpt == 100.0) {
-			throw new RuleCoveredException("Rules covered, \n");
-    	}
-		
-		cpt = 0;
-		
+		cpt = (cpt/(double)(rules.size()))*100.0;
         compteur++;
+        return cpt;
     }
 }
 
@@ -203,6 +197,7 @@ class ExecutionReport {
     }
     //actual reconf
     public void notifyStepAfter(int i, Element lastReconf, Element lastTriggeredReconf) {
+    	System.out.println("adding");
     	if (steps.get(i) == null) {
             // when no reconfiguration was expected 
             steps.put(i,new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
@@ -350,7 +345,7 @@ class ExecutionReport {
     	writerErr.println(x);
     	Iterator it = eligibleMap.entrySet().iterator();
     	Iterator it2 = actualMap.entrySet().iterator();
-
+    	
     	    while (it.hasNext()) { 
     	        Map.Entry pair = (Map.Entry)it.next();
     	        System.out.print(pair.getKey() + " = " + pair.getValue());
@@ -424,6 +419,7 @@ class ExecutionReport {
     	String x="";
     	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
 			//filling actual map
+    		
     		if(pair.second.size()>0) {
 				Element elt = pair.second.get(0);
 				value = actualCountedMap.get(elt);
@@ -436,6 +432,7 @@ class ExecutionReport {
 			}
     		//filling eligible map
 				for(Element eligElt : pair.first) {
+					System.out.println("elig elt "+ eligElt);
 					value = eligibleNotSortedCountedMap.get(eligElt);
 					if(value==null) {
 						eligibleNotSortedCountedMap.put(eligElt, 1);
@@ -459,6 +456,7 @@ class ExecutionReport {
     		}
     	}
     	
+    	
     	//creating frequencies array based on actual reconf versus TP conditions
     	HashMap<Element,Double> frequenciesOccTPMap = new HashMap<Element,Double>();
     	Integer val=0;
@@ -467,7 +465,7 @@ class ExecutionReport {
     		val=actualCountedMap.get(elt.getKey()); 
     		if(val!=null) {
     			freq = (((Double)(double)(val))/((Double)(double)(elt.getValue())))*100.0;
-    			System.out.println("freq "+ freq + " " + (Double)(double)(val) );
+    			//System.out.println("freq "+ freq + " " + (Double)(double)(val) );
     			frequenciesOccTPMap.put(elt.getKey(), freq);
     		}
     		else {
@@ -480,10 +478,11 @@ class ExecutionReport {
     	val=0;
     	freq=0.0;
     	for(Map.Entry<Element, Integer> elt: eligibleNotSortedCountedMap.entrySet()) {
+    		System.out.println("elig not sorted " +elt.getKey());
     		val= actualCountedMap.get(elt.getKey()); 
     		if(val!=null) {
     			freq = (((Double)(double)(val))/((Double)(double)(elt.getValue())))*100.0;
-    			System.out.println("freq "+ freq + " " + (Double)(double)(val) );
+    			//System.out.println("freq "+ freq + " " + (Double)(double)(val) );
     			frequenciesActuEligMap.put(elt.getKey(), freq);
     		}
     		else {
@@ -494,40 +493,40 @@ class ExecutionReport {
     	System.out.println("Counted actual map :");
     	for(Map.Entry<Element,Integer> map : actualCountedMap.entrySet()) {
     		x= " key " + map.getKey() + " value "+ map.getValue();
-    		System.out.println(x);
+    		//System.out.println(x);
     		writeStats.println(x);
     	}
     	System.out.println("Counted eligible map :");
     	for(Map.Entry<Element,Integer> map : eligibleSortedCountedMap.entrySet()) {
     		x= " key " + map.getKey() + " value "+ map.getValue();
-    		System.out.println(x);
+    		//System.out.println(x);
     		writeStats.println(x);
     	}
     	
     	System.out.println("Counted unsorted eligible map :");
     	for(Map.Entry<Element,Integer> map : eligibleNotSortedCountedMap.entrySet()) {
     		x= " key " + map.getKey() + " value "+ map.getValue();
-    		System.out.println(x);
+    		//System.out.println(x);
     		writeStats.println(x);
     	}
     	
     	System.out.println("occurrencesTP :");
     	for(Map.Entry<Element,Integer> rule :occurrencesTP.entrySet()) {
     		x= "name " + rule.getKey().getName() + " vehicle "+ rule.getKey().getVehicle()+ " priority "+ rule.getKey().getPriority()+" value " + rule.getValue();
-    		System.out.println(x);
+    		//System.out.println(x);
     		writeStats.println(x);
     	}
     	System.out.println("size : " + nb);
     	
     	for(Map.Entry<Element,Double> map : frequenciesOccTPMap.entrySet()){
     		x= " key " + map.getKey() + " value "+ map.getValue();
-    		System.out.println(x);
+    		//System.out.println(x);
     		writeStats.println(x);
     	}
     	writeStats.println("--------------------------------------------------------");
     	for(Map.Entry<Element,Double> map : frequenciesActuEligMap.entrySet()){
     		x= " key " + map.getKey() + " value "+ map.getValue();
-    		System.out.println(x);
+    		//System.out.println(x);
     		writeStats.println(x);
     	}
     	
@@ -550,8 +549,8 @@ class ExecutionReport {
     	writeStats.close();
     }
     public boolean containsReconf(Element e1, ArrayList<Element> array) {
-    	for(int i =0; i< array.size(); i++) {
-    		if(e1.name == array.get(i).name && e1.priority== array.get(i).priority && e1.vehicle==array.get(i).vehicle ) return true;
+    	for(Element elt : array) {
+    		if(e1.name == elt.name && e1.priority== elt.priority && e1.vehicle==elt.vehicle ) return true;
     	}
     	return false;
     }

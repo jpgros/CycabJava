@@ -241,8 +241,9 @@ public class Vehicle extends Entity implements Serializable {
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt);
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
+				road.addStringWriter("platoon quitfail"+ myPlatoon + "distance " + distance);
 			}
-			else if(distance < LOW_DIST) {
+			else if(distance < 201) {// LOW_DIST) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.LOW, this);
 				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]"+"\n";
 				//System.out.print(x);
@@ -259,7 +260,7 @@ public class Vehicle extends Entity implements Serializable {
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 
 			}
-			if (this == myPlatoon.leader && (this.getMinValueLeader() <= LOW_LEADER_DIST)){ 
+			if (this == myPlatoon.leader && (this.autonomie <= LOW_LEADER_BATTERY)) {//  (this.getMinValueLeader() <= LOW_LEADER_DIST)){ 
 				//this.getMinValue() <= LOW_LEADER_DIST || this.getAutonomie() < LOW_LEADER_BATTERY)) {
 				x = "Event : vehicle " + this.getId() + " should relay soon [HIGH]"+"\n";
 				//System.out.print(x);
@@ -306,11 +307,12 @@ public class Vehicle extends Entity implements Serializable {
 					road.addStringWriter(x);
 				}
 			}									
-			road.addStringWriter("nb vehicles"+ myPlatoon.vehiclesList.size() + "minval " + this.getMinValue()/DEC_LEADER+ "leader min val " +myPlatoon.leader.getMinValue()+"\n");
+			
 			if(!this.isLeader() && myPlatoon.vehiclesList.size()>=3 && ((this.getMinValue()/DEC_LEADER)> myPlatoon.leader.getMinValue())) {
 				Element elt = new Element(PolicyName.UPGRADERELAY, Priority.MEDIUM, this);
 				myPlatoon.policies.addElement(elt);
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
+				road.addStringWriter("upgrade decleader = " + DEC_LEADER);
 			}
 			
 			//leader ask platoon to choose wich adaptation policy to choose

@@ -54,8 +54,8 @@ public class VanetFACS implements Serializable{
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog,apm);
-        generatetest(fsm, writer, vcm, writerErr, writerLog,apm);
+        ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog,apm);
+        //generatetest(fsm, writer, vcm, writerErr, writerLog,apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
@@ -94,14 +94,14 @@ public class VanetFACS implements Serializable{
 
 
 
-        Rule r4  = new Rule(new r4p1(), new r4p2(), PolicyName.QUITPLATOON, Priority.HIGH); //or quitstation
+        Rule r4  = new Rule(new r4p1(), new r4p2(), PolicyName.QUITPLATOON, Priority.LOW); //or quitstation
         a.addRule(r4);
         // Rule: -- départ du platoon du véhicule qui arrive à destination ou échéance
         //  after join until quit
         //      if (v.auto >= distance station[0] && v.auto < distance station[1])
         //          quit |--> high
 
-        Rule r5  = new Rule(new r5p1(), new r5p2(), PolicyName.QUITPLATOON, Priority.LOW); //or quitstation
+        Rule r5  = new Rule(new r5p1(), new r5p2(), PolicyName.QUITPLATOON, Priority.HIGH); //or quitstation
         a.addRule(r5);
 //        Rule r6  = new Rule(new r6p1(), new r6p2(), PolicyName.QUITPLATOON, Priority.MEDIUM); //or quitstation
 //        a.addRule(r6);
@@ -152,9 +152,12 @@ public class VanetFACS implements Serializable{
 	        objectInputStream.close();
 			st.setMonitor(vcm); 
 	        initial = st.retrieve(propertiesWriter);
+	        System.out.println("tes number " +initial.size());
 	        st.deinit(propertiesWriter);
 	        String strLog=((VanetFSM) fsm).getSUT().writerLog;
-	        writerLog.print(strLog);  
+	        writerLog.print(strLog); 
+
+			propertiesWriter.close();
 	        vcm.printReport();			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -188,9 +191,8 @@ public class VanetFACS implements Serializable{
 			ArrayList<MyTest> testsLoop=null;
 			String strLog="";
 			//for(int i= 50; i < 501; i*=10) {
-				for(int j= 0; j < 4; j++) {
-					testsLoop=st.generate(1,2500,propertiesWriter,strLog,apm);
-					System.out.println("OKgen");
+				for(int j= 0; j <1 ; j++) {
+					testsLoop=st.generate(1,4000,propertiesWriter,strLog,apm);
 					writerLog.print(strLog);
 					initial.addAll(testsLoop);
 					strLog=((VanetFSM) fsm).getSUT().writerLog;
@@ -198,8 +200,10 @@ public class VanetFACS implements Serializable{
 			        strLog="";
 					st.deinit(propertiesWriter);
 					for(Rule r :apm.rules) {
-						r.coverage=0.0;
+						if(r.coverage!=1.0) propertiesWriter.print(" rules not covered "+ r.reconf);
+						//r.coverage=0.0;
 					}
+					
 					//writerLog.print("coverage done " + j);
 					//propertiesWriter.println("coverage rules :" + "100" + "%" + "at step:" );
 				}
@@ -281,7 +285,7 @@ class r1p1 extends VanetProperty {
         }
         else {
         	String x ="Config upgraderelay OK for vehicle "+ currentVehicle.getId();
-        	System.out.println(x);
+        	//System.out.println(x);
         	writer.println(x);
         }
         return 0;
@@ -307,7 +311,7 @@ class r1p2 extends VanetProperty {
     
     else {
     	String x="TP upgraderelay OK for vehicle min value "+ currentVehicle.getMinValue()/currentVehicle.DEC_LEADER + "leader minvalue "+ currentVehicle.myPlatoon.leader.getMinValue();
-    	System.out.println(x);
+    	//System.out.println(x);
     	writer.println(x);
 
     }
@@ -344,7 +348,7 @@ class r2p1 extends VanetProperty {
 //        }
         else {
         	String x ="Config relay OK for vehicle "+ currentVehicle.id;
-        	System.out.println(x);
+        	//System.out.println(x);
         	writer.println(x);
         }
         return 0;
@@ -363,14 +367,14 @@ class r2p2 extends VanetProperty {
     //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
     @Override
     public double match(Road sut) throws PropertyFailedException {
-        if (currentVehicle.getMinValueLeader() >200) { //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
+        if (currentVehicle.autonomie >currentVehicle.LOW_LEADER_BATTERY){// getMinValueLeader() >200) { //currentVehicle.myPlatoon.getVehiclesList().size() < 3 ||
         	writer.println("TP relay KO for vehicle "+ currentVehicle.id + "minVal "+ currentVehicle.getMinValueLeader());
             throw new PropertyFailedException(this, "Vehicle not ready to downgrade");}
         
     
 	   else {
 		   String x="TP relay OK for vehicle "+ currentVehicle.id + "minval " + currentVehicle.getMinValueLeader();
-		   System.out.println(x);
+		   //System.out.println(x);
 		   writer.println(x);
 	    }
         return 0;
@@ -429,7 +433,7 @@ class r4p1 extends VanetProperty {
 class r4p2 extends VanetProperty {
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.distance >= 100)
+	        if ( currentVehicle.distance >= currentVehicle.LOW_DIST)
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        return 0;
 	    }
@@ -462,7 +466,7 @@ class r5p2 extends VanetProperty {
 
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.distance >= 200)
+	        if ( currentVehicle.autonomie >= currentVehicle.LOW_BATTERY)
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        return 0;
 	    }
@@ -503,10 +507,9 @@ class r6p2 extends VanetProperty {
 	}
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-		 	if ( currentVehicle.autonomie >= 15)
+		 	if ( currentVehicle.distance >= currentVehicle.VLOW_DIST )
 	            throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
-		 	else writer.println("TP OK QUITFAIL");
-	        
+		 	
 	        return 0;
 	    }
 	 	public String toString(){

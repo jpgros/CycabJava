@@ -79,30 +79,6 @@ public class VanetFSM implements FsmModel {
         while ((sCurrentLine = br.readLine()) != null){
         	distance.add(Double.parseDouble(sCurrentLine));
         }
-        
-//        sCurrentLine = br.readLine();
-//        while(!sCurrentLine.contains("indexJoined")) {
-//        	distance.add(Double.parseDouble(sCurrentLine));
-//        	sCurrentLine = br.readLine();
-//    	}
-//        sCurrentLine = br.readLine();
-//        while(!sCurrentLine.contains("indexKicked")){
-//        	indexjoined.add((int)(Double.parseDouble(sCurrentLine)));
-//        	sCurrentLine = br.readLine();
-//        }
-//    	while ((sCurrentLine = br.readLine()) != null){
-//    		indexKicked.add((int)(Double.parseDouble(sCurrentLine)));
-//    	}       
-    	vehicleReader.close();
-//    	for(Double elt: distance) {
-//    		System.out.println("dist : " +elt);
-//    	}
-//    	for(Integer elt: indexjoined) {
-//    		System.out.println("indexjoin : " +elt);
-//    	}
-//    	for(Integer elt: indexKicked) {
-//    		System.out.println("indexKick : " +elt);
-//    	}
     }
     
     public void printValues() throws FileNotFoundException, UnsupportedEncodingException {
@@ -128,7 +104,7 @@ public class VanetFSM implements FsmModel {
     public boolean tickGuard() {
         return true;
     }
-    public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; }
+    public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; } //0.87
     @Action
     public Object[] tick() {
         sut.tick();
@@ -136,7 +112,7 @@ public class VanetFSM implements FsmModel {
     }
 
     public boolean addVehicleGuard() { return ! sut.isFull(); }
-    public double addVehicleProba() { return sut.nbVehiclesOnRoad() == 0 ? 1 : 0.05; }
+    public double addVehicleProba() { return sut.nbVehiclesOnRoad() == 0 ? 1 : 0.05; } //0.05
     @Action
     public Object[] addVehicle() {
     	addedVehicles++;

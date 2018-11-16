@@ -22,9 +22,10 @@ public class VanetConformanceMonitor {
         er = new ExecutionReport(writerErr);
     }
 
-    public void notify(MyStep newStep, Road sut) throws RuleCoveredException {
-        apm.match(sut, er);
+    public double notify(MyStep newStep, Road sut)  {
+		double cov =apm.match(sut, er);
         sut.setStepName(newStep.meth.getName());
+        return cov;
     }
 
     public void printReport() {

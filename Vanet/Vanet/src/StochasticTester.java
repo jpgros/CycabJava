@@ -127,7 +127,7 @@ public class StochasticTester implements Serializable{
 		
 		cpt = 0;
     }
-    public void checkProperties(PrintWriter propertiesWriter,int nbSteps, int stepNumber)  throws PropertyCoveredException{
+    public boolean checkProperties(PrintWriter propertiesWriter,int nbSteps, int stepNumber) {//  throws PropertyCoveredException{
 
         HashMap<Vehicle, ArrayList<Triple>> p1Log =properties.get(0).forEachVehicleProp;
         HashMap<Vehicle, ArrayList<Triple>> p2Log =properties.get(1).forEachVehicleProp;
@@ -178,10 +178,12 @@ public class StochasticTester implements Serializable{
         coverage = (coverage/(30))*100;
 
     	if(coverage == 100.0) {
-    		depopList(nbSteps,stepNumber);
-    		propertiesWriter.println("coverage props :" + coverage + "%" + "at step:" + stepNumber);
-    		throw new PropertyCoveredException("Properties covered, step  " + stepNumber+" terminated\n");
+    		//depopList(nbSteps,stepNumber);
+    		//propertiesWriter.println("coverage props :" + coverage + "%" + "at step:" + stepNumber);
+    		//throw new PropertyCoveredException("Properties covered, step  " + stepNumber+" terminated\n");
+    		return true;
     	}
+    	return false;
         //propertiesWriter.close();
     }
     public void depopList(int nbSteps, int stepNumber) {
@@ -233,9 +235,8 @@ public class StochasticTester implements Serializable{
         	{
         	    for(int j = 0; j<2; j++)
         	    {
-        	    	System.out.print(vProp.transitionsMade[i][j]);
         	     if(vProp.transitionsMade[i][j]) 	 coverage += 1.0;
-        	     vProp.transitionsMade[i][j]=false;
+        	     //vProp.transitionsMade[i][j]=false;
         	    }
         	}vProp.transitionsMade[0][1]=true;
 
@@ -255,6 +256,10 @@ public class StochasticTester implements Serializable{
      */
     public ArrayList<MyTest> generate(int nb, int length,PrintWriter propertiesWriter, String log,AdaptationPolicyModel apm) throws FileNotFoundException, UnsupportedEncodingException {
     	//BufferedReader inStream = new BufferedReader(readerStep);
+    	boolean propCov=false;
+    	double ruleCov=0.0;
+    	int indRules=0;
+    	int indProp=0;
         String inString;
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         // for each of the resulting test cases
@@ -283,15 +288,15 @@ public class StochasticTester implements Serializable{
                     currentTest.append(newStep);
                     j++;
                     if (vcm != null) { 
-                        try {
-                        	vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
-                        }
-                        catch (RuleCoveredException e) {
-        					e.printStackTrace();
-        					depopList(((VanetFSM) fsm).addedVehicles, j);
-        		    		propertiesWriter.println("coverage rules :"  + " 100%" + "at step:" + j);
-        					ret.add(currentTest);
-        					return ret;
+                        ruleCov =vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
+                        if(ruleCov==100.0) {
+                    		indRules= indRules==0? j : indRules;
+        					if(propCov) {
+	        					depopList(((VanetFSM) fsm).addedVehicles, j);
+	        					propertiesWriter.println("coverage rules :"  + " 100%" + "at step:" + j+ "and properties at index " + indProp) ;
+//	        					ret.add(currentTest);
+//	        					return ret;
+        					}
         				}
                     }
                     // TODO :if newstep !=tick
@@ -301,21 +306,28 @@ public class StochasticTester implements Serializable{
                 for(VanetProperty prop : properties) {
                 try {
 					prop.match(((VanetFSM) fsm).getSUT());
-					checkProperties(propertiesWriter,((VanetFSM) fsm).addedVehicles, j);
+					propCov=checkProperties(propertiesWriter,((VanetFSM) fsm).addedVehicles, j);
 					//checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
 				} catch (PropertyFailedException e) {
 					propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+					System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					depopList(((VanetFSM) fsm).addedVehicles, j);
 					ret.add(currentTest);
 					return ret;
-				} catch (PropertyCoveredException e) {
+				}// catch (PropertyCoveredException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
-					depopList(((VanetFSM) fsm).addedVehicles, j);
-					ret.add(currentTest);
-					return ret;
+				if(propCov) {	
+					//e.printStackTrace();
+					propCov=true;
+					indProp= indProp==0? j: indProp;
+					if(ruleCov==100.0) {
+						depopList(((VanetFSM) fsm).addedVehicles, j);
+						propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
+//						ret.add(currentTest);
+//						return ret;
+					}
 				}
                 }
 
@@ -328,12 +340,32 @@ public class StochasticTester implements Serializable{
             ret.add(currentTest);
         }
         propertiesWriter.print(propertiesOutput);
+        double coverage=0.0;
+        for(VanetProperty vProp : properties) {
+        	for(int i = 0; i<3; i++)
+        	{
+        	    for(int j = 0; j<2; j++)
+        	    {
+        	    	System.out.print(vProp.transitionsMade[i][j]);
+        	     if(vProp.transitionsMade[i][j]) 	 coverage += 1.0;
+        	    // vProp.transitionsMade[i][j]=false;
+        	    }
+        	}vProp.transitionsMade[0][1]=true;
+
+        	//propertiesWriter.println(Arrays.stream(vProp.transitionsMade).allMatch(s -> s.equals(vProp.transitionsMade[0])));
+        }
+        coverage = (coverage/(30))*100;
+        propertiesWriter.print(" Test finished with " +coverage +"% of properties covered "+ indProp+ "and " + ruleCov + "% of rules " + indRules +"\n");
        // propertiesWriter.close();
         return ret;
     }
     
     //retrieve the list of input steps and notify them to the SUT
     public ArrayList<MyTest> retrieve(PrintWriter propertiesWriter) {
+    	boolean propCov=false;
+    	double ruleCov=0.0;
+    	int indRules=0;
+    	int indProp=0;
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         String inString;
         int j=0,k=0;
@@ -355,30 +387,64 @@ public class StochasticTester implements Serializable{
                 if (b) {
                     currentTest.append(newStep);
                     if (vcm != null) { 
-                        try {
-                    	vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
-                        }catch (RuleCoveredException e) {
-        					e.printStackTrace();
-        					depopList(((VanetFSM) fsm).addedVehicles, j);
-        		    		propertiesWriter.println("coverage rules :"  + " 100%" + "at step:" + j);
-        					ret.add(currentTest);
-        					return ret;
+                    	 ruleCov =vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
+                         if(ruleCov==100.0) {
+                    		indRules= indRules==0? j : indRules;
+                    		if(propCov) {
+	        					depopList(((VanetFSM) fsm).addedVehicles, j);
+	        		    		propertiesWriter.println("coverage rules :"  + " 100%" + "at step:" + j+ "and properties at index " + indProp) ;
+	        					//ret.add(currentTest);
+	        					//return ret;
+                    		}
         				}
                     }
                 }
                 for(VanetProperty prop : properties) {
                 try {
 					prop.match(((VanetFSM) fsm).getSUT());
+					propCov=checkProperties(propertiesWriter,((VanetFSM) fsm).addedVehicles, j);
 				} catch (PropertyFailedException e) {
 					propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+
+					System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					ret.add(currentTest);
+					//return ret;
+				}
+				if(propCov) {	
+					//e.printStackTrace();
+					propCov=true;
+					indProp= indProp==0? j: indProp;
+					if(ruleCov==100.0) {
+						propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
+						depopList(((VanetFSM) fsm).addedVehicles, j);
+						//ret.add(currentTest);
+						//return ret;
+					}
 				}
                 }
                 //ticktrigger here
                 ((VanetFSM) fsm).getSUT().tickTrigger();
 			}
 			j=0;
+			 double coverage=0.0;
+		        for(VanetProperty vProp : properties) {
+		        	for(int i = 0; i<3; i++)
+		        	{
+		        	    for(j = 0; j<2; j++)
+		        	    {
+		        	    	System.out.print(vProp.transitionsMade[i][j]);
+		        	     if(vProp.transitionsMade[i][j]) 	 coverage += 1.0;
+		        	     //vProp.transitionsMade[i][j]=false;
+		        	    }
+		        	}vProp.transitionsMade[0][1]=true;
+
+		        	//propertiesWriter.println(Arrays.stream(vProp.transitionsMade).allMatch(s -> s.equals(vProp.transitionsMade[0])));
+		        }
+		        coverage = (coverage/(30))*100;
+		        propertiesWriter.print(" Test finished with " +coverage +"% of properties covered "+ indProp+ "and " + ruleCov + "% of rules " + indRules +"\n");
+		       // propertiesWriter.close();
 			ret.add(currentTest);
 		}
 		propertiesWriter.print(propertiesOutput);
