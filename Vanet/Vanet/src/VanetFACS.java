@@ -142,7 +142,7 @@ public class VanetFACS implements Serializable{
     	FileInputStream inser;
 		try {
 	        ((VanetFSM) fsm).getValues();     
-			inser = new FileInputStream("input.ser");
+			inser = new FileInputStream("output.ser");
 			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectInputStream objectInputStream = new ObjectInputStream(inser);
 	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
@@ -192,7 +192,7 @@ public class VanetFACS implements Serializable{
 			String strLog="";
 			//for(int i= 50; i < 501; i*=10) {
 				for(int j= 0; j <1 ; j++) {
-					testsLoop=st.generate(1,4000,propertiesWriter,strLog,apm);
+					testsLoop=st.generate(1,10000,propertiesWriter,strLog,apm);
 					writerLog.print(strLog);
 					initial.addAll(testsLoop);
 					strLog=((VanetFSM) fsm).getSUT().writerLog;

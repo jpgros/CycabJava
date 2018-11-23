@@ -141,7 +141,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	
 	public void tickTrigger() {
 		String x = "";
-		if(policies.listPolicy.size()>0) {
+		if(policies.listPolicy.size()>0) {			
 			lastReconf = policies.listPolicy.remove(0);
 			policies.listPolicy.clear();
 		

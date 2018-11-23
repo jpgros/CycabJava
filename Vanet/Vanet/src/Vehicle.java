@@ -243,7 +243,7 @@ public class Vehicle extends Entity implements Serializable {
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 				road.addStringWriter("platoon quitfail"+ myPlatoon + "distance " + distance);
 			}
-			else if(distance < 201) {// LOW_DIST) {
+			if(distance < LOW_DIST) {
 				Element elt = new Element(PolicyName.QUITPLATOON, Priority.LOW, this);
 				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]"+"\n";
 				//System.out.print(x);

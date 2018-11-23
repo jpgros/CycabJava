@@ -10,44 +10,46 @@ public class AdaptationPolicy implements Serializable{
 	public void addElement(Element elt) {
 		if(listPolicy.size()==0) {
 			listPolicy.add(0, elt);
+			System.out.println("elt added " + elt);
 		}
 		//if the element is already present with a higher or equal priority, no need to add the selected elt
 		else {
 			int index=0;
 			boolean looping = true;
-			int indexElt= this.containsName(elt.name);
+			//int indexElt= this.containsName(elt.name);
 			
-			if(indexElt !=-1) {
+			//if(indexElt !=-1) {
 				switch(elt.priority) {
 				case HIGH :
 					listPolicy.add(0, elt);
+					System.out.println("elt added high " + index + "size list" + listPolicy.size()+ " " + elt);
 				break;
 				case MEDIUM :
-					index=-1;
-					while(looping && index<listPolicy.size() ) {
-					index++;
+					index=0;
+					do{
 					looping = listPolicy.get(index).getPriority()==Priority.HIGH;
-				}
-				listPolicy.add(index, elt);
-				System.out.println("elt added med " + index + "size list" + listPolicy.size());
+					index++;
+				}while(looping && index<listPolicy.size());
+				listPolicy.add(--index, elt);
+				System.out.println("elt added med " + elt + " " + index + "size list" + listPolicy.size());
 				index=0;
 				break;
 				
-				case LOW :
-					index= listPolicy.size();
-					while(looping && index<listPolicy.size()) {
-					index--;
-					looping = listPolicy.get(index).getPriority()==Priority.LOW;
-				}
+				case LOW :	
+//					while(looping && index<listPolicy.size()) {
+//					index--;
+//					looping = listPolicy.get(index).getPriority()==Priority.LOW;
+//				}
+				index= listPolicy.size();
 				listPolicy.add(index, elt);
-				System.out.println("elt added low " + index + "size list" + listPolicy.size());
+				System.out.println("elt added low " + elt+ " " + index + "size list" + listPolicy.size());
 				break;
 				
 				default :
 					
 					break;
 				}
-			}
+			//}
 			//if( (indexElt !=-1 && elt.priority.value > listPolicy.get(indexElt).getPriority().value) || indexElt ==-1 ) {
 			//if element already exists but with a lesser priority we remove it
 				
