@@ -54,8 +54,8 @@ public class VanetFACS implements Serializable{
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog,apm);
-        generatetest(fsm, writer, vcm, writerErr, writerLog,apm);
+        ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog,apm);
+        //generatetest(fsm, writer, vcm, writerErr, writerLog,apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
@@ -140,23 +140,19 @@ public class VanetFACS implements Serializable{
     public static ArrayList<MyTest> retrieveTest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm, PrintWriter writerLog,AdaptationPolicyModel apm){
     	ArrayList<MyTest> initial=null;
     	FileInputStream inser;
+		boolean reinitRulesCov = false;
 		try {
 	        ((VanetFSM) fsm).getValues();     
 			inser = new FileInputStream("output.ser");
 			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectInputStream objectInputStream = new ObjectInputStream(inser);
 	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
-	        System.out.println("testinput" +testInput);
 	        StochasticTester st   = new StochasticTester(fsm,writer, testInput);
-	        st.init();
 	        objectInputStream.close();
 			st.setMonitor(vcm); 
-	        initial = st.retrieve(propertiesWriter);
-	        System.out.println("tes number " +initial.size());
-	        st.deinit(propertiesWriter);
+	        initial = st.retrieve(propertiesWriter,apm);
 	        String strLog=((VanetFSM) fsm).getSUT().writerLog;
 	        writerLog.print(strLog); 
-
 			propertiesWriter.close();
 	        vcm.printReport();			
 		} catch (FileNotFoundException e) {
@@ -178,41 +174,26 @@ public class VanetFACS implements Serializable{
     	//attention risque d incomptatibilite nbstep 
         ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
         ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();
-    	StochasticTester st   = new StochasticTester(fsm,writer);
-		st.init();      
+    	StochasticTester st   = new StochasticTester(fsm,writer);     
 		try {
 	        ((VanetFSM) fsm).getValues();     
-
 			FileOutputStream outser = new FileOutputStream("output.ser");
 			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			st.setMonitor(vcm);
-			ArrayList<MyTest> initial=new ArrayList<MyTest>();
-			ArrayList<MyTest> testsLoop=null;
+			ArrayList<MyTest> testsList=null;
 			String strLog="";
-			//for(int i= 50; i < 501; i*=10) {
-				for(int j= 0; j <1 ; j++) {
-					testsLoop=st.generate(1,10000,propertiesWriter,strLog,apm);
-					writerLog.print(strLog);
-					initial.addAll(testsLoop);
-					strLog=((VanetFSM) fsm).getSUT().writerLog;
-			        writerLog.print(strLog); 
-			        strLog="";
-					st.deinit(propertiesWriter);
-					for(Rule r :apm.rules) {
-						if(r.coverage!=1.0) propertiesWriter.print(" rules not covered "+ r.reconf);
-						//r.coverage=0.0;
-					}
-					
-					//writerLog.print("coverage done " + j);
-					//propertiesWriter.println("coverage rules :" + "100" + "%" + "at step:" );
-				}
-			//}
+			testsList=st.generate(10,1000,propertiesWriter,strLog,apm);
+			//stats should be verified : may be done globaly
+			writerLog.print(strLog);
+			strLog=((VanetFSM) fsm).getSUT().writerLog;
+	        writerLog.print(strLog); 
+	        strLog="";			
 			propertiesWriter.close();
 			vcm.printReport();
 	        			
-	        //convertir initial in a serializable list and writing it
-	        for(MyTest curTest : initial) {
+	        //convert initial in a serializable list and writing it
+	        for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
 	        		serializableArray.add(step);
