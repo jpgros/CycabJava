@@ -54,8 +54,8 @@ public class VanetFACS implements Serializable{
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog,apm);
-        //generatetest(fsm, writer, vcm, writerErr, writerLog,apm);
+        //ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog,apm);
+        generatetest(fsm, writer, vcm, writerErr, writerLog,apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
@@ -210,38 +210,7 @@ public class VanetFACS implements Serializable{
 			//}
 			propertiesWriter.close();
 			vcm.printReport();
-	        
-//	        VanetConformanceMonitor vcm2 = new VanetConformanceMonitor(apm, writerErr);
-//	        st.setMonitor(vcm2);
-//	        for(MyTest test : st.generate(1, 400)){
-//	        	initial.add(test);
-//	        }
-//	        System.out.println("initial :"+initial.size());
-//			vcm2.printReport();
-//	        
-//	        VanetConformanceMonitor vcm3 = new VanetConformanceMonitor(apm, writerErr);
-//	        st.setMonitor(vcm3);
-//	        for(MyTest test : st.generate(1, 400)){
-//	        	initial.add(test);
-//	        }
-//
-//	        System.out.println("initial :"+initial.size());
-//	        vcm3.printReport();
-	        
-//	        VanetConformanceMonitor vcm4 = new VanetConformanceMonitor(apm, writerErr);
-//	        st.setMonitor(vcm4);
-//	        for(MyTest test : st.generate(1, 400)){
-//	        	initial.add(test);
-//	        }
-//	        vcm4.printReport();
-//	        
-//	        VanetConformanceMonitor vcm5 = new VanetConformanceMonitor(apm, writerErr);
-//	        for(MyTest test : st.generate(1, 400)){
-//	        	initial.add(test);
-//	        }
-//
-//			vcm5.printReport();
-			
+	        			
 	        //convertir initial in a serializable list and writing it
 	        for(MyTest curTest : initial) {
 	        	for(MyStep curStep : curTest ) {

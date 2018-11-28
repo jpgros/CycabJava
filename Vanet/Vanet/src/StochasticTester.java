@@ -301,34 +301,36 @@ public class StochasticTester implements Serializable{
                     }
                     // TODO :if newstep !=tick
                 }
-                //ticktrigger here
-                ((VanetFSM) fsm).getSUT().tickTrigger();
-                for(VanetProperty prop : properties) {
-                try {
-					prop.match(((VanetFSM) fsm).getSUT());
-					propCov=checkProperties(propertiesWriter,((VanetFSM) fsm).addedVehicles, j);
-					//checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
-				} catch (PropertyFailedException e) {
-					propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
-					System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					depopList(((VanetFSM) fsm).addedVehicles, j);
-					ret.add(currentTest);
-					return ret;
-				}// catch (PropertyCoveredException e) {
-					// TODO Auto-generated catch block
-				if(propCov) {	
-					//e.printStackTrace();
-					propCov=true;
-					indProp= indProp==0? j: indProp;
-					if(ruleCov==100.0) {
+                if(newStep.meth.getName() == "tick") {//if not tick we do not do reconfiguration
+	                //ticktrigger here
+	                ((VanetFSM) fsm).getSUT().tickTrigger();
+	                for(VanetProperty prop : properties) {
+	                try {
+						prop.match(((VanetFSM) fsm).getSUT());
+						propCov=checkProperties(propertiesWriter,((VanetFSM) fsm).addedVehicles, j);
+						//checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
+					} catch (PropertyFailedException e) {
+						propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+						System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 						depopList(((VanetFSM) fsm).addedVehicles, j);
-						propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
-//						ret.add(currentTest);
-//						return ret;
+						ret.add(currentTest);
+						return ret;
+					}// catch (PropertyCoveredException e) {
+						// TODO Auto-generated catch block
+					if(propCov) {	
+						//e.printStackTrace();
+						propCov=true;
+						indProp= indProp==0? j: indProp;
+						if(ruleCov==100.0) {
+							depopList(((VanetFSM) fsm).addedVehicles, j);
+							propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
+	//						ret.add(currentTest);
+	//						return ret;
+						}
 					}
-				}
+	                }
                 }
 
                 //checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
@@ -399,33 +401,35 @@ public class StochasticTester implements Serializable{
         				}
                     }
                 }
-                for(VanetProperty prop : properties) {
-                try {
-					prop.match(((VanetFSM) fsm).getSUT());
-					propCov=checkProperties(propertiesWriter,((VanetFSM) fsm).addedVehicles, j);
-				} catch (PropertyFailedException e) {
-					propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
-
-					System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					ret.add(currentTest);
-					//return ret;
-				}
-				if(propCov) {	
-					//e.printStackTrace();
-					propCov=true;
-					indProp= indProp==0? j: indProp;
-					if(ruleCov==100.0) {
-						propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
-						depopList(((VanetFSM) fsm).addedVehicles, j);
-						//ret.add(currentTest);
+                if(newStep.meth.getName() == "tick") {//if not tick we do not do reconfiguration
+	                for(VanetProperty prop : properties) {
+	                try {
+						prop.match(((VanetFSM) fsm).getSUT());
+						propCov=checkProperties(propertiesWriter,((VanetFSM) fsm).addedVehicles, j);
+					} catch (PropertyFailedException e) {
+						propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+	
+						System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						ret.add(currentTest);
 						//return ret;
 					}
-				}
+					if(propCov) {	
+						//e.printStackTrace();
+						propCov=true;
+						indProp= indProp==0? j: indProp;
+						if(ruleCov==100.0) {
+							propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
+							depopList(((VanetFSM) fsm).addedVehicles, j);
+							//ret.add(currentTest);
+							//return ret;
+						}
+					}
+	                }
+	                //ticktrigger here
+	                ((VanetFSM) fsm).getSUT().tickTrigger();
                 }
-                //ticktrigger here
-                ((VanetFSM) fsm).getSUT().tickTrigger();
 			}
 			j=0;
 			 double coverage=0.0;

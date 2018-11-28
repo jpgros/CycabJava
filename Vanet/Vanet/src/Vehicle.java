@@ -227,6 +227,16 @@ public class Vehicle extends Entity implements Serializable {
 			road.addStringWriter(x);
 		}
 	}
+	
+	public void updatevehicleAutonomie() {
+		String x="";
+		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
+		if( this.autonomie < 0){
+			x = "Error : new Battery left negative !"+"\n";
+			System.out.print(x);
+			road.addStringWriter(x);
+		}
+	}
 	public void tick() {
 		String x ="";
 

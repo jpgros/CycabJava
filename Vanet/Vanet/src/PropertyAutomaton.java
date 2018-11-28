@@ -459,12 +459,10 @@ class Property5 extends VanetProperty {
                     }
                     else if(v.myPlatoon!=null) {
                     	transitionsMade[1][0]=true;
-//                   	 if (v.autonomie == 100) {
-//                         throw new PropertyFailedException(this, "Vehicle " + v.id + " should not refill while in platoon.");
-//                         // verify this property
-//                     }
+                   	 if (v.autonomie == 100) {
+                         throw new PropertyFailedException(this, "Vehicle " + v.id + " should not refill while in platoon.");
+                     }
                     }
-                   
                     break;
             }
             alpTmp =forEachVehicleProp.get(v);

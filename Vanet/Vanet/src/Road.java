@@ -111,7 +111,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
                 if(v.myPlatoon!=null) { 
                     removeVehicle(v, "Error : vehicle: "+ v.id+ " reached distance but is inside platoon, removed anyway ");
                 }
-                else {
+                else{
                 	vehicleLog += ";quitRoad";
                     removeVehicle(v, "Event : vehicle: "+ v.id+ " reached distance and quitting successfully the road ");
                 }
@@ -132,6 +132,11 @@ public class Road implements Serializable, Iterable<Vehicle> {
         roadLog="";
     }
     public void tickTrigger() {
+//    	if(!tick) {
+//        	for (Vehicle v : allVehicles) {
+//               v.updatevehicleAutonomie();
+//            }
+//    	}
     	for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
             	v.getPlatoon().tickTrigger();
