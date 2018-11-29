@@ -40,22 +40,22 @@ public class VanetFACS implements Serializable{
         FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         FileReader roadReader = new FileReader("./platoonPolicies.txt");   
-           			
+        boolean reinitCov  =false; // do we want to reinit different coverages afeter each test
+    	boolean interruptCovered =false; // do we want to stop execution when everything is covered		
         String strWriter ="";
         String vhReader="";
         String plReader="";
         String rdReader="";
         String strLog="";
         FsmModel fsm = new VanetFSM(strWriter, vhReader, plReader, rdReader, strLog);       
-
-        //StochasticTester st = new StochasticTester(fsm,writer,readerStep);
+        StochasticTester st   = new StochasticTester(fsm,writerLog,reinitCov, interruptCovered);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        ArrayList<MyTest> initial=retrieveTest(fsm,writer,vcm, writerLog,apm);
-        //generatetest(fsm, writer, vcm, writerErr, writerLog,apm);
+        //ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
+        generatetest(st, vcm, writerErr,apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
@@ -137,24 +137,16 @@ public class VanetFACS implements Serializable{
 
     }
     
-    public static ArrayList<MyTest> retrieveTest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm, PrintWriter writerLog,AdaptationPolicyModel apm){
+    public static ArrayList<MyTest> retrieveTest(StochasticTester st, VanetConformanceMonitor vcm, AdaptationPolicyModel apm){
     	ArrayList<MyTest> initial=null;
     	FileInputStream inser;
-		boolean reinitRulesCov = false;
-		try {
-	        ((VanetFSM) fsm).getValues();     
+		try {  
 			inser = new FileInputStream("output.ser");
-			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectInputStream objectInputStream = new ObjectInputStream(inser);
 	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
-	        StochasticTester st   = new StochasticTester(fsm,writer, testInput);
 	        objectInputStream.close();
 			st.setMonitor(vcm); 
-	        initial = st.retrieve(propertiesWriter,apm);
-	        String strLog=((VanetFSM) fsm).getSUT().writerLog;
-	        writerLog.print(strLog); 
-			propertiesWriter.close();
-	        vcm.printReport();			
+	        initial = st.retrieve(apm,testInput);	
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -170,29 +162,18 @@ public class VanetFACS implements Serializable{
 		return initial;
     }
     
-    public static void generatetest(FsmModel fsm, PrintWriter writer, VanetConformanceMonitor vcm,PrintWriter writerErr, PrintWriter writerLog,AdaptationPolicyModel apm) {
+    public static void generatetest(StochasticTester st, VanetConformanceMonitor vcm, PrintWriter writerLog,AdaptationPolicyModel apm) {
     	//attention risque d incomptatibilite nbstep 
         ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
-        ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();
-    	StochasticTester st   = new StochasticTester(fsm,writer);     
+        ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();   
 		try {
-	        ((VanetFSM) fsm).getValues();     
 			FileOutputStream outser = new FileOutputStream("output.ser");
-			PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
-			st.setMonitor(vcm);
 			ArrayList<MyTest> testsList=null;
-			String strLog="";
-			testsList=st.generate(10,1000,propertiesWriter,strLog,apm);
-			//stats should be verified : may be done globaly
-			writerLog.print(strLog);
-			strLog=((VanetFSM) fsm).getSUT().writerLog;
-	        writerLog.print(strLog); 
-	        strLog="";			
-			propertiesWriter.close();
-			vcm.printReport();
-	        			
-	        //convert initial in a serializable list and writing it
+			st.setMonitor(vcm);
+			testsList=st.generate(1,1000,apm);
+			//stats should be verified : may be done globaly		
+			//convert initial in a serializable list and writing it
 	        for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);

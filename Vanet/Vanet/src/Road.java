@@ -55,7 +55,6 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public void addStringWriter(String s) {
     	writer += s;
     }
-    
     public String getStringWriterLog() {
     	return writerLog;
     }
