@@ -49,11 +49,10 @@ public class AdaptationPolicyModel {
                 	for(Rule r : rules) {
                 		if(v.myPlatoon.lastReconf.name == r.reconf) r.coverage=1.0;
                 	}
-                    er.notifyStepAfter(compteur, v.myPlatoon.lastReconf,lastTriggeredReconf);
+                	er.notifyStepAfter(compteur, v.myPlatoon.lastReconf,lastTriggeredReconf);
                 }
             }
         }
-        
         double cpt=0.0;
 		for(Rule r : rules) {
 			cpt+=r.coverage;
@@ -223,13 +222,6 @@ class ExecutionReport {
     	map2.put(PolicyName.UPGRADERELAY, 0);
     	//map2.put(PolicyName.RUN, 0);
     }
-//    public boolean containsElt(ArrayList<Element> array, Element elt) {
-//    	for(Element loopElt : array) {
-//    		if(loopElt.name == elt.name && loopElt.priority == elt.priority && loopElt.vehicle == elt.vehicle ) return true;
-//    	}
-//    	
-//    	return false;
-//    }
 
     public void dump() {
     	Map<PolicyName, Integer> eligibleMap = new HashMap<PolicyName, Integer>();
@@ -266,17 +258,6 @@ class ExecutionReport {
             	eligibleMap.put(elig.name, eligibleMap.get(elig.name) + 1);
             	if(elig.name==PolicyName.RELAY) eligHigh ++;
             	
-//            	switch(elig.priority) {
-//            	case LOW :
-//            		eligLow++;
-//            		break;
-//            	case MEDIUM:
-//            		eligMed++;
-//            		break;
-//            	case HIGH: 
-//            		eligHigh++;
-//            		break;
-//            	}
             }
             x=" --> Actual reconfiguration: " + steps.get(step).getSecond();
             System.out.println(x);
@@ -285,17 +266,6 @@ class ExecutionReport {
             	actualMap.put(elig.name, actualMap.get(elig.name) + 1);
             	if(elig.name==PolicyName.RELAY) eligHigh ++;
 
-//            	switch(elig.priority) {
-//            	case LOW :
-//            		actuLow++;
-//            		break;
-//            	case MEDIUM:
-//            		actuMed++;
-//            		break;
-//            	case HIGH: 
-//            		actuHigh++;
-//            		break;
-//            	}
             }
             // if(steps.get(step).getSecond().size()>0 && (steps.get(step).getFirst().contains(steps.get(step).getSecond()))) {
             //if priority eligible > actual 

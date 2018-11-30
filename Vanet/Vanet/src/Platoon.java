@@ -99,9 +99,18 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		//System.out.println("tick policy: " + tickCounter);
 		//writer.println("tick policy: " + tickCounter);
 		//if(tickCounter ==0) {
-			lastReconf=null; // to remove , already done in ticktrigger
+		if(true) {//M3 lastReconf not reinit at the end of tick trigger so if on the next step another action than tick is used, lastreconf will apear again into actual
+			lastReconf=null;
+		}
 			if(policies.listPolicy.size()>0) {
 				lastReconf = policies.listPolicy.get(0);
+//				lastReconf=policies.listPolicy.get(policies.listPolicy.size()-1);   //M1 replaces tickTriggerM1
+//				if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
+//					lastReconf = policies.listPolicy.get(0);
+//				}
+																					
+																					//M4 does not do a reconf
+				policies.listPolicy.clear();
 			}
 				//verification that vehicle Leader wants to relay and quit platoon:
 	//			if(lastReconf.vehicle.isLeader() && lastReconf.name == PolicyName.RELAY) {
@@ -141,9 +150,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	
 	public void tickTrigger() {
 		String x = "";
-		if(policies.listPolicy.size()>0) {			
-			lastReconf = policies.listPolicy.remove(0);
-			policies.listPolicy.clear();
+		if(lastReconf!=null) {// policies.listPolicy.size()>0) {			
+			//lastReconf = policies.listPolicy.remove(0);
+			//policies.listPolicy.clear();
 		
 			if(lastReconf.name == PolicyName.RELAY) {
 				this.relay();
@@ -210,284 +219,27 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			road.platoonLog+="Platoon;"+ id+";" +vehiclesList.size() +vlList+  "\n";
 		}
 	}
-	
-	public void tickTriggerM1() { //always get lower priority
-		String x = "";
-		if(policies.listPolicy.size()>0) {
-			System.out.println("list " + policies.listPolicy+ "taking " +policies.listPolicy.get(policies.listPolicy.size()-1));
-			lastReconf = policies.listPolicy.remove(policies.listPolicy.size()-1);
-			policies.listPolicy.clear();
-		
-			if(lastReconf.name == PolicyName.RELAY) {
-				this.relay();
-				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				//System.out.print(x);
-				road.addStringWriter(x);
-				//tickCounter=6;
-			}
-			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
-				this.upgradeRelay(lastReconf.vehicle);
-				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				//System.out.print(x);
-				road.addStringWriter(x);
-				//tickCounter=6;
-			}
-			else if(lastReconf.name == PolicyName.QUITFAILURE || lastReconf.name == PolicyName.QUITPLATOON || lastReconf.name == PolicyName.QUITFORSTATION) {
-				if(lastReconf.vehicle == leader) {
-					relay();
-					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter=6;
-				}
-				deleteVehicle(lastReconf.vehicle);
-				switch (lastReconf.name) {
-				case QUITFAILURE:
-					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter+=3;
-					break;
-				case QUITFORSTATION:
-					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter+=5;
-					break;
-				case QUITPLATOON:
-					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x); // or distance reached
-					road.addStringWriter(x);
-					//tickCounter+=4;
-					break;
-				default:
-					x= "Error, policy name not verified properly"+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					break;
-				}
-			}
-        }
-		created=false;
-		lastReconf=null;
-	}
-	
-	public void tickTriggerM2() { //get random priority should be harde rto detect than M1
-		String x = "";
-		if(policies.listPolicy.size()>0) {
-			lastReconf = policies.listPolicy.remove(new Random().nextInt(policies.listPolicy.size()));
-			policies.listPolicy.clear();
-		
-			if(lastReconf.name == PolicyName.RELAY) {
-				this.relay();
-				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				//System.out.print(x);
-				road.addStringWriter(x);
-				//tickCounter=6;
-			}
-			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
-				this.upgradeRelay(lastReconf.vehicle);
-				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				//System.out.print(x);
-				road.addStringWriter(x);
-				//tickCounter=6;
-			}
-			else if(lastReconf.name == PolicyName.QUITFAILURE || lastReconf.name == PolicyName.QUITPLATOON || lastReconf.name == PolicyName.QUITFORSTATION) {
-				if(lastReconf.vehicle == leader) {
-					relay();
-					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter=6;
-				}
-				deleteVehicle(lastReconf.vehicle);
-				switch (lastReconf.name) {
-				case QUITFAILURE:
-					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter+=3;
-					break;
-				case QUITFORSTATION:
-					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter+=5;
-					break;
-				case QUITPLATOON:
-					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x); // or distance reached
-					road.addStringWriter(x);
-					//tickCounter+=4;
-					break;
-				default:
-					x= "Error, policy name not verified properly"+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					break;
-				}
-			}
-        }
-		created=false;
-		lastReconf=null;
-	}
-	
-	public void tickTriggerM3() { //lastReconf not reinit at the end of tick trigger so if on the next step another action than tick is used, lastreconf will apear again into actual
-		String x = "";
-		if(policies.listPolicy.size()>0) {
-			lastReconf = policies.listPolicy.remove(0);
-			policies.listPolicy.clear();
-		
-			if(lastReconf.name == PolicyName.RELAY) {
-				this.relay();
-				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				//System.out.print(x);
-				road.addStringWriter(x);
-				//tickCounter=6;
-			}
-			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
-				this.upgradeRelay(lastReconf.vehicle);
-				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				//System.out.print(x);
-				road.addStringWriter(x);
-				//tickCounter=6;
-			}
-			else if(lastReconf.name == PolicyName.QUITFAILURE || lastReconf.name == PolicyName.QUITPLATOON || lastReconf.name == PolicyName.QUITFORSTATION) {
-				if(lastReconf.vehicle == leader) {
-					relay();
-					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter=6;
-				}
-				deleteVehicle(lastReconf.vehicle);
-				switch (lastReconf.name) {
-				case QUITFAILURE:
-					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter+=3;
-					break;
-				case QUITFORSTATION:
-					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter+=5;
-					break;
-				case QUITPLATOON:
-					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x); // or distance reached
-					road.addStringWriter(x);
-					//tickCounter+=4;
-					break;
-				default:
-					x= "Error, policy name not verified properly"+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					break;
-				}
-			}
-        }
-		created=false;
-		//lastReconf=null; mutant removes this line
-	}
-	
-	public void tickTriggerM4() { // randomly doest not do a reconf
-		String x = "";
-		double proba  = Math.random();
-	    
-		if(policies.listPolicy.size()>0 && proba >=0.95) { //here
-			lastReconf = policies.listPolicy.remove(0);
-			policies.listPolicy.clear();
-		
-			if(lastReconf.name == PolicyName.RELAY) {
-				this.relay();
-				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
-				//System.out.print(x);
-				road.addStringWriter(x);
-				//tickCounter=6;
-			}
-			else if(lastReconf.name == PolicyName.UPGRADERELAY) {
-				this.upgradeRelay(lastReconf.vehicle);
-				x = "Reconfiguration : normal vehicle get better leader" + lastReconf.vehicle.getId() + " : [UPGRADERELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";// + " tick : " + tickCounter;
-				//System.out.print(x);
-				road.addStringWriter(x);
-				//tickCounter=6;
-			}
-			else if(lastReconf.name == PolicyName.QUITFAILURE || lastReconf.name == PolicyName.QUITPLATOON || lastReconf.name == PolicyName.QUITFORSTATION) {
-				if(lastReconf.vehicle == leader) {
-					relay();
-					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter=6;
-				}
-				deleteVehicle(lastReconf.vehicle);
-				switch (lastReconf.name) {
-				case QUITFAILURE:
-					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter+=3;
-					break;
-				case QUITFORSTATION:
-					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to station : [QUITFORSTATION] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					//tickCounter+=5;
-					break;
-				case QUITPLATOON:
-					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
-					//System.out.print(x); // or distance reached
-					road.addStringWriter(x);
-					//tickCounter+=4;
-					break;
-				default:
-					x= "Error, policy name not verified properly"+ "\n";
-					//System.out.print(x);
-					road.addStringWriter(x);
-					break;
-				}
-			}
-        }
-		created=false;
-		//lastReconf=null; mutant removes this line
-	}
+
 	public void relayMutant() {
 		this.leader=null;
 	}
 	public void relay() {
-//		if(!nextLeaderList.isEmpty()){
-//			if(leader.getId()==nextLeaderList.get(0).getId()) {
-//				nextLeaderList.remove(0);
-//			}
-//		}
 		if(!nextLeaderList.isEmpty()) {
 			//System.out.print("Leader vehicle "+ leader.getId());
 			if(nextLeaderList.get(0).autonomie >= leader.LOW_LEADER_BATTERY) {
 				road.addStringWriter("actual leader id " +leader.getId() + "next leader " + nextLeaderList.get(0).getId());
 				this.leader = nextLeaderList.remove(0);
 			}
-			else {
+			else{
 				//System.out.println("No better vehicle available, Platoon deleted");
 				road.addStringWriter("No better vehicle available, Platoon deleted");
 				deletePlatoon();
 			}
 		}
-		
 		else { // remove platoon
 			//System.out.println("No better vehicle available, Platoon deleted");
 			road.addStringWriter("No better vehicle available, Platoon deleted");
 			deletePlatoon();
-            /*
-            if (vehiclesList.size()>0) {
-				leader = vehiclesList.get((int)(Math.random() * vehiclesList.size()));
-				System.out.println("Leader vehicle replaced by random " + leader.getId());
-			}
-			else {
-				System.out.println("No more vehicle avaiblable");
-			}
-			*/
 		}
 	}
 	

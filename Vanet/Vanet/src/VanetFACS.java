@@ -54,8 +54,8 @@ public class VanetFACS implements Serializable{
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        //ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
-        generatetest(st, vcm, writerErr,apm);
+        ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
+        //generatetest(st, vcm, writerErr,apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.println(" strLog Begins : "); 
         writer.print(strWriter);
