@@ -31,7 +31,7 @@ public class VanetMonitoring {
     	String roadReader="";
         String writerLog ="";
 
-        VanetFSM fsm = new VanetFSM(writer, vehicleReader, platoonReader, roadReader, writerLog);        
+        VanetFSM fsm = new VanetFSM(writer, writerLog);        
         ArrayList<VanetProperty> props = new ArrayList<VanetProperty>();
         props.add(new Property1());
         props.add(new Property2());

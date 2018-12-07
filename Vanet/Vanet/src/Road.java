@@ -24,24 +24,18 @@ public class Road implements Serializable, Iterable<Vehicle> {
 	final static double FREQUENCYSTATION = 100;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
-    String writer = null;
+    String writer = "";
     //String vehicleReader = null;
-    String platoonReader = null;
-    String roadReader = null;
     String writerLog ="";
-    String vehicleLog="";
-    String platoonLog="";
-    String roadLog="";
+    String component="";
+    String binding="";
+    String state="";
+    String action="";
     String stepName="";
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
-    public Road(String w, String vr, String pr, String rr, String wl) {
+    public Road(String w, String wl) {
     	writer = w;
-    	//vehicleReader=vr;
-    	platoonReader=pr;
-    	roadReader=rr;
     	writerLog=wl;
-
-
     }
     public void setStepName(String s) {
     	stepName=s;
@@ -64,7 +58,6 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public void addStringWriterLog(String s) {
     	writerLog += s;
     }
-    
     public void reset() {
         allVehicles.clear();
     }
@@ -101,22 +94,31 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public void tick() {
     	stepNb++;
     	tick=true;
+    	component="Components(";
+    	binding="Bindings(";
+    	state="State(";
+    	action="Actions(";
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.updateVehicleVariables();
-            vehicleLog +="Vehicle;"+v.getId() + ";"+ v.distance+";"+v.autonomie +";"+v.getStatus();
+            component +="Vehicle;"+v.getId();
+            state+= "Vehicle;"+v.getId() +"->"+ v.distance+";";
+            state+= "Vehicle;"+v.getId() +"->"+v.autonomie+";";
+            state+= "Vehicle;"+v.getId() +"->"+v.getStatus()+";";
             v.tick();
             if(v.distance <=10) {
                 if(v.myPlatoon!=null) { 
+                	component +="Platoon"+v.getIdPlatoon();
+                	state +="Platoon"+v.getIdPlatoon()+ "->" + v.myPlatoon.vehiclesList.size();
+                	if(v.myPlatoon.lastReconf!=null) action += "Platoon"+v.getIdPlatoon()+ "->" +v.myPlatoon.lastReconf;
                     removeVehicle(v, "Error : vehicle: "+ v.id+ " reached distance but is inside platoon, removed anyway ");
                 }
                 else{
-                	vehicleLog += ";quitRoad";
+                	action += "quitRoad";
                     removeVehicle(v, "Event : vehicle: "+ v.id+ " reached distance and quitting successfully the road ");
                 }
                 i--;
             }
-            vehicleLog+="\n";
         }
         affiche();
         for (Vehicle v : allVehicles) {
@@ -124,11 +126,20 @@ public class Road implements Serializable, Iterable<Vehicle> {
                 v.getPlatoon().tick();
             }
         }
-        roadLog += "Station;"+distanceStation[0]+";"+stepName+"\n";
-        addStringWriterLog(roadLog+ platoonLog+ vehicleLog );
-        vehicleLog="";
-        platoonLog="";
-        roadLog="";
+        
+    	component=")\n";
+    	binding=")\n";
+    	state=")\n";
+    	action=")\n";
+    	this.addStringWriterLog(component);
+    	this.addStringWriterLog(binding);
+    	this.addStringWriterLog(state);
+    	this.addStringWriterLog(action);
+//        roadLog += "Station;"+distanceStation[0]+";"+stepName+"\n";
+//        addStringWriterLog(roadLog+ platoonLog+ vehicleLog );
+//        vehicleLog="";
+//        platoonLog="";
+//        roadLog="";
     }
     public void tickTrigger() {
 //    	if(!tick) {

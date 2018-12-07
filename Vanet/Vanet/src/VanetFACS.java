@@ -37,9 +37,9 @@ public class VanetFACS implements Serializable{
     	PrintWriter writerLog = new PrintWriter("./logs/log"+ dateFormat.format(date) +".txt", "UTF-8");    	    	
     	PrintWriter writer = new PrintWriter("./outputGenetic.txt", "UTF-8");
         PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8"); 
-        FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
-        FileReader platoonReader = new FileReader("./platoonPolicies.txt");
-        FileReader roadReader = new FileReader("./platoonPolicies.txt");   
+        //FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
+        //FileReader platoonReader = new FileReader("./platoonPolicies.txt");
+        //FileReader roadReader = new FileReader("./platoonPolicies.txt");   
         boolean reinitCov  =false; // do we want to reinit different coverages afeter each test
     	boolean interruptCovered =false; // do we want to stop execution when everything is covered		
         String strWriter ="";
@@ -47,23 +47,26 @@ public class VanetFACS implements Serializable{
         String plReader="";
         String rdReader="";
         String strLog="";
-        FsmModel fsm = new VanetFSM(strWriter, vhReader, plReader, rdReader, strLog);       
-        StochasticTester st   = new StochasticTester(fsm,writerLog,reinitCov, interruptCovered);
+        FsmModel fsm = new VanetFSM(strWriter, strLog);       
+        StochasticTester st   = new StochasticTester(fsm,writerErr,reinitCov, interruptCovered);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
-        //generatetest(st, vcm, writerErr,apm);
+        //ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
+        writer.println(" str Begins : ");
+        generatetest(st, vcm,apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
-        writer.println(" strLog Begins : "); 
         writer.print(strWriter);
+        strLog=((VanetFSM) fsm).getSUT().getStringWriterLog();
+        writerLog.println(" strLog Begins : "); 
+        writerLog.print(strLog);
         writerErr.close();
         writer.close();
-        vehicleReader.close();
-        platoonReader.close();
-        roadReader.close();
+        //vehicleReader.close();
+        //platoonReader.close();
+        //roadReader.close();
         writerLog.close();
         //objectInputStream.close();
         //writerLog.close();
@@ -162,7 +165,7 @@ public class VanetFACS implements Serializable{
 		return initial;
     }
     
-    public static void generatetest(StochasticTester st, VanetConformanceMonitor vcm, PrintWriter writerLog,AdaptationPolicyModel apm) {
+    public static void generatetest(StochasticTester st, VanetConformanceMonitor vcm,AdaptationPolicyModel apm) {
     	//attention risque d incomptatibilite nbstep 
         ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
         ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();   

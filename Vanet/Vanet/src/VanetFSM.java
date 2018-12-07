@@ -35,13 +35,10 @@ public class VanetFSM implements FsmModel {
     ArrayList<Double> distance = new ArrayList<Double>();
     ArrayList<Integer> indexjoined = new ArrayList<Integer>();
     ArrayList<Integer> indexKicked = new ArrayList<Integer>();
-    public VanetFSM(String w, String vr, String pr, String rr, String wl) {
+    public VanetFSM(String w, String wl) {
         writer = w;
-        vehicleReader=vr;
-        platoonReader=pr;
-        roadReader=rr;
         writerLog=wl;
-        sut = new Road(w,vr,pr,rr,wl);
+        sut = new Road(w,wl);
     }
     public String getStringWriter() {
     	return sut.getStringWriter();

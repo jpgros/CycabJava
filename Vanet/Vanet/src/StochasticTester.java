@@ -30,12 +30,12 @@ import java.io.UnsupportedEncodingException;
  * Time: 09:26
  */
 public class StochasticTester implements Serializable{
-	public PrintWriter writerStep = null;
-	public PrintWriter writerLog = null;
+	//public PrintWriter writer = null;
+	//public PrintWriter writerLog = null;
 	public FileReader readerStep = null;
+	public PrintWriter writerErr = null;
 	public FileOutputStream outser = null;   
 	public ObjectOutputStream objOutStr = null;
-	public PrintWriter writerTest = null;
 	boolean reinitCov  ; // do we want to reinit different coverages afeter each test
 	boolean interruptCovered ; // do we want to stop execution when everything is covered
 	
@@ -54,12 +54,13 @@ public class StochasticTester implements Serializable{
      * @param _fsm
      * @param writerlog four output trace generation
      */
-    public StochasticTester(FsmModel _fsm,PrintWriter wl, boolean rc, boolean ic) {
+    public StochasticTester(FsmModel _fsm, PrintWriter we,boolean rc, boolean ic) {
         fsm = _fsm;
         actionsAndProbabilities = getActionTaggedMethods(fsm);
         System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
         fsm.reset(true);
-        writerLog=wl;
+        //writer=w;
+        //writerLog=wl;
         reinitCov =rc;
         interruptCovered = ic;
     }
@@ -198,13 +199,16 @@ public class StochasticTester implements Serializable{
     	int indRules=0;
     	int indProp=0;
     	String strLog="";
+    	String x="";
         PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         ((VanetFSM) fsm).getValues();
         // for each of the resulting test cases
         for (int i=0; i < nb; i++) {
-            System.out.println("== Generating test #" + i + " ==");
-            strLog+= "== Generating test #" + i + " ==";
+        	x="== Generating test #" + i + " ==";
+        	((VanetFSM) fsm).getSUT().addStringWriter(x);
+            System.out.println(x);
+            x="";
             // initialize step counter
             int j=0;
             // reset FSM exploration
@@ -215,7 +219,8 @@ public class StochasticTester implements Serializable{
             // while limit has not been reached and there exists a next step
             MyStep newStep;
         	do {
-            	strLog += "step " +j; 
+        		x="step " +j;
+            	((VanetFSM) fsm).getSUT().addStringWriter(x);
 	            newStep = computeNextStep();
             	b = (newStep != null);
                 if (b) {
@@ -276,16 +281,11 @@ public class StochasticTester implements Serializable{
             ret.add(currentTest);
             propertiesWriter.print(propertiesOutput);
             propertiesWriter.print(checkCoverageProperties(i,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
-            strLog+=((VanetFSM) fsm).getSUT().writerLog;
-            ((VanetFSM) fsm).getSUT().setStringWriterLog("");
             if(reinitCov) {
             	resetCov(apm);
             }
         }
 		vcm.printReport();
-		strLog+=((VanetFSM) fsm).getSUT().writerLog;
-		writerLog.print(strLog);
-        writerLog.print(strLog); 
 		propertiesWriter.close();
         return ret;
     }
@@ -363,8 +363,7 @@ public class StochasticTester implements Serializable{
             }
 			ret.add(currentTest);
 		}
-        String strLog=((VanetFSM) fsm).getSUT().writerLog;
-        writerLog.print(strLog); 
+       // writerLog.print(strLog); 
 		propertiesWriter.print(propertiesOutput);
 		propertiesWriter.close();
         vcm.printReport();

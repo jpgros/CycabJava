@@ -160,7 +160,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				//System.out.print(x);
 				road.addStringWriter(x);
 //				x = "Replaced by " + this.leader.getId();
-//
 //				System.out.println(x);
 //				writer.println(x);
 				//tickCounter=6;
@@ -211,18 +210,19 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		created=false;
 		lastReconf=null;
 		String vlList="";
-		if(vehiclesList==null) road.platoonLog+="0 \n";
-		else {
-			for(Vehicle v : this.vehiclesList) {
-				vlList+=";"+ v.id;
-			}
-			road.platoonLog+="Platoon;"+ id+";" +vehiclesList.size() +vlList+  "\n";
-		}
+		//if(vehiclesList==null) road.platoonLog+="0 \n";
+//		else {
+//			for(Vehicle v : this.vehiclesList) {
+//				vlList+=";"+ v.id;
+//			}
+			//road.platoonLog+="Platoon;"+ id+";" +vehiclesList.size() +vlList+  "\n";
+//		}
 	}
 
 	public void relayMutant() {
 		this.leader=null;
 	}
+	
 	public void relay() {
 		if(!nextLeaderList.isEmpty()) {
 			//System.out.print("Leader vehicle "+ leader.getId());
