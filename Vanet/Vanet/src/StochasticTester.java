@@ -222,6 +222,7 @@ public class StochasticTester implements Serializable{
         		x="step " +j;
             	((VanetFSM) fsm).getSUT().addStringWriter(x);
 	            newStep = computeNextStep();
+	            ((VanetFSM) fsm).getSUT().externalEvent="Event("+newStep.meth.getName()+");\n";
             	b = (newStep != null);
                 if (b) {
                     currentTest.append(newStep);

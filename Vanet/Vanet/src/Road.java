@@ -32,6 +32,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     String state="";
     String action="";
     String stepName="";
+    String externalEvent="";
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
     public Road(String w, String wl) {
     	writer = w;
@@ -98,43 +99,54 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	binding="Bindings(";
     	state="State(";
     	action="Actions(";
+
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.updateVehicleVariables();
-            component +="Vehicle;"+v.getId();
-            state+= "Vehicle;"+v.getId() +"->"+ v.distance+";";
-            state+= "Vehicle;"+v.getId() +"->"+v.autonomie+";";
-            state+= "Vehicle;"+v.getId() +"->"+v.getStatus()+";";
+            component +="Vehicle:"+v.getId();
+            state+= "Vehicle:"+v.getId() +"->remaining distance:"+ v.distance+";";
+            state+= "Vehicle:"+v.getId() +"->remaining automony:"+v.autonomie+";";
+            state+= "Vehicle:"+v.getId() +"->status:"+v.getStatus()+";";
             v.tick();
+            if(v.myPlatoon!=null) { 
+            	if(v.isLeader()) {
+            		component +="Platoon:"+v.myPlatoon+"\n";
+            	}
+            	binding+= "Platoon:"+v.myPlatoon+"->Vehicle:"+v.getId()+"\n";
+            	state +="\n"+"Platoon:"+v.myPlatoon+ "->number vehicles:" + v.myPlatoon.vehiclesList.size();
+            }
             if(v.distance <=10) {
                 if(v.myPlatoon!=null) { 
-                	component +="Platoon"+v.getIdPlatoon();
-                	state +="Platoon"+v.getIdPlatoon()+ "->" + v.myPlatoon.vehiclesList.size();
-                	if(v.myPlatoon.lastReconf!=null) action += "Platoon"+v.getIdPlatoon()+ "->" +v.myPlatoon.lastReconf;
                     removeVehicle(v, "Error : vehicle: "+ v.id+ " reached distance but is inside platoon, removed anyway ");
                 }
                 else{
-                	action += "quitRoad";
+                	action +="Vehicle:"+v.getId() +"quitRoad";
                     removeVehicle(v, "Event : vehicle: "+ v.id+ " reached distance and quitting successfully the road ");
                 }
                 i--;
             }
+            state+="\n";
         }
         affiche();
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
                 v.getPlatoon().tick();
+                if(v.myPlatoon.lastReconf!=null) action += v.myPlatoon.lastReconf;
             }
         }
         
-    	component=")\n";
-    	binding=")\n";
-    	state=")\n";
-    	action=")\n";
+    	component+=")\n";
+    	binding+=")\n";
+    	state = state.substring(0, state.length()-1); 
+    	state+=")\n";
+    	action+=")\n";
+    	this.addStringWriterLog("Tick " + stepNb +"\n");
     	this.addStringWriterLog(component);
     	this.addStringWriterLog(binding);
     	this.addStringWriterLog(state);
     	this.addStringWriterLog(action);
+    	this.addStringWriterLog(externalEvent);
+    	this.addStringWriterLog("\n");
 //        roadLog += "Station;"+distanceStation[0]+";"+stepName+"\n";
 //        addStringWriterLog(roadLog+ platoonLog+ vehicleLog );
 //        vehicleLog="";
