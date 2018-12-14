@@ -1,6 +1,7 @@
 
 import nz.ac.waikato.modeljunit.FsmModel;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -36,7 +37,10 @@ public class VanetFACS implements Serializable{
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
     	PrintWriter writerLog = new PrintWriter("./logs/log"+ dateFormat.format(date) +".txt", "UTF-8");    	    	
     	PrintWriter writer = new PrintWriter("./outputGenetic.txt", "UTF-8");
-        PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8"); 
+        PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8");
+        PrintWriter writerReconfChoosen = new PrintWriter("./writerReconfChoosen.txt", "UTF-8");
+        FileReader reconfChoosenReader = new FileReader("./writerReconfChoosen1.txt");
+        Mutant mutant = Mutant.NONE;
         //FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         //FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         //FileReader roadReader = new FileReader("./platoonPolicies.txt");   
@@ -47,8 +51,22 @@ public class VanetFACS implements Serializable{
         String plReader="";
         String rdReader="";
         String strLog="";
-        FsmModel fsm = new VanetFSM(strWriter, strLog);       
-        StochasticTester st   = new StochasticTester(fsm,writerErr,reinitCov, interruptCovered);
+        String reconfChoosen="";
+        String reconfChoosenRead="";
+        
+        BufferedReader br = new BufferedReader(reconfChoosenReader);
+        try {
+            String line = br.readLine();
+            while (line != null) {
+                reconfChoosenRead+=line;
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        
+        FsmModel fsm = new VanetFSM(strWriter, strLog,reconfChoosen,reconfChoosenRead,mutant);       
+        StochasticTester st   = new StochasticTester(fsm,writerErr,reinitCov, interruptCovered,mutant);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);       
@@ -62,6 +80,8 @@ public class VanetFACS implements Serializable{
         strLog=((VanetFSM) fsm).getSUT().getStringWriterLog();
         writerLog.println(" strLog Begins : "); 
         writerLog.print(strLog);
+        reconfChoosen=((VanetFSM) fsm).getSUT().getReconfigurationChoosen();
+        writerReconfChoosen.print(reconfChoosen);
         writerErr.close();
         writer.close();
         //vehicleReader.close();
@@ -70,6 +90,7 @@ public class VanetFACS implements Serializable{
         writerLog.close();
         //objectInputStream.close();
         //writerLog.close();
+        writerReconfChoosen.close();
     }
 
     public static void setRulesForAPM(AdaptationPolicyModel a, PrintWriter writer) {

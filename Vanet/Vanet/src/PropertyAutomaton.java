@@ -124,7 +124,13 @@ class PropertyCoveredException extends Exception {
  */
 
 class Property1 extends VanetProperty {
-
+	Mutant mutant;
+	public Property1() {
+		
+	}
+	public Property1(Mutant m) {
+		mutant=m;
+	}
     // Toujours un leader dans le peloton
 
     public double match(Road sut) throws PropertyFailedException {
@@ -195,9 +201,16 @@ class Property1 extends VanetProperty {
 
 
 class Property2 extends VanetProperty {
-
+	Mutant mutant;
+	public Property2() {
+		
+	}
+	public Property2(Mutant m) {
+		mutant=m;
+	}
     // Au moins 2 VL dans le peloton
     public double match(Road sut) throws PropertyFailedException {
+    	 int numberVl = mutant== Mutant.M6 ? 3 : 2;
     	 double scoreV, ret = -1;
          for (Vehicle v : sut) {
              if (!forEachVehicleProp.keySet().contains(v)) {
@@ -242,7 +255,7 @@ class Property2 extends VanetProperty {
                      }
                      else if(v.myPlatoon !=null){
                     	 transitionsMade[1][0]=true;
-                         if (v.myPlatoon.vehiclesList.size() < 2) {
+                         if (v.myPlatoon.vehiclesList.size() < numberVl) {
                              throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " has less than 2 vehicles.");
                          }
                      }
@@ -263,7 +276,15 @@ class Property2 extends VanetProperty {
 }
 
 class Property3 extends VanetProperty {
-
+	Mutant mutant;
+	public static int MIN_LEVEL_BATTERY;
+	public Property3() {
+		
+	}
+	public Property3(Mutant m) {
+		mutant=m;
+		MIN_LEVEL_BATTERY = mutant==Mutant.M1 ? 20 : 0;
+	}
     // For each vehicle:  After joinPlatoon Always v.battery > 0 && v.distance > 0 until quitting platoon
 
 
@@ -310,7 +331,7 @@ class Property3 extends VanetProperty {
                     }
                     else if(v.myPlatoon!=null) {
                     	transitionsMade[1][0]=true;
-                        if (v.autonomie < 0 || v.distance == 0) {
+                        if (v.autonomie < MIN_LEVEL_BATTERY || v.distance == 0) {
                             throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination.");
                         }
                     }
@@ -339,11 +360,18 @@ class Property3 extends VanetProperty {
 
 
 class Property4 extends VanetProperty {
-
+	Mutant mutant;
+	public Property4() {
+		
+	}
+	public Property4(Mutant m) {
+		mutant=m;
+	}
+	
     // For each vehicle: After relay(v) always battery > 33 until vehicle downgraded
-
     public double match(Road sut) throws PropertyFailedException {
         double scoreV, ret = -1;
+        double minLeaderBat;
         for (Vehicle v : sut) {
             if (!forEachVehicleProp.keySet().contains(v)) {
             	Triple t = new Triple(0, "init",sut.stepNb);
@@ -386,7 +414,8 @@ class Property4 extends VanetProperty {
                     }
                     else if(v.myPlatoon!=null && v.myPlatoon.leader==v) {
                     	transitionsMade[1][0]=true;
-                        if (v.autonomie < v.LOW_LEADER_BATTERY-3.0) {
+                    	minLeaderBat = mutant==Mutant.M4 ? v.LOW_LEADER_BATTERY+3.0 : v.LOW_LEADER_BATTERY-3.0;
+                        if (v.autonomie < minLeaderBat) {
                         	System.out.println("auto" +v.autonomie + "le" + v.myPlatoon.leader + "me" + v);
                             throw new PropertyFailedException(this, "Vehicle " + v.id + " has a too low autonomy for being leader.");
                         }
@@ -411,7 +440,13 @@ class Property4 extends VanetProperty {
 
 
 class Property5 extends VanetProperty {
-
+	Mutant mutant;
+	public Property5() {
+		
+	}
+	public Property5(Mutant m) {
+		mutant=m;
+	}
     // For each vehicle: Never refill when inPlatoon
 
     public double match(Road sut) throws PropertyFailedException {

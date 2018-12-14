@@ -39,6 +39,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		vehicleLeader = leader.id;
 		leader.setPlatoon(this);
 		road =r;
+		r.numberPlatoon++;
 		for (Vehicle v : others) {
 			vehiclesList.add(v);
 			eligibleLeader(v);
@@ -99,17 +100,52 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		//System.out.println("tick policy: " + tickCounter);
 		//writer.println("tick policy: " + tickCounter);
 		//if(tickCounter ==0) {
+		String lines[]=road.reconfChoosenRead.split("\n");
 		if(true) {//M3 lastReconf not reinit at the end of tick trigger so if on the next step another action than tick is used, lastreconf will apear again into actual
 			lastReconf=null;
 		}
 			if(policies.listPolicy.size()>0) {
-				lastReconf = policies.listPolicy.get(0);
-//				lastReconf=policies.listPolicy.get(policies.listPolicy.size()-1);   //M1 replaces tickTriggerM1
-//				if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
-//					lastReconf = policies.listPolicy.get(0);
-//				}
-																					
-																					//M4 does not do a reconf
+				if(policies.listPolicy.size()>1) {
+					road.addReconfigurationChoosen("Tick " +road.stepNb );
+					System.out.println("ok size 2");
+				}
+				switch(road.mutant) {
+				case M5:
+					if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
+					if(policies.listPolicy.size()>1) {
+						for(int i=0; i<policies.listPolicy.size();i++) {
+							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
+						}
+						road.addReconfigurationChoosen("\n");
+					}
+					lastReconf = policies.listPolicy.get(0);
+				}
+				break;
+				case M11:
+					if(policies.listPolicy.size()>1) {
+						for(int i=0; i<policies.listPolicy.size();i++) {
+							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
+						}
+						road.addReconfigurationChoosen("\n");
+					}
+					lastReconf=policies.listPolicy.get(policies.listPolicy.size()-1);   //M1 replaces tickTriggerM1
+				break;
+				case M10:// chooses randomly a reconf
+					//TODO 
+				break;
+				default:
+					if(policies.listPolicy.size()>1) {
+						
+						for(int i=0; i<policies.listPolicy.size();i++) {
+							String[] reconf= lines[i].split("/");
+							for(int j=0;j< reconf.length;j++)
+							road.addReconfigurationChoosen("/"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
+						}
+						road.addReconfigurationChoosen("\n");
+					}
+					lastReconf = policies.listPolicy.get(0);
+				break;
+				}													
 				policies.listPolicy.clear();
 			}
 				//verification that vehicle Leader wants to relay and quit platoon:
@@ -277,6 +313,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			this.leader=null;
 			this.vehiclesList=null;
 			this.policies=null;
+			road.numberPlatoon--;
 		}
 		else {
 			System.out.println("Case not taken care of");

@@ -30,15 +30,21 @@ public class VanetFSM implements FsmModel {
     String platoonReader =null;
     String roadReader =null;
     String writerLog=null;
+    String reconfChoosen="";
+    Mutant mutant;
+    String reconfChoosenReader;
     ArrayList<Double> battery = new ArrayList<Double>();
     ArrayList<Double> decBattery = new ArrayList<Double>();
     ArrayList<Double> distance = new ArrayList<Double>();
     ArrayList<Integer> indexjoined = new ArrayList<Integer>();
     ArrayList<Integer> indexKicked = new ArrayList<Integer>();
-    public VanetFSM(String w, String wl) {
+    public VanetFSM(String w, String wl, String rc,String rcr ,Mutant m) {
         writer = w;
         writerLog=wl;
-        sut = new Road(w,wl);
+        reconfChoosen=rc;
+        mutant=m;
+        reconfChoosenReader=rcr;
+        sut = new Road(w,wl,rc,rcr,m);
     }
     public String getStringWriter() {
     	return sut.getStringWriter();

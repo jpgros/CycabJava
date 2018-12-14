@@ -38,6 +38,7 @@ public class StochasticTester implements Serializable{
 	public ObjectOutputStream objOutStr = null;
 	boolean reinitCov  ; // do we want to reinit different coverages afeter each test
 	boolean interruptCovered ; // do we want to stop execution when everything is covered
+	Mutant mutant;
 	
 	//public ArrayList<SerializableTest> serializableTest;
 	public LinkedList<VanetProperty> properties = new LinkedList<VanetProperty>();
@@ -54,7 +55,7 @@ public class StochasticTester implements Serializable{
      * @param _fsm
      * @param writerlog four output trace generation
      */
-    public StochasticTester(FsmModel _fsm, PrintWriter we,boolean rc, boolean ic) {
+    public StochasticTester(FsmModel _fsm, PrintWriter we,boolean rc, boolean ic, Mutant m) {
         fsm = _fsm;
         actionsAndProbabilities = getActionTaggedMethods(fsm);
         System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
@@ -63,6 +64,7 @@ public class StochasticTester implements Serializable{
         //writerLog=wl;
         reinitCov =rc;
         interruptCovered = ic;
+        mutant =m;
     }
     
     /**
@@ -80,11 +82,11 @@ public class StochasticTester implements Serializable{
         vcm = _vcm;
     }
     public void init() {
-        properties.add(new Property1());
-        properties.add(new Property2());
-        properties.add(new Property3());
-        properties.add(new Property4());
-        properties.add(new Property5());
+        properties.add(new Property1(mutant));
+        properties.add(new Property2(mutant));
+        properties.add(new Property3(mutant));
+        properties.add(new Property4(mutant));
+        properties.add(new Property5(mutant));
     }
     
     /**

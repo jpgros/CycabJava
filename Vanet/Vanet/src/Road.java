@@ -20,10 +20,12 @@ import java.io.UnsupportedEncodingException;
 public class Road implements Serializable, Iterable<Vehicle> {
 	boolean tick =false;
 	int stepNb=0;
-    final static int MAX_CAPACITY = 5;
+    final static int MAX_CAPACITY = 15;
 	final static double FREQUENCYSTATION = 100;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
+    int numberPlatoon=0;
+    Mutant mutant;
     String writer = "";
     //String vehicleReader = null;
     String writerLog ="";
@@ -33,10 +35,19 @@ public class Road implements Serializable, Iterable<Vehicle> {
     String action="";
     String stepName="";
     String externalEvent="";
+    String reconfigurationChoosen="";
+    String reconfChoosenRead="";
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
-    public Road(String w, String wl) {
+    public Road(String w, String wl, String rc,String rcr,Mutant m) {
     	writer = w;
     	writerLog=wl;
+    	reconfigurationChoosen=rc;
+    	mutant=m;
+    	reconfChoosenRead=rcr;
+    	
+    }
+    public String getReconfChoosenRead() {
+    	return reconfChoosenRead;
     }
     public void setStepName(String s) {
     	stepName=s;
@@ -58,6 +69,15 @@ public class Road implements Serializable, Iterable<Vehicle> {
     }
     public void addStringWriterLog(String s) {
     	writerLog += s;
+    }
+    public void setReconfigurationChoosen(String s) {
+    	reconfigurationChoosen = s;
+    }
+    public void addReconfigurationChoosen(String s) {
+    	reconfigurationChoosen += s;
+    }
+    public String getReconfigurationChoosen() {
+    	return reconfigurationChoosen;
     }
     public void reset() {
         allVehicles.clear();
@@ -141,6 +161,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	state+=")\n";
     	action+=")\n";
     	this.addStringWriterLog("Tick " + stepNb +"\n");
+    	this.addStringWriterLog("Vehicles on road " +allVehicles.size()+"\n");
+    	this.addStringWriterLog("Platoons on road " +numberPlatoon+"\n");
     	this.addStringWriterLog(component);
     	this.addStringWriterLog(binding);
     	this.addStringWriterLog(state);
@@ -223,7 +245,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     }
 
     public void updateDistStas(){
-		distanceStation[0]-=10;
+		distanceStation[0] = mutant==Mutant.M3 ? distanceStation[0]-1 : distanceStation[0]-10;
 		if(distanceStation[0]<=0) {
 			if(distanceStation[0]<0) System.out.println("distance station negative, should not happen");
 			distanceStation[0]=distanceStation[1];
