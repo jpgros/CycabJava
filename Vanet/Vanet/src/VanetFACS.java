@@ -58,23 +58,23 @@ public class VanetFACS implements Serializable{
         try {
             String line = br.readLine();
             while (line != null) {
-                reconfChoosenRead+=line;
+                reconfChoosenRead+=line+"\n";
                 line = br.readLine();
             }
         } finally {
             br.close();
         }
         
-        FsmModel fsm = new VanetFSM(strWriter, strLog,reconfChoosen,reconfChoosenRead,mutant);       
+        FsmModel fsm = new VanetFSM(strWriter, strLog, reconfChoosen, reconfChoosenRead, mutant);       
         StochasticTester st   = new StochasticTester(fsm,writerErr,reinitCov, interruptCovered,mutant);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);       
         VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
         //choice between generation and retrieving
-        //ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
+        ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
         writer.println(" str Begins : ");
-        generatetest(st, vcm,apm);
+        //generatetest(st, vcm,apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.print(strWriter);
         strLog=((VanetFSM) fsm).getSUT().getStringWriterLog();
@@ -91,10 +91,14 @@ public class VanetFACS implements Serializable{
         //objectInputStream.close();
         //writerLog.close();
         writerReconfChoosen.close();
+        PrintWriter writerReconfChoosen2 = new PrintWriter("./writerReconfChoosen1.txt", "UTF-8");
+        System.out.println("end ");
+        String rcw =(((VanetFSM) fsm).getSUT().getReconfigurationChoosenWrite());
+        writerReconfChoosen2.print(rcw);
+        writerReconfChoosen2.close();
     }
 
     public static void setRulesForAPM(AdaptationPolicyModel a, PrintWriter writer) {
-    	
         // Rule: -- relai d'un vehicule qui vient d'entrer dans le peloton
         //  after join(v) until quit(v)
         //      if min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)

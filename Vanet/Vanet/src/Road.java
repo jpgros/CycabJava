@@ -3,12 +3,17 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.UUID;
 
+import com.sun.tools.hat.internal.parser.Reader;
+
 import static java.util.UUID.*;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -37,6 +42,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
     String externalEvent="";
     String reconfigurationChoosen="";
     String reconfChoosenRead="";
+    String reconfChoosenWrite="";
+    transient BufferedReader reader;
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
     public Road(String w, String wl, String rc,String rcr,Mutant m) {
     	writer = w;
@@ -44,7 +51,11 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	reconfigurationChoosen=rc;
     	mutant=m;
     	reconfChoosenRead=rcr;
+    	reader = new BufferedReader(new StringReader(rcr));
     	
+    }
+    public String getLineReconfChoosenRead() throws IOException {
+    	return reader.readLine();
     }
     public String getReconfChoosenRead() {
     	return reconfChoosenRead;
@@ -81,6 +92,12 @@ public class Road implements Serializable, Iterable<Vehicle> {
     }
     public void reset() {
         allVehicles.clear();
+    }
+    public void addReconfChoosenWrite(String s){
+    	reconfChoosenWrite+=s;    	
+    }
+    public String getReconfigurationChoosenWrite() {
+    	return reconfChoosenWrite;
     }
 
     public int addVehicle(double _auto, double _distance, double decAuto) {

@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -19,6 +20,8 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	AdaptationPolicy policies =new AdaptationPolicy();
 	Element lastReconf =null;
 	boolean created;
+	boolean review = true;
+	String line;
 	//int tickCounter =0;
 	public Platoon(int consommationLeader, int numberVehicleMax,UUID id, UUID vehicleLeader) {
 		this.consommationLeader = consommationLeader;
@@ -26,11 +29,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		this.id = id;
 		this.vehicleLeader = vehicleLeader;
 	}
-
 	public Platoon() {   
 
     }
-
 	public Platoon(Vehicle _leader, Road r, Vehicle... others) {
 	    created =true;
 		leader = _leader;
@@ -100,14 +101,12 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		//System.out.println("tick policy: " + tickCounter);
 		//writer.println("tick policy: " + tickCounter);
 		//if(tickCounter ==0) {
-		String lines[]=road.reconfChoosenRead.split("\n");
 		if(true) {//M3 lastReconf not reinit at the end of tick trigger so if on the next step another action than tick is used, lastreconf will apear again into actual
 			lastReconf=null;
 		}
 			if(policies.listPolicy.size()>0) {
-				if(policies.listPolicy.size()>1) {
-					road.addReconfigurationChoosen("Tick " +road.stepNb );
-					System.out.println("ok size 2");
+				if(policies.listPolicy.size()>1 && !review) {
+					road.addReconfigurationChoosen("Tick " +road.stepNb );;
 				}
 				switch(road.mutant) {
 				case M5:
@@ -134,20 +133,70 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					//TODO 
 				break;
 				default:
-					if(policies.listPolicy.size()>1) {
-						
-						for(int i=0; i<policies.listPolicy.size();i++) {
-							String[] reconf= lines[i].split("/");
-							for(int j=0;j< reconf.length;j++)
-							road.addReconfigurationChoosen("/"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
+					System.out.println("sizepol"+ policies.listPolicy.size()+ "line before cond " + line);
+					if(policies.listPolicy.size()>1 ) {
+						if(review) {
+							try {
+								line = road.getLineReconfChoosenRead();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							String[] reconf;
+							try {
+							reconf= line.split("/");
+							}catch (NullPointerException e) {
+					            System.out.print("Caught the NullPointerException line " + line);
+					            break;
+					        }
+	//						System.out.println("line "+ line);
+	//						System.out.println("reconfs " +reconf[0] + " "+ reconf[1] + "  "+reconf[2] + "size" + reconf.length);
+							int i=0;
+							boolean looping=true;
+							do {
+								String splits[]=reconf[i+1].split(";");
+	//							for(int k=0; k<splits.length;k++) {
+	//								System.out.println("split "+ splits[k]);
+	//							}	
+								if(splits[splits.length-1].equals("OK")) {
+									looping=false;
+									//System.out.println("ok ko " +splits[splits.length-1]);
+									lastReconf = policies.listPolicy.get(i);
+									reconf[i+1] =reconf[i+1].replaceAll("OK", "KO");
+									line="";
+									policies.listPolicy.clear();
+									for(String vector : reconf){
+							             line += vector+"/";
+							       }
+									//System.out.println("adding line "+ line);
+									road.addReconfChoosenWrite(line+"\n");
+									road.addReconfigurationChoosen(line+"\n");
+								}
+								else {
+									
+								}
+							i++;
+							}while(looping && i<policies.listPolicy.size());
+						}//list>1
+						else {
+							lastReconf = policies.listPolicy.get(0);
+							for(Element elt : policies.listPolicy) {
+								road.addReconfigurationChoosen("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
+							}
+							road.addReconfigurationChoosen("\n");
+							policies.listPolicy.clear();
 						}
-						road.addReconfigurationChoosen("\n");
+
+					break;
+					
 					}
-					lastReconf = policies.listPolicy.get(0);
-				break;
-				}													
-				policies.listPolicy.clear();
-			}
+					else {
+						lastReconf = policies.listPolicy.get(0);
+						policies.listPolicy.clear();
+					}
+				}	
+				
+			}//list >0
 				//verification that vehicle Leader wants to relay and quit platoon:
 	//			if(lastReconf.vehicle.isLeader() && lastReconf.name == PolicyName.RELAY) {
 	//				Element elt = new Element(PolicyName.QUITFAILURE,Priority.HIGH);

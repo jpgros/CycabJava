@@ -417,7 +417,7 @@ class Property4 extends VanetProperty {
                     	minLeaderBat = mutant==Mutant.M4 ? v.LOW_LEADER_BATTERY+3.0 : v.LOW_LEADER_BATTERY-3.0;
                         if (v.autonomie < minLeaderBat) {
                         	System.out.println("auto" +v.autonomie + "le" + v.myPlatoon.leader + "me" + v);
-                            throw new PropertyFailedException(this, "Vehicle " + v.id + " has a too low autonomy for being leader.");
+                            throw new PropertyFailedException(this, "Vehicle " + v.id + " has a too low autonomy for being leader, min leader bat " + minLeaderBat);
                         }
                     }
 
