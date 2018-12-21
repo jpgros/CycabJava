@@ -106,7 +106,8 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		}
 			if(policies.listPolicy.size()>0) {
 				if(policies.listPolicy.size()>1 && !review) {
-					road.addReconfigurationChoosen("Tick " +road.stepNb );;
+					road.addReconfigurationChoosen("Tick " +road.stepNb);
+					road.addReconfChoosenWrite("Tick " +road.stepNb );
 				}
 				switch(road.mutant) {
 				case M5:
@@ -181,14 +182,14 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 						else {
 							lastReconf = policies.listPolicy.get(0);
 							for(Element elt : policies.listPolicy) {
+								road.addReconfChoosenWrite("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
 								road.addReconfigurationChoosen("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
 							}
+							road.addReconfChoosenWrite("\n");
 							road.addReconfigurationChoosen("\n");
 							policies.listPolicy.clear();
 						}
-
-					break;
-					
+					break;				
 					}
 					else {
 						lastReconf = policies.listPolicy.get(0);
