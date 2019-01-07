@@ -28,11 +28,11 @@ public class VanetMain {
 		Vehicle v3 = new Vehicle(50.0, 400.0, randomUUID(), null, null, 1.0);
 		Vehicle v4 = new Vehicle(50.0, 400.0, randomUUID(), null, null, 1.0);
 		
-		Element e1 = new Element(n1, p1, v1);
+		Element e1 = new Element(n1, 8, v1);
 		//Element e2 = new Element(n1, p2, v2);
-		Element e3 = new Element(n1, p2, v3);
-		Element e4 = new Element(n1, p1, v4);
-		Element e5 = new Element(n1, p2, v3);
+		Element e3 = new Element(n1, 2, v3);
+		Element e4 = new Element(n1, 8, v4);
+		Element e5 = new Element(n1, 1, v3);
 		
 		HashMap<Element, Integer> map = new HashMap<Element, Integer>();
 		

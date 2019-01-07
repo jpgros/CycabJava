@@ -12,85 +12,60 @@ public class AdaptationPolicy implements Serializable{
 			listPolicy.add(0, elt);
 			System.out.println("elt added " + elt);
 		}
-		//if the element is already present with a higher or equal priority, no need to add the selected elt
 		else {
 			int index=0;
 			boolean looping = true;
-			//int indexElt= this.containsName(elt.name);
-			
-			//if(indexElt !=-1) {
-				switch(elt.priority) {
-				case HIGH :
-					listPolicy.add(0, elt);
-					System.out.println("elt added high " + index + "size list" + listPolicy.size()+ " " + elt);
-				break;
-				case MEDIUM :
-					index=0;
-					do{
-					looping = listPolicy.get(index).getPriority()==Priority.HIGH;
-					index++;
-				}while(looping && index<listPolicy.size());
-				listPolicy.add(--index, elt);
-				System.out.println("elt added med " + elt + " " + index + "size list" + listPolicy.size());
-				index=0;
-				break;
-				
-				case LOW :	
-//					while(looping && index<listPolicy.size()) {
-//					index--;
-//					looping = listPolicy.get(index).getPriority()==Priority.LOW;
-//				}
-				index= listPolicy.size();
-				listPolicy.add(index, elt);
-				System.out.println("elt added low " + elt+ " " + index + "size list" + listPolicy.size());
-				break;
-				
-				default :
-					
-					break;
-				}
-			//}
-			//if( (indexElt !=-1 && elt.priority.value > listPolicy.get(indexElt).getPriority().value) || indexElt ==-1 ) {
-			//if element already exists but with a lesser priority we remove it
-				
-//				if (indexElt !=-1 && elt.priority.value > listPolicy.get(indexElt).getPriority().value ) {
-//					listPolicy.remove(indexElt);
-//				}
-//				if(elt.getPriority()==Priority.HIGH) {
-//					while(looping && indexSup<listPolicy.size() ) {
-//						looping = listPolicy.get(indexSup).getPriority()==Priority.HIGH;
-//						indexSup++;
-//					}
-//					int randomNum = ThreadLocalRandom.current().nextInt(indexInf, indexSup + 1);
-//					listPolicy.add(randomNum, elt);
-//				}
-//				if(elt.getPriority()==Priority.MEDIUM) {
-//					while(looping && indexInf<listPolicy.size() ) {
-//						looping = listPolicy.get(indexSup).getPriority()==Priority.HIGH;
-//						indexInf++;
-//					}
-//					looping=true;
-//					indexSup=indexInf;
-//					while(looping && indexSup<listPolicy.size() ) {
-//						looping =listPolicy.get(indexSup).getPriority()==Priority.MEDIUM;
-//						indexSup++;
-//					}
-//					int randomNum = ThreadLocalRandom.current().nextInt(indexInf, indexSup + 1);
-//					listPolicy.add(randomNum, elt);
-//				}
-//				if(elt.getPriority()==Priority.LOW) {
-//					indexSup = listPolicy.size()-1;
-//					indexInf=indexSup;
-//					while(looping && indexInf <0 ) {
-//						looping =listPolicy.get(indexSup).getPriority()==Priority.LOW;
-//						indexInf--;
-//					}
-//					int randomNum = ThreadLocalRandom.current().nextInt(indexInf, indexSup + 1);
-//					listPolicy.add(randomNum, elt);
-//				}
-//			}
+			while(looping && index < listPolicy.size()) {
+				looping = elt.priority<listPolicy.get(index).priority;
+				index ++;
+			}
+			listPolicy.add(index,elt);
 		}
 	}
+//	public void addElement(Element elt) {
+//		if(listPolicy.size()==0) {
+//			listPolicy.add(0, elt);
+//			System.out.println("elt added " + elt);
+//		}
+//		//if the element is already present with a higher or equal priority, no need to add the selected elt
+//		else {
+//			int index=0;
+//			boolean looping = true;
+//			//int indexElt= this.containsName(elt.name);
+//			
+//			//if(indexElt !=-1) {
+//				switch(elt.priority) {
+//				case HIGH :
+//					listPolicy.add(0, elt);
+//					System.out.println("elt added high " + index + "size list" + listPolicy.size()+ " " + elt);
+//				break;
+//				case MEDIUM :
+//					index=0;
+//					do{
+//					looping = listPolicy.get(index).getPriority()==Priority.HIGH;
+//					index++;
+//				}while(looping && index<listPolicy.size());
+//				listPolicy.add(--index, elt);
+//				System.out.println("elt added med " + elt + " " + index + "size list" + listPolicy.size());
+//				index=0;
+//				break;
+//				
+//				case LOW :	
+////					while(looping && index<listPolicy.size()) {
+////					index--;
+////					looping = listPolicy.get(index).getPriority()==Priority.LOW;
+////				}
+//				index= listPolicy.size();
+//				listPolicy.add(index, elt);
+//				System.out.println("elt added low " + elt+ " " + index + "size list" + listPolicy.size());
+//				break;
+//				
+//				default :
+//					
+//					break;
+//				}
+//		}
+//	}
 	
 	public int containsName(PolicyName n) {
 		for(int i=0; i< listPolicy.size(); i++) {

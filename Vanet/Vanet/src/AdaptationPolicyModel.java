@@ -84,9 +84,9 @@ class Rule {
 //		  };
     VanetProperty config;
     PolicyName reconf;
-    Priority prio;
+    double prio;
     
-    public Rule(VanetProperty TP, VanetProperty config, PolicyName reconf, Priority prio) {
+    public Rule(VanetProperty TP, VanetProperty config, PolicyName reconf, double prio) {
         this.TP = TP;
         this.config = config;
         this.reconf = reconf;
@@ -101,7 +101,7 @@ class Rule {
         return reconf;
     }
 
-    public Priority getPrio() {
+    public double getPrio() {
         return prio;
     }
 
@@ -176,8 +176,16 @@ class ExecutionReport {
     public void notifyTP(Element e) { //Rule rule, Vehicle v, VanetProperty tp) {
     	Integer value;
 		value = (Integer)(occurrencesTP.get(e));
-    	MiniElement miniElt = new MiniElement(e.name,e.priority);
-
+		MiniElement miniElt=null;
+		if(e.priority <=3 && e.priority>0) {
+			miniElt = new MiniElement(e.name,Priority.LOW);
+		}
+		else if(e.priority <7 && e.priority>3) {
+			miniElt = new MiniElement(e.name,Priority.MEDIUM);
+		}
+		else if(e.priority>7) {
+			miniElt = new MiniElement(e.name,Priority.HIGH);
+		}
         miniOccurrencesTP.add(miniElt);
 		if (value == null) {
             occurrencesTP.put(e, 1);
@@ -502,7 +510,7 @@ class ExecutionReport {
     	
     	//detecting which TP was not triggered
     	for (PolicyName pol : PolicyName.values()) {
-    		  for(Priority prio : Priority.values()) {
+    		  for(Priority prio : Priority.values()) {// replace enum with range
     			  MiniElement miniElt = new MiniElement(pol,prio);
     			  possibleMiniOccurrencesTP.add(miniElt);
     		  }

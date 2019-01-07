@@ -25,7 +25,7 @@ public interface PropertyAutomaton<SUT> {
 abstract class VanetProperty implements PropertyAutomaton<Road> {
 	protected PolicyName name=null;
     protected int state = 0;
-    protected Priority priority=null;
+    protected double priority=0;
     protected Vehicle currentVehicle = null;
     protected HashMap<Vehicle, ArrayList<Triple>> forEachVehicleProp = new HashMap<Vehicle, ArrayList<Triple>>();
     protected boolean [][] transitionsMade = new boolean[][]{
@@ -36,7 +36,7 @@ abstract class VanetProperty implements PropertyAutomaton<Road> {
     public void setCurrentVehicle(Vehicle v) {
         currentVehicle = v;
     }
-    public void setPriority(Priority p) {
+    public void setPriority(double p) {
     	priority=p;
     }
 
@@ -70,7 +70,7 @@ abstract class VanetProperty implements PropertyAutomaton<Road> {
    public Vehicle getVehicle(){
 	   return currentVehicle;
    }
-   public Priority getPriority() {
+   public double getPriority() {
 	   return priority;
    }
    

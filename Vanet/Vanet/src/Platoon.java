@@ -133,7 +133,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				case M10:// chooses randomly a reconf
 					//TODO 
 				break;
-				default:
+				case M12:
 					System.out.println("sizepol"+ policies.listPolicy.size()+ "line before cond " + line);
 					if(policies.listPolicy.size()>1 ) {
 						if(review) {
@@ -189,12 +189,18 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 							road.addReconfigurationChoosen("\n");
 							policies.listPolicy.clear();
 						}
-					break;				
+					break;
+					
 					}
 					else {
 						lastReconf = policies.listPolicy.get(0);
 						policies.listPolicy.clear();
 					}
+					break;
+				default:
+					lastReconf = policies.listPolicy.get(0);
+					policies.listPolicy.clear();
+				break;
 				}	
 				
 			}//list >0

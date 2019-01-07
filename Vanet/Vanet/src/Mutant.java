@@ -12,5 +12,6 @@ M8,// In order to verify the property 5, we let the possibility of vehicles to r
 M9,// This mutant modifies the relay reconfiguration, it suppress the leader instead of replacing by another one.
 M10,// Chooses randomly reconfiguration without taking utility value into account.
 M11,// Chooses reconfiguration in inverted order of utility. DONE
+M12,// Can redo same scenario with other reconf : DONE but bugs
 M13// NOT A MUTANT This mutant changes the test generation probabilities, in some case we reduced the probability of event to occur, in other cases we increased the probability.
 }

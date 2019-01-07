@@ -3,22 +3,23 @@ import java.util.Objects;
 
 public class Element implements Serializable {
 	PolicyName name;
-	Priority priority;
+	//Priority priority;
+	double priority;
 	Vehicle vehicle;
 	
-	public Element(PolicyName n, Priority p) {
+	public Element(PolicyName n, double p) {
 		name =n;
 		priority=p;
 	}
 	
-	public Element(PolicyName n, Priority p, Vehicle v) {
+	public Element(PolicyName n, double p, Vehicle v) {
 		name =n;
 		priority=p;
 		vehicle = v;
 	}
 	public Element(PolicyName n) {
 		name =n;
-		priority=null;
+		priority=0;
 		vehicle=null;
 	}
     @Override
@@ -58,11 +59,11 @@ public class Element implements Serializable {
 		this.name = name;
 	}
 
-	public Priority getPriority() {
+	public double getPriority() {
 		return priority;
 	}
 
-	public void setPriority(Priority priority) {
+	public void setPriority(double priority) {
 		this.priority = priority;
 	}
 
