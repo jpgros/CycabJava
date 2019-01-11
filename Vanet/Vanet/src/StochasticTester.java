@@ -207,6 +207,7 @@ public class StochasticTester implements Serializable{
         ((VanetFSM) fsm).getValues();
         // for each of the resulting test cases
         for (int i=0; i < nb; i++) {
+
         	x="== Generating test #" + i + " ==";
         	((VanetFSM) fsm).getSUT().addStringWriter(x);
             System.out.println(x);
@@ -287,6 +288,7 @@ public class StochasticTester implements Serializable{
             if(reinitCov) {
             	resetCov(apm);
             }
+            
         }
 		vcm.printReport();
 		propertiesWriter.close();
@@ -294,7 +296,7 @@ public class StochasticTester implements Serializable{
     }
     
     //retrieve the list of input steps and notify them to the SUT
-    public ArrayList<MyTest> retrieve(AdaptationPolicyModel apm, ArrayList<SerializableTest> serializableTest) throws NumberFormatException, IOException {
+    public String retrieve(AdaptationPolicyModel apm, ArrayList<SerializableTest> serializableTest,int sourcePA,int sourceCoeff) throws NumberFormatException, IOException {
     	boolean propCov=false;
     	double ruleCov=0.0;
     	int indRules=0;
@@ -302,12 +304,17 @@ public class StochasticTester implements Serializable{
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         int j=0,k=0;
         boolean b;
+        String conso="";
         MyStep newStep;
 		PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
         ((VanetFSM) fsm).getValues();
         // for each of the resulting test cases
         init();
+        ((VanetFSM) fsm).getSUT().globalConso=0;
         for(SerializableTest test : serializableTest) {
+        	for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
+        		((VanetFSM) fsm).getSUT().k[cptK] = ((VanetFSM) fsm).getSUT().k[cptK]== sourcePA ? sourceCoeff :0;
+        	}
 			k++;
 	        // reset FSM exploration
             fsm.reset(true);
@@ -364,13 +371,15 @@ public class StochasticTester implements Serializable{
 	        if(reinitCov) {
             	resetCov(apm);
             }
+	        System.out.println("\n consummed energy : "+((VanetFSM) fsm).getSUT().getGlobalConso());
+	        conso+=((VanetFSM) fsm).getSUT().getGlobalConso()+";";
 			ret.add(currentTest);
 		}
        // writerLog.print(strLog); 
 		propertiesWriter.print(propertiesOutput);
 		propertiesWriter.close();
         vcm.printReport();
-		return ret;
+		return conso;
     }
    
     public MyStep computeInputTest(SerializableStep step){

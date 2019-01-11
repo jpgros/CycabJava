@@ -30,6 +30,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
     int numberPlatoon=0;
+    double globalConso=0;
     Mutant mutant;
     String writer = "";
     //String vehicleReader = null;
@@ -44,6 +45,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     String reconfChoosenRead="";
     String reconfChoosenWrite="";
     transient BufferedReader reader;
+    double k[];
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
     public Road(String w, String wl, String rc,String rcr,Mutant m) {
     	writer = w;
@@ -52,7 +54,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	mutant=m;
     	reconfChoosenRead=rcr;
     	reader = new BufferedReader(new StringReader(rcr));
-    	
+    	k = new double[8];
+    	for(int i=0;i<k.length;i++) k[i]=0;
     }
     public String getLineReconfChoosenRead() throws IOException {
     	return reader.readLine();
@@ -99,7 +102,9 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public String getReconfigurationChoosenWrite() {
     	return reconfChoosenWrite;
     }
-
+    public double getGlobalConso() {
+    	return globalConso;
+    }
     public int addVehicle(double _auto, double _distance, double decAuto) {
     	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null,this, decAuto));
     	//System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
@@ -139,7 +144,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
 
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
-            v.updateVehicleVariables();
+            v.updateVehicleDistance();
+            globalConso+=v.updatevehicleAutonomie();
             component +="Vehicle:"+v.getId();
             state+= "Vehicle:"+v.getId() +"->remaining distance:"+ v.distance+";";
             state+= "Vehicle:"+v.getId() +"->remaining automony:"+v.autonomie+";";
@@ -208,7 +214,6 @@ public class Road implements Serializable, Iterable<Vehicle> {
     		tick =false;
     	}
     }
-
 
     public void affiche() {
         for (Vehicle v : allVehicles) {

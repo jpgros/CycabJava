@@ -70,11 +70,15 @@ public class VanetFACS implements Serializable{
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
         setRulesForAPM(apm,writer);       
-        VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);         
+        VanetConformanceMonitor vcm = new VanetConformanceMonitor(apm, writerErr);       
+		for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
+    		((VanetFSM) fsm).getSUT().k[cptK] = 0;
+    	}
         //choice between generation and retrieving
         //ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
         writer.println(" str Begins : ");
-        generatetest(st, vcm,apm);
+        //generatetest(st, vcm,apm);
+        generateAndRerunTest(st, vcm, apm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.print(strWriter);
         strLog=((VanetFSM) fsm).getSUT().getStringWriterLog();
@@ -167,8 +171,45 @@ public class VanetFACS implements Serializable{
         // quitforstation |----> low
 
     }
-    
-    public static ArrayList<MyTest> retrieveTest(StochasticTester st, VanetConformanceMonitor vcm, AdaptationPolicyModel apm){
+    public static void generateAndRerunTest(StochasticTester st, VanetConformanceMonitor vcm,AdaptationPolicyModel apm) {
+    	ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
+    	ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();  
+    	ArrayList<MyTest> testsList=null;
+    	String conso="";
+		st.setMonitor(vcm);
+		try {
+			PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
+			testsList=st.generate(1,30,apm);
+			for(MyTest curTest : testsList) {
+	        	for(MyStep curStep : curTest ) {
+	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
+	        		serializableArray.add(step);
+	        	}
+	        	SerializableTest test = new SerializableTest(serializableArray);
+	        	testArraySer.add(test);
+	        	serializableArray.clear();
+	      }
+			for(int cpt=0; cpt <3; cpt++) {
+				System.out.println("test array " +testArraySer);
+				for(int k=-1; k<2; k+=2) {
+					writerConso.println("k = "+ k);
+					for(int i=0; i<8; i++) {
+	    				conso += st.retrieve(apm,testArraySer,i,k);
+	    				writerConso.print(conso);
+	    				conso="";
+		        	}
+					writerConso.print("\n");
+		        }
+		        writerConso.print("\n");
+		    }
+	        writerConso.close();
+	        
+		} catch (NumberFormatException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    public static void retrieveTest(StochasticTester st, VanetConformanceMonitor vcm, AdaptationPolicyModel apm){
     	ArrayList<MyTest> initial=null;
     	FileInputStream inser;
 		try {  
@@ -177,7 +218,7 @@ public class VanetFACS implements Serializable{
 	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
 	        objectInputStream.close();
 			st.setMonitor(vcm); 
-	        initial = st.retrieve(apm,testInput);	
+	        st.retrieve(apm,testInput,-1,-1);	
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -190,7 +231,6 @@ public class VanetFACS implements Serializable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return initial;
     }
     
     public static void generatetest(StochasticTester st, VanetConformanceMonitor vcm,AdaptationPolicyModel apm) {
@@ -202,7 +242,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(1,1000,apm);
+			testsList=st.generate(8,100,apm);
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
 	        for(MyTest curTest : testsList) {
