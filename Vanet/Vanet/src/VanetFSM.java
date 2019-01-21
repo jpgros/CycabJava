@@ -38,13 +38,13 @@ public class VanetFSM implements FsmModel {
     ArrayList<Double> distance = new ArrayList<Double>();
     ArrayList<Integer> indexjoined = new ArrayList<Integer>();
     ArrayList<Integer> indexKicked = new ArrayList<Integer>();
-    public VanetFSM(String w, String wl, String rc,String rcr ,Mutant m) {
+    public VanetFSM(String w, String wl, String rc,String rcr ,Mutant m, LogLevel logL) {
         writer = w;
         writerLog=wl;
         reconfChoosen=rc;
         mutant=m;
         reconfChoosenReader=rcr;
-        sut = new Road(w,wl,rc,rcr,m);
+        sut = new Road(w,wl,rc,rcr,m,logL);
     }
     public String getStringWriter() {
     	return sut.getStringWriter();
@@ -63,29 +63,34 @@ public class VanetFSM implements FsmModel {
     public void reset(boolean testing) {
         sut.reset();
     }
-    public void getValues() throws NumberFormatException, IOException {
-    	FileReader vehicleReader = new FileReader("./outputVals.txt");
-        BufferedReader br = new BufferedReader(vehicleReader);
-        String sCurrentLine;
-        String[] splits;
-        sCurrentLine = br.readLine();
-        sCurrentLine = br.readLine();
-        while(!sCurrentLine.contains("DecAuto")) {
-    		battery.add(Double.parseDouble(sCurrentLine));
-    		sCurrentLine = br.readLine();
+    public void getValues(ArrayList<Double> bat,  ArrayList<Double> decBat, ArrayList<Double> dist, int nbSteps) throws NumberFormatException, IOException {//does not work as expected
+    	int cpt=0;
+    	while(cpt<nbSteps) {
+    		battery.add(cpt,bat.get(cpt));
+    		cpt++;
     	}
-        sCurrentLine = br.readLine();
-        while(!sCurrentLine.contains("Distance")) {
-    		decBattery.add(Double.parseDouble(sCurrentLine));
-    		sCurrentLine = br.readLine();
+//    	for(int i=0; i< 100; i++) {
+//    		System.out.println("added battery "+ battery + "\n existing battery " +bat.get(i));
+//    	}
+    	cpt=0;
+    	while(cpt<nbSteps) {
+    		decBattery.add(cpt,decBat.get(cpt));
+    		cpt++;
     	}
-        while ((sCurrentLine = br.readLine()) != null){
-        	distance.add(Double.parseDouble(sCurrentLine));
-        }
+    	cpt=0;
+    	while(cpt<nbSteps) {
+    		distance.add(cpt,dist.get(cpt));
+    		cpt++;
+    	}
     }
-    
+    public void afficheTestValues() {
+    	System.out.println(battery);
+    	System.out.println(decBattery);
+    	System.out.println(distance);
+    }
     public void printValues() throws FileNotFoundException, UnsupportedEncodingException {
-    	PrintWriter writer = new PrintWriter("./outputVals.txt", "UTF-8");
+    	PrintWriter writerFile = new PrintWriter("./outputVals.txt", "UTF-8");
+        LogPrinter writer = new LogPrinter(writerFile, LogLevel.INFO, LogLevel.ERROR);
     	writer.println("Battery");
     	for(double bat : battery) {
     		writer.println(bat);
@@ -110,7 +115,10 @@ public class VanetFSM implements FsmModel {
     public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; } //0.87
     @Action
     public Object[] tick() {
+    	//long startTime = System.currentTimeMillis();
         sut.tick();
+        //long estimatedTime = (System.currentTimeMillis() - startTime);
+        //System.out.println("tick elapsed time  " + estimatedTime + "miliseconds");
         return new Object[]{ sut };
     }
 
@@ -181,9 +189,6 @@ public class VanetFSM implements FsmModel {
         //}
 //        return new Object[]{ sut }; // should not happen : except if vehicle did not found another vehicle
     }
-
-
-
     public boolean forceQuitPlatoonGuard() {
         for (Vehicle v : sut) {
             if (v.getPlatoon() != null) {

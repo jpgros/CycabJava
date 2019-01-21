@@ -158,9 +158,9 @@ class ExecutionReport {
     HashSet<MiniElement> untriggeredMiniOccurrencesTP = new HashSet<MiniElement>();
     HashMap<PropertyAutomaton,Integer> occurrencesConfig = new HashMap<PropertyAutomaton, Integer>();
     int nb=0;
-    PrintWriter writerErr =null;
+    LogPrinter writerErr =null;
     boolean property =true;
-    public ExecutionReport(PrintWriter w) {
+    public ExecutionReport(LogPrinter w) {
     	writerErr = w;
     }
     
@@ -392,7 +392,8 @@ class ExecutionReport {
     	
     }
     public void stats() throws FileNotFoundException, UnsupportedEncodingException {
-    	PrintWriter writeStats = new PrintWriter("./stats.txt", "UTF-8"); 
+    	PrintWriter writerStatsFile = new PrintWriter("./stats.txt", "UTF-8");
+        LogPrinter writeStats = new LogPrinter(writerStatsFile, LogLevel.INFO, LogLevel.ERROR);
     	Integer value;
     	String x="";
     	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {

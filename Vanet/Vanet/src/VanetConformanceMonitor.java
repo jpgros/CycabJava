@@ -13,10 +13,10 @@ public class VanetConformanceMonitor {
     AdaptationAutomaton<Road> aa;
 
     AdaptationPolicyModel apm = null;
-    PrintWriter writerErr = null;
+    LogPrinter writerErr = null;
     ExecutionReport er = null;    //shallow copy  
 
-    public VanetConformanceMonitor(AdaptationPolicyModel _apm, PrintWriter w) {
+    public VanetConformanceMonitor(AdaptationPolicyModel _apm, LogPrinter w) {
         apm = _apm;
         writerErr = w;
         er = new ExecutionReport(writerErr);

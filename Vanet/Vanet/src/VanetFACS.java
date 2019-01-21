@@ -34,11 +34,12 @@ import org.apache.commons.collections15.iterators.EntrySetMapIterator;
 public class VanetFACS implements Serializable{
     public static void main(String[] args) throws Exception {    	
     	Date date = new Date() ;
+    	LogLevel logLevel= LogLevel.ERROR;
     	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
-    	PrintWriter writerLog = new PrintWriter("./logs/log"+ dateFormat.format(date) +".txt", "UTF-8");    	    	
-    	PrintWriter writer = new PrintWriter("./outputGenetic.txt", "UTF-8");
-        PrintWriter writerErr = new PrintWriter("./outputError.txt", "UTF-8");
-        PrintWriter writerReconfChoosen = new PrintWriter("./writerReconfChoosen.txt", "UTF-8");
+    	PrintWriter writerFileLog = new PrintWriter("./logs/log"+ dateFormat.format(date) +".txt", "UTF-8");    	    	
+    	PrintWriter writerFileOut = new PrintWriter("./outputGenetic.txt", "UTF-8");
+        PrintWriter writerFileErr = new PrintWriter("./outputError.txt", "UTF-8");
+        PrintWriter writerFileReconfChoosen = new PrintWriter("./writerReconfChoosen.txt", "UTF-8");
         FileReader reconfChoosenReader = new FileReader("./writerReconfChoosen1.txt");
         Mutant mutant = Mutant.NONE;
         //FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
@@ -53,7 +54,12 @@ public class VanetFACS implements Serializable{
         String strLog="";
         String reconfChoosen="";
         String reconfChoosenRead="";
-        
+        LogPrinter writerLog = new LogPrinter(writerFileLog,LogLevel.INFO,logLevel);    	    	
+        LogPrinter writer = new LogPrinter(writerFileOut,LogLevel.INFO, logLevel);
+        LogPrinter writerErr = new LogPrinter(writerFileErr,LogLevel.INFO, logLevel);
+        LogPrinter writerReconfChoosen = new LogPrinter(writerFileReconfChoosen,LogLevel.INFO, logLevel);
+        long startTime = System.currentTimeMillis();
+
         BufferedReader br = new BufferedReader(reconfChoosenReader);
         try {
             String line = br.readLine();
@@ -65,7 +71,7 @@ public class VanetFACS implements Serializable{
             br.close();
         }
         
-        FsmModel fsm = new VanetFSM(strWriter, strLog, reconfChoosen, reconfChoosenRead, mutant);       
+        FsmModel fsm = new VanetFSM(strWriter, strLog, reconfChoosen, reconfChoosenRead, mutant,logLevel);       
         StochasticTester st   = new StochasticTester(fsm,writerErr,reinitCov, interruptCovered,mutant);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
         // Adaptation policy rules go here
@@ -75,10 +81,10 @@ public class VanetFACS implements Serializable{
     		((VanetFSM) fsm).getSUT().k[cptK] = 0;
     	}
         //choice between generation and retrieving
-        //ArrayList<MyTest> initial=retrieveTest(st,vcm,apm);
+        //retrieveTest(st,vcm,apm);
         writer.println(" str Begins : ");
         //generatetest(st, vcm,apm);
-        generateAndRerunTest(st, vcm, apm);
+        generateAndRerunTest(st, vcm, apm,fsm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.print(strWriter);
         strLog=((VanetFSM) fsm).getSUT().getStringWriterLog();
@@ -100,9 +106,13 @@ public class VanetFACS implements Serializable{
         String rcw =(((VanetFSM) fsm).getSUT().getReconfigurationChoosenWrite());
         writerReconfChoosen2.print(rcw);
         writerReconfChoosen2.close();
+        // ... do something ...
+        long estimatedTime = (System.currentTimeMillis() - startTime)/1000;
+        
+        System.out.println("elapsed time " + estimatedTime + "seconds");
     }
 
-    public static void setRulesForAPM(AdaptationPolicyModel a, PrintWriter writer) {
+    public static void setRulesForAPM(AdaptationPolicyModel a, LogPrinter writer) {
     	final double HIGHPRIO = 8;
     	final double MEDIUMPRIO = 5;
     	final double LOWPRIO = 2;
@@ -171,7 +181,7 @@ public class VanetFACS implements Serializable{
         // quitforstation |----> low
 
     }
-    public static void generateAndRerunTest(StochasticTester st, VanetConformanceMonitor vcm,AdaptationPolicyModel apm) {
+    public static void generateAndRerunTest(StochasticTester st, VanetConformanceMonitor vcm,AdaptationPolicyModel apm,FsmModel fsm) {
     	ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
     	ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();  
     	ArrayList<MyTest> testsList=null;
@@ -179,7 +189,10 @@ public class VanetFACS implements Serializable{
 		st.setMonitor(vcm);
 		try {
 			PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
-			testsList=st.generate(1,30,apm);
+			System.out.println("generate fsm values");
+			((VanetFSM) fsm).afficheTestValues();
+			testsList=st.generate(1,100,apm);
+			System.out.println("used battery list " + ((VanetFSM) fsm).decBattery);
 			for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
@@ -188,19 +201,31 @@ public class VanetFACS implements Serializable{
 	        	SerializableTest test = new SerializableTest(serializableArray);
 	        	testArraySer.add(test);
 	        	serializableArray.clear();
-	      }
-			for(int cpt=0; cpt <3; cpt++) {
-				System.out.println("test array " +testArraySer);
+	        }			
+//			long startTime = System.currentTimeMillis();
+//			long estimatedTime;
+			for(int cpt=0; cpt <5; cpt++) {
 				for(int k=-1; k<2; k+=2) {
 					writerConso.println("k = "+ k);
 					for(int i=0; i<8; i++) {
-	    				conso += st.retrieve(apm,testArraySer,i,k);
+						System.out.println("used battery list " + ((VanetFSM) fsm).decBattery);
+			        	conso += st.retrieve(apm,testArraySer,i,0);
+						
 	    				writerConso.print(conso);
 	    				conso="";
+//	    				estimatedTime = (System.currentTimeMillis() - startTime)/1000;
+//				        System.out.println("elapsed time loop i " + i +" " + estimatedTime + "seconds and testArraySer lenght " + testArraySer.get(0).size() );
 		        	}
 					writerConso.print("\n");
+//					estimatedTime = (System.currentTimeMillis() - startTime)/1000;
+//			        System.out.println("elapsed time loop k " + k +" " + estimatedTime + "seconds");
 		        }
 		        writerConso.print("\n");
+//		        estimatedTime = (System.currentTimeMillis() - startTime)/1000;
+//		        System.out.println("elapsed time loop cpt " + cpt +" " + estimatedTime + "seconds");
+				for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
+		    		((VanetFSM) fsm).getSUT().k[cptK] = 0;
+		    	}
 		    }
 	        writerConso.close();
 	        
@@ -242,7 +267,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(8,100,apm);
+			testsList=st.generate(10,5000,apm);
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
 	        for(MyTest curTest : testsList) {
@@ -268,7 +293,7 @@ public class VanetFACS implements Serializable{
 }
 
 class r1p1 extends VanetProperty {
-	PrintWriter writer =null;
+	LogPrinter writer =null;
     //  after join(v) until quit(v)
     @Override
     public double match(Road sut) throws PropertyFailedException {
@@ -292,7 +317,7 @@ class r1p1 extends VanetProperty {
         }
         return 0;
     }
-    public r1p1(PrintWriter w) {
+    public r1p1(LogPrinter w) {
     	writer = w;
     }
     public String toString(){
@@ -301,7 +326,7 @@ class r1p1 extends VanetProperty {
 }
 
 class r1p2 extends VanetProperty {
-	PrintWriter writer = null;
+	LogPrinter writer = null;
     //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
     @Override
     public double match(Road sut) throws PropertyFailedException {
@@ -319,7 +344,7 @@ class r1p2 extends VanetProperty {
     }
     return 0;
     }
-    public r1p2(PrintWriter w) {
+    public r1p2(LogPrinter w) {
     	writer = w;
     }
     public String toString(){
@@ -328,9 +353,9 @@ class r1p2 extends VanetProperty {
 }
 
 class r2p1 extends VanetProperty {
-	PrintWriter writer =null;
+	LogPrinter writer =null;
     //  after join(v) until quit(v)
-	public r2p1(PrintWriter w) {
+	public r2p1(LogPrinter w) {
 		writer = w;
 	}
     @Override
@@ -361,9 +386,9 @@ class r2p1 extends VanetProperty {
 }
 
 class r2p2 extends VanetProperty {
-	PrintWriter writer =null;
+	LogPrinter writer =null;
     //  after join(v) until quit(v)
-	public r2p2(PrintWriter w) {
+	public r2p2(LogPrinter w) {
 		writer = w;
 	}
     //      if platoon.size > 2 && min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
@@ -478,9 +503,9 @@ class r5p2 extends VanetProperty {
 }
 
 class r6p1 extends VanetProperty {
-	PrintWriter writer =null;
+	LogPrinter writer =null;
 
-	public r6p1(PrintWriter w) {
+	public r6p1(LogPrinter w) {
 		writer = w;
 	}
 	  @Override
@@ -502,9 +527,9 @@ class r6p1 extends VanetProperty {
 }
 
 class r6p2 extends VanetProperty {
-	PrintWriter writer =null;
+	LogPrinter writer =null;
     //  after join(v) until quit(v)
-	public r6p2(PrintWriter w) {
+	public r6p2(LogPrinter w) {
 		writer = w;
 	}
 	 @Override
@@ -522,9 +547,9 @@ class r6p2 extends VanetProperty {
 ///////////////////
 
 class r7p1 extends VanetProperty {
-	  PrintWriter writer =null;
+	LogPrinter writer =null;
       //  after join(v) until quit(v)
-	  public r7p1(PrintWriter w) {
+	  public r7p1(LogPrinter w) {
 		  writer = w;
 	  }
 	  @Override
@@ -547,9 +572,9 @@ class r7p1 extends VanetProperty {
 }
 
 class r7p2 extends VanetProperty {
-	 PrintWriter writer =null;
+	LogPrinter writer =null;
      //  after join(v) until quit(v)
-	 public r7p2(PrintWriter w) {
+	 public r7p2(LogPrinter w) {
 	 	 writer = w;
 	 }
 	 @Override
@@ -568,9 +593,9 @@ class r7p2 extends VanetProperty {
 	    }
 }
 class r8p1 extends VanetProperty {
-	 PrintWriter writer =null;
+	LogPrinter writer =null;
      //  after join(v) until quit(v)
-	 public r8p1(PrintWriter w) {
+	 public r8p1(LogPrinter w) {
 		 writer = w;
 	 }
 	  @Override
@@ -593,9 +618,9 @@ class r8p1 extends VanetProperty {
 }
 
 class r8p2 extends VanetProperty {
-	 PrintWriter writer =null;
+	LogPrinter writer =null;
      //  after join(v) until quit(v)
-	 public r8p2(PrintWriter w) {
+	 public r8p2(LogPrinter w) {
 		 writer = w;
 	 }
 	 @Override
@@ -614,9 +639,9 @@ class r8p2 extends VanetProperty {
 	    }
 }
 class r9p1 extends VanetProperty {
-	  PrintWriter writer =null;
-      //  after join(v) until quit(v)
-	  public r9p1(PrintWriter w) {
+		LogPrinter writer =null;
+	  //  after join(v) until quit(v)
+	  public r9p1(LogPrinter w) {
 		  writer = w;
 	  }
 	  @Override
@@ -639,9 +664,9 @@ class r9p1 extends VanetProperty {
 }
 
 class r9p2 extends VanetProperty {
-	 PrintWriter writer =null;
+	LogPrinter writer =null;
      //  after join(v) until quit(v)
-	 public r9p2(PrintWriter w) {
+	 public r9p2(LogPrinter w) {
 		 writer = w;
 	 }
 	 @Override

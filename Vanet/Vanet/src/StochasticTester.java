@@ -50,21 +50,30 @@ public class StochasticTester implements Serializable{
 
     private VanetConformanceMonitor vcm = null;
     String propertiesOutput="";
+    final ArrayList<Double> battery = new ArrayList<Double>();
+    final ArrayList<Double> decBattery = new ArrayList<Double>();
+    final ArrayList<Double> distance = new ArrayList<Double>();
     /**
      * Constructor. Initializes the FSM and computes associated actionsAndProbabilities.
      * @param _fsm
      * @param writerlog four output trace generation
      */
-    public StochasticTester(FsmModel _fsm, PrintWriter we,boolean rc, boolean ic, Mutant m) {
+    public StochasticTester(FsmModel _fsm, LogPrinter we,boolean rc, boolean ic, Mutant m) {
         fsm = _fsm;
         actionsAndProbabilities = getActionTaggedMethods(fsm);
-        System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+       // System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
         fsm.reset(true);
         //writer=w;
         //writerLog=wl;
         reinitCov =rc;
         interruptCovered = ic;
         mutant =m;
+        try {
+			getTestValues();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     /**
@@ -74,8 +83,14 @@ public class StochasticTester implements Serializable{
     public StochasticTester(FsmModel _fsm) {
         fsm = _fsm;
         actionsAndProbabilities = getActionTaggedMethods(fsm);
-        System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
+       // System.out.println("Actions & Probabilities :\n" + actionsAndProbabilities);
         fsm.reset(true);
+        try {
+			getTestValues();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     public void setMonitor(VanetConformanceMonitor _vcm) {
@@ -157,11 +172,11 @@ public class StochasticTester implements Serializable{
      * @param stepNumber number of steps done by the reference execution 
      */
     public void depopList(int nbSteps, int stepNumber) {
-        for(int i = ((VanetFSM) fsm).addedVehicles; i<nbSteps; i++) { // in order to be even for the next executions when the attributes of vehicles are read in file
-        	((VanetFSM) fsm).battery.remove(0);
-        	((VanetFSM) fsm).decBattery.remove(0);
-        	((VanetFSM) fsm).distance.remove(0);
-    	}
+//        for(int i = ((VanetFSM) fsm).addedVehicles; i<nbSteps; i++) { // in order to be even for the next executions when the attributes of vehicles are read in file
+//        	((VanetFSM) fsm).battery.remove(0);
+//        	((VanetFSM) fsm).decBattery.remove(0);
+//        	((VanetFSM) fsm).distance.remove(0);
+//    	}
     }
     /**
      * Reinitializes property and rules coverage to 0%
@@ -202,12 +217,14 @@ public class StochasticTester implements Serializable{
     	int indProp=0;
     	String strLog="";
     	String x="";
-        PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
+        PrintWriter propertiesWriterFile = new PrintWriter("./propertiesErr.txt", "UTF-8");
+        LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.INFO, LogLevel.ERROR);
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
-        ((VanetFSM) fsm).getValues();
+        ((VanetFSM) fsm).getValues(this.battery, this.decBattery,this.distance, length);
         // for each of the resulting test cases
+        long startTime;
         for (int i=0; i < nb; i++) {
-
+        	
         	x="== Generating test #" + i + " ==";
         	((VanetFSM) fsm).getSUT().addStringWriter(x);
             System.out.println(x);
@@ -223,9 +240,9 @@ public class StochasticTester implements Serializable{
             MyStep newStep;
         	do {
         		x="step " +j;
-            	((VanetFSM) fsm).getSUT().addStringWriter(x);
+            	((VanetFSM) fsm).getSUT().addStringWriter(x);           
 	            newStep = computeNextStep();
-	            ((VanetFSM) fsm).getSUT().externalEvent="Event("+newStep.meth.getName()+");\n";
+	            ((VanetFSM) fsm).getSUT().externalEvent="Event("+newStep.meth.getName()+");\n";               
             	b = (newStep != null);
                 if (b) {
                     currentTest.append(newStep);
@@ -288,7 +305,7 @@ public class StochasticTester implements Serializable{
             if(reinitCov) {
             	resetCov(apm);
             }
-            
+
         }
 		vcm.printReport();
 		propertiesWriter.close();
@@ -297,21 +314,31 @@ public class StochasticTester implements Serializable{
     
     //retrieve the list of input steps and notify them to the SUT
     public String retrieve(AdaptationPolicyModel apm, ArrayList<SerializableTest> serializableTest,int sourcePA,int sourceCoeff) throws NumberFormatException, IOException {
+    	long startTime = System.currentTimeMillis();
+    	long estimatedTime=0;
+    	 
     	boolean propCov=false;
     	double ruleCov=0.0;
     	int indRules=0;
     	int indProp=0;
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
+        ((VanetFSM) fsm).getValues(this.battery, this.decBattery,this.distance, serializableTest.get(0).size());
+        System.out.println("serialisable test size " + serializableTest.get(0).size());
         int j=0,k=0;
         boolean b;
         String conso="";
-        MyStep newStep;
-		PrintWriter propertiesWriter = new PrintWriter("./propertiesErr.txt", "UTF-8"); 
-        ((VanetFSM) fsm).getValues();
-        // for each of the resulting test cases
+        MyStep newStep; 
+		PrintWriter propertiesWriterFile = new PrintWriter("./propertiesErr.txt", "UTF-8");
+        LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.INFO, LogLevel.ERROR);
+//        estimatedTime = (System.currentTimeMillis() - estimatedTime - startTime);
+//        System.out.println("elapsed time header" + estimatedTime + " miliseconds " );
+         System.out.println("retrieve fsm ");
+		 // for each of the resulting test cases
         init();
         ((VanetFSM) fsm).getSUT().globalConso=0;
+       
         for(SerializableTest test : serializableTest) {
+        	
         	for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
         		((VanetFSM) fsm).getSUT().k[cptK] = ((VanetFSM) fsm).getSUT().k[cptK]== sourcePA ? sourceCoeff :0;
         	}
@@ -320,6 +347,7 @@ public class StochasticTester implements Serializable{
             fsm.reset(true);
 	        MyTest currentTest = new MyTest();
 			for(SerializableStep step : test.steps) {
+				
 				j++;
 				System.out.println("step :"+step.toString());
 				newStep = computeInputTest(step);
@@ -338,33 +366,50 @@ public class StochasticTester implements Serializable{
         				}
                     }
                 }
-                if(newStep.meth.getName() == "tick") {//if not tick we do not do reconfiguration
-	                for(VanetProperty prop : properties) {
-		                try {
-							prop.match(((VanetFSM) fsm).getSUT());
-							propCov=checkCoverageProperties();
-						} catch (PropertyFailedException e) {
-							propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
-							System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							ret.add(currentTest);
-							if(interruptCovered) break;
-						}
-						if(propCov) {	
-							//e.printStackTrace();
-							propCov=true;
-							indProp= indProp==0? j: indProp;
-							if(ruleCov==100.0) {
-								propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
-								depopList(((VanetFSM) fsm).addedVehicles, j);
+                
+                try {
+	                if(newStep.meth.getName() == "tick") {//if not tick we do not do reconfiguration
+	                	for(VanetProperty prop : properties) {
+//	                		estimatedTime = (System.currentTimeMillis()  - startTime);
+//	                		System.out.println("elapsed time 1 " + estimatedTime + "miliseconds properties length " + properties.size());
+			                try {
+								prop.match(((VanetFSM) fsm).getSUT());
+								propCov=checkCoverageProperties();
+							} catch (PropertyFailedException e) {
+								propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+								System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+								ret.add(currentTest);
 								if(interruptCovered) break;
 							}
-						}
+							if(propCov) {	
+								//e.printStackTrace();
+								propCov=true;
+								indProp= indProp==0? j: indProp;
+								if(ruleCov==100.0) {
+									propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
+									depopList(((VanetFSM) fsm).addedVehicles, j);
+									if(interruptCovered) break;
+								}
+							}
+							
 	                }
-	                ((VanetFSM) fsm).getSUT().tickTrigger();
+	                	//estimatedTime = (System.currentTimeMillis() - startTime);
+//	        	        System.out.println("elapsed time 2 " + estimatedTime + " miliseconds " );
+	                	
+		                ((VanetFSM) fsm).getSUT().tickTrigger();
+	                }
                 }
+                catch (Exception e) {
+                	System.out.println("newstep null "+ newStep + " step " + step );
+                	System.out.println(" methods possible "+ actionsAndProbabilities);
+                	System.exit(1);
+					// TODO: handle exception
+				}
+    			
 			}
+
 			j=0;
 			propertiesWriter.print(propertiesOutput);
 	        propertiesWriter.print(checkCoverageProperties(k,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
@@ -374,7 +419,10 @@ public class StochasticTester implements Serializable{
 	        System.out.println("\n consummed energy : "+((VanetFSM) fsm).getSUT().getGlobalConso());
 	        conso+=((VanetFSM) fsm).getSUT().getGlobalConso()+";";
 			ret.add(currentTest);
+//			estimatedTime = (System.currentTimeMillis() - estimatedTime- startTime);
+//	        System.out.println("elapsed time end " + estimatedTime + " miliseconds " );
 		}
+        
        // writerLog.print(strLog); 
 		propertiesWriter.print(propertiesOutput);
 		propertiesWriter.close();
@@ -384,6 +432,7 @@ public class StochasticTester implements Serializable{
    
     public MyStep computeInputTest(SerializableStep step){
     	 HashMap<Method, Double> actionsReady = getActivableActions(fsm);
+    	 System.out.println("possible methods "+ actionsReady.keySet());
 		 for (Method act : actionsReady.keySet()) {
 			 if(step.getMethName().contains(act.getName()) ) {
 				 try {
@@ -404,6 +453,11 @@ public class StochasticTester implements Serializable{
 			 }
 			 
     	 }
+		 for (Method act : actionsReady.keySet()) {
+			 //System.out.println("meth name "+ act.getName());
+		 }
+		 //System.out.println("step name " + step.getMethName());
+		 //System.out.println("step = " +step );
     	 return null;
     		 
     }
@@ -418,7 +472,9 @@ public class StochasticTester implements Serializable{
         String ret = null;
         double sum = 0;
         double rand = 0;
+        long startTime = System.currentTimeMillis();
         HashMap<Method, Double> actionsReady = getActivableActions(fsm);
+        
         if (actionsReady.isEmpty()) {
             return null;
         }
@@ -430,7 +486,10 @@ public class StochasticTester implements Serializable{
                 sum += actionsReady.get(act);
                 if (rand <= sum) {
                     try {
+                    	
                         Object[] tab = (Object[]) act.invoke(fsm);
+                        //long estimatedTime = (System.currentTimeMillis() - startTime);
+                        //System.out.println("compute elapsed time 2  " + estimatedTime + "miliseconds" + "method name " + act.getName());
                         Object[] params = new Object[tab.length - 1];
                         for (int i=1; i < tab.length; i++) {
                             params[i-1] = tab[i];
@@ -449,7 +508,6 @@ public class StochasticTester implements Serializable{
             }
         }
         while (rand > sum);
-
         return null;
     }
     
@@ -461,8 +519,11 @@ public class StochasticTester implements Serializable{
     private HashMap<Method, Double> getActionTaggedMethods(FsmModel _fsm) {
         HashMap<Method, Double> ret = new HashMap<Method, Double>();
         for (Method m : _fsm.getClass().getDeclaredMethods()) {
+        	//System.out.println("method " + m);
             Annotation[] ta = m.getDeclaredAnnotations();
+            
             for (int i=0; i < ta.length; i++) {
+            	//System.out.println(ta[i] instanceof Action);
                 if (ta[i] instanceof Action) {
                     Method actProba = null;
                     double proba = 0;
@@ -485,6 +546,9 @@ public class StochasticTester implements Serializable{
                 }
             }
         }
+        //System.out.println(ret);
+    	//System.exit(1);
+
         return ret;
     }
 
@@ -500,6 +564,7 @@ public class StochasticTester implements Serializable{
         for (Method act : this.actionsAndProbabilities.keySet()) {
             try {
                 Method actGuard = fsm.getClass().getDeclaredMethod(act.getName() + "Guard");
+                //System.out.println("actguard " + actGuard);
                 if ((Boolean) actGuard.invoke(fsm)) {
                     Method actProba = fsm.getClass().getDeclaredMethod(act.getName() + "Proba");
                     double proba = (Double) actProba.invoke(fsm);
@@ -522,7 +587,28 @@ public class StochasticTester implements Serializable{
                 System.err.println("Warning: sum of probabilities of activable actionsAndProbabilities is > 1 !\n" + activableOnes);
             }
         }
+        //System.out.println("activable ones "+ activableOnes);
         return activableOnes;
+    }
+    public void getTestValues() throws IOException {
+    	FileReader vehicleReader = new FileReader("./outputVals.txt");
+        BufferedReader br = new BufferedReader(vehicleReader);
+        String sCurrentLine;
+        sCurrentLine = br.readLine();
+        sCurrentLine = br.readLine();
+        while(!sCurrentLine.contains("DecAuto")) {
+    		battery.add(Double.parseDouble(sCurrentLine));
+    		sCurrentLine = br.readLine();
+    	}
+        sCurrentLine = br.readLine();
+        while(!sCurrentLine.contains("Distance")) {
+    		decBattery.add(Double.parseDouble(sCurrentLine));
+    		sCurrentLine = br.readLine();
+    	}
+        while ((sCurrentLine = br.readLine()) != null){
+        	distance.add(Double.parseDouble(sCurrentLine));
+        }
+        br.close();
     }
 }
 

@@ -46,8 +46,9 @@ public class Road implements Serializable, Iterable<Vehicle> {
     String reconfChoosenWrite="";
     transient BufferedReader reader;
     double k[];
+    LogLevel logLevel;
     //LinkedList<Element> lastReconfList = new LinkedList<Element>();
-    public Road(String w, String wl, String rc,String rcr,Mutant m) {
+    public Road(String w, String wl, String rc,String rcr,Mutant m, LogLevel lg) {
     	writer = w;
     	writerLog=wl;
     	reconfigurationChoosen=rc;
@@ -55,6 +56,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	reconfChoosenRead=rcr;
     	reader = new BufferedReader(new StringReader(rcr));
     	k = new double[8];
+    	logLevel=lg;
     	for(int i=0;i<k.length;i++) k[i]=0;
     }
     public String getLineReconfChoosenRead() throws IOException {
@@ -141,15 +143,16 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	binding="Bindings(";
     	state="State(";
     	action="Actions(";
-
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.updateVehicleDistance();
             globalConso+=v.updatevehicleAutonomie();
-            component +="Vehicle:"+v.getId();
-            state+= "Vehicle:"+v.getId() +"->remaining distance:"+ v.distance+";";
-            state+= "Vehicle:"+v.getId() +"->remaining automony:"+v.autonomie+";";
-            state+= "Vehicle:"+v.getId() +"->status:"+v.getStatus()+";";
+            if(logLevel!=LogLevel.ERROR) {
+	            component +="Vehicle:"+v.getId();
+	            state+= "Vehicle:"+v.getId() +"->remaining distance:"+ v.distance+";";
+	            state+= "Vehicle:"+v.getId() +"->remaining automony:"+v.autonomie+";";
+	            state+= "Vehicle:"+v.getId() +"->status:"+v.getStatus()+";";
+            }
             v.tick();
             if(v.myPlatoon!=null) { 
             	if(v.isLeader()) {
@@ -170,28 +173,31 @@ public class Road implements Serializable, Iterable<Vehicle> {
             }
             state+="\n";
         }
-        affiche();
+        if(logLevel!=LogLevel.ERROR) {
+   	 		affiche();
+        } 	
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
                 v.getPlatoon().tick();
                 if(v.myPlatoon.lastReconf!=null) action += v.myPlatoon.lastReconf;
             }
         }
-        
-    	component+=")\n";
-    	binding+=")\n";
-    	state = state.substring(0, state.length()-1); 
-    	state+=")\n";
-    	action+=")\n";
-    	this.addStringWriterLog("Tick " + stepNb +"\n");
-    	this.addStringWriterLog("Vehicles on road " +allVehicles.size()+"\n");
-    	this.addStringWriterLog("Platoons on road " +numberPlatoon+"\n");
-    	this.addStringWriterLog(component);
-    	this.addStringWriterLog(binding);
-    	this.addStringWriterLog(state);
-    	this.addStringWriterLog(action);
-    	this.addStringWriterLog(externalEvent);
-    	this.addStringWriterLog("\n");
+        if(logLevel!=LogLevel.ERROR) {
+	    	component+=")\n";
+	    	binding+=")\n";
+	    	state = state.substring(0, state.length()-1); 
+	    	state+=")\n";
+	    	action+=")\n";
+	    	this.addStringWriterLog("Tick " + stepNb +"\n");
+	    	this.addStringWriterLog("Vehicles on road " +allVehicles.size()+"\n");
+	    	this.addStringWriterLog("Platoons on road " +numberPlatoon+"\n");
+	    	this.addStringWriterLog(component);
+	    	this.addStringWriterLog(binding);
+	    	this.addStringWriterLog(state);
+	    	this.addStringWriterLog(action);
+	    	this.addStringWriterLog(externalEvent);
+	    	this.addStringWriterLog("\n");
+        }
 //        roadLog += "Station;"+distanceStation[0]+";"+stepName+"\n";
 //        addStringWriterLog(roadLog+ platoonLog+ vehicleLog );
 //        vehicleLog="";
