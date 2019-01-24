@@ -316,7 +316,7 @@ public class StochasticTester implements Serializable{
     public String retrieve(AdaptationPolicyModel apm, ArrayList<SerializableTest> serializableTest,int sourcePA,int sourceCoeff) throws NumberFormatException, IOException {
     	long startTime = System.currentTimeMillis();
     	long estimatedTime=0;
-    	 
+    	int cpt=0;
     	boolean propCov=false;
     	double ruleCov=0.0;
     	int indRules=0;
@@ -335,10 +335,9 @@ public class StochasticTester implements Serializable{
          System.out.println("retrieve fsm ");
 		 // for each of the resulting test cases
         init();
-        ((VanetFSM) fsm).getSUT().globalConso=0;
+        ((VanetFSM) fsm).getSUT().reinit();
        
         for(SerializableTest test : serializableTest) {
-        	
         	for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
         		((VanetFSM) fsm).getSUT().k[cptK] = ((VanetFSM) fsm).getSUT().k[cptK]== sourcePA ? sourceCoeff :0;
         	}
@@ -347,7 +346,7 @@ public class StochasticTester implements Serializable{
             fsm.reset(true);
 	        MyTest currentTest = new MyTest();
 			for(SerializableStep step : test.steps) {
-				
+				cpt++;
 				j++;
 				System.out.println("step :"+step.toString());
 				newStep = computeInputTest(step);
@@ -427,13 +426,13 @@ public class StochasticTester implements Serializable{
 		propertiesWriter.print(propertiesOutput);
 		propertiesWriter.close();
         vcm.printReport();
+        System.out.println("size test "+ cpt);
 		return conso;
     }
    
     public MyStep computeInputTest(SerializableStep step){
     	 HashMap<Method, Double> actionsReady = getActivableActions(fsm);
-    	 System.out.println("possible methods "+ actionsReady.keySet());
-		 for (Method act : actionsReady.keySet()) {
+    	for (Method act : actionsReady.keySet()) {
 			 if(step.getMethName().contains(act.getName()) ) {
 				 try {
 					act.invoke(fsm);

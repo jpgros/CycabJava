@@ -84,6 +84,7 @@ public class VanetFSM implements FsmModel {
     	}
     }
     public void afficheTestValues() {
+    	System.out.println("print test values ");
     	System.out.println(battery);
     	System.out.println(decBattery);
     	System.out.println(distance);
@@ -167,6 +168,7 @@ public class VanetFSM implements FsmModel {
         }
         if(k>=0 ){
         	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k)+ " vehicle one auto"+ sut.allVehicles.get(j).autonomie);
+        	System.out.println("vehicle k "  +sut.getVehicle(k).getDisplayString() + "vehicle j " + sut.getVehicle(j).getDisplayString() + "next stas "+ sut.distanceStation[0]);
         	//indexjoined.add(k);
         	return new Object[]{ sut, j, k };
         }

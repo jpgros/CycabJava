@@ -249,7 +249,7 @@ class ExecutionReport {
     	for (Integer step : steps.keySet()) {
     		while (lastStep < step) {
     			x = "*** Step " + lastStep;
-    			System.out.println(x);
+    			//System.out.println(x);
     			//writerErr.println(x);
     			lastStep++;
     		}
@@ -260,7 +260,7 @@ class ExecutionReport {
 
             ArrayList<Element> elt2 = steps.get(step).getSecond();
             x ="Eligible reconfigurations: " + elt;
-            System.out.println(x);
+            //System.out.println(x);
             //writerErr.println(x);
             for(Element elig : elt) {
             	eligibleMap.put(elig.name, eligibleMap.get(elig.name) + 1);
@@ -268,7 +268,7 @@ class ExecutionReport {
             	
             }
             x=" --> Actual reconfiguration: " + steps.get(step).getSecond();
-            System.out.println(x);
+            //System.out.println(x);
             //writerErr.println(x);
             for(Element elig : elt2) {
             	actualMap.put(elig.name, actualMap.get(elig.name) + 1);
@@ -317,20 +317,20 @@ class ExecutionReport {
 //            }
             lastStep++;
         }
-    	System.out.println("Last step with eligible reconfiguration is step " + --lastStep);
+    	//System.out.println("Last step with eligible reconfiguration is step " + --lastStep);
     	x = "Eligible versus actual reconfigurations :";
-    	System.out.println(x);
+    	//System.out.println(x);
     	writerErr.println(x);
     	Iterator it = eligibleMap.entrySet().iterator();
     	Iterator it2 = actualMap.entrySet().iterator();
     	
     	    while (it.hasNext()) { 
     	        Map.Entry pair = (Map.Entry)it.next();
-    	        System.out.print(pair.getKey() + " = " + pair.getValue());
+    	        //System.out.print(pair.getKey() + " = " + pair.getValue());
     	        it.remove(); // avoids a ConcurrentModificationException
     	        
     	        Map.Entry pair2 = (Map.Entry)it2.next();
-    	        System.out.println(" / " + pair2.getValue());
+    	        //System.out.println(" / " + pair2.getValue());
     	        it2.remove(); // avoids a ConcurrentModificationException
     	    }
 //    	    x= "Low eligible vs actual : " + eligLow + "/" + actuLow;
@@ -340,17 +340,17 @@ class ExecutionReport {
 //    	    System.out.println(x);
 //    	    writerErr.println(x);
     	    x= "High eligible vs actual : " + eligHigh + "/" + actuHigh;
-    	    System.out.println(x);
+    	    //System.out.println(x);
     	    writerErr.println(x);
     	    
     	    if(property) {
     	    	x ="Verdict : test passed successfully";
-    	    	System.out.println(x);
+    	    	//System.out.println(x);
     	    	writerErr.println(x);
     	    }
     	    else {
     	    	x ="Verdict : test failed";
-    	    	System.out.println(x);
+    	    	//System.out.println(x);
     	    	writerErr.println(x);
     	    }
     	    
@@ -411,7 +411,7 @@ class ExecutionReport {
 			}
     		//filling eligible map
 				for(Element eligElt : pair.first) {
-					System.out.println("elig elt "+ eligElt);
+					//System.out.println("elig elt "+ eligElt);
 					value = eligibleNotSortedCountedMap.get(eligElt);
 					if(value==null) {
 						eligibleNotSortedCountedMap.put(eligElt, 1);
@@ -457,7 +457,7 @@ class ExecutionReport {
     	val=0;
     	freq=0.0;
     	for(Map.Entry<Element, Integer> elt: eligibleNotSortedCountedMap.entrySet()) {
-    		System.out.println("elig not sorted " +elt.getKey());
+    		//System.out.println("elig not sorted " +elt.getKey());
     		val= actualCountedMap.get(elt.getKey()); 
     		if(val!=null) {
     			freq = (((Double)(double)(val))/((Double)(double)(elt.getValue())))*100.0;
@@ -469,33 +469,33 @@ class ExecutionReport {
     		}
     	}
     	    	
-    	System.out.println("Counted actual map :");
+    	//System.out.println("Counted actual map :");
     	for(Map.Entry<Element,Integer> map : actualCountedMap.entrySet()) {
     		x= " key " + map.getKey() + " value "+ map.getValue();
     		//System.out.println(x);
     		writeStats.println(x);
     	}
-    	System.out.println("Counted eligible map :");
+    	//System.out.println("Counted eligible map :");
     	for(Map.Entry<Element,Integer> map : eligibleSortedCountedMap.entrySet()) {
     		x= " key " + map.getKey() + " value "+ map.getValue();
     		//System.out.println(x);
     		writeStats.println(x);
     	}
     	
-    	System.out.println("Counted unsorted eligible map :");
+    	//System.out.println("Counted unsorted eligible map :");
     	for(Map.Entry<Element,Integer> map : eligibleNotSortedCountedMap.entrySet()) {
     		x= " key " + map.getKey() + " value "+ map.getValue();
     		//System.out.println(x);
     		writeStats.println(x);
     	}
     	
-    	System.out.println("occurrencesTP :");
+    	//System.out.println("occurrencesTP :");
     	for(Map.Entry<Element,Integer> rule :occurrencesTP.entrySet()) {
     		x= "name " + rule.getKey().getName() + " vehicle "+ rule.getKey().getVehicle()+ " priority "+ rule.getKey().getPriority()+" value " + rule.getValue();
     		//System.out.println(x);
     		writeStats.println(x);
     	}
-    	System.out.println("size : " + nb);
+    	//System.out.println("size : " + nb);
     	
     	for(Map.Entry<Element,Double> map : frequenciesOccTPMap.entrySet()){
     		x= " key " + map.getKey() + " value "+ map.getValue();

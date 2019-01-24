@@ -227,6 +227,7 @@ public class Vehicle extends Entity implements Serializable {
 	public double updatevehicleAutonomie() {
 		String x="";
 		double conso = this.autonomie;
+		System.out.println(this.getDisplayString());
 		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
 		if( this.autonomie < 0){
 			x = "Error : new Battery left negative !"+"\n";

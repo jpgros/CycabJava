@@ -81,10 +81,10 @@ public class VanetFACS implements Serializable{
     		((VanetFSM) fsm).getSUT().k[cptK] = 0;
     	}
         //choice between generation and retrieving
-        //retrieveTest(st,vcm,apm);
+        retrieveTest(st,vcm,apm);      
         writer.println(" str Begins : ");
         //generatetest(st, vcm,apm);
-        generateAndRerunTest(st, vcm, apm,fsm);
+        //generateAndRerunTest(st, vcm, apm,fsm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.print(strWriter);
         strLog=((VanetFSM) fsm).getSUT().getStringWriterLog();
@@ -189,10 +189,8 @@ public class VanetFACS implements Serializable{
 		st.setMonitor(vcm);
 		try {
 			PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
-			System.out.println("generate fsm values");
-			((VanetFSM) fsm).afficheTestValues();
 			testsList=st.generate(1,100,apm);
-			System.out.println("used battery list " + ((VanetFSM) fsm).decBattery);
+			((VanetFSM) fsm).afficheTestValues();
 			for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
@@ -204,13 +202,12 @@ public class VanetFACS implements Serializable{
 	        }			
 //			long startTime = System.currentTimeMillis();
 //			long estimatedTime;
-			for(int cpt=0; cpt <5; cpt++) {
+			for(int cpt=0; cpt <1; cpt++) {
 				for(int k=-1; k<2; k+=2) {
 					writerConso.println("k = "+ k);
 					for(int i=0; i<8; i++) {
-						System.out.println("used battery list " + ((VanetFSM) fsm).decBattery);
+						((VanetFSM) fsm).afficheTestValues();
 			        	conso += st.retrieve(apm,testArraySer,i,0);
-						
 	    				writerConso.print(conso);
 	    				conso="";
 //	    				estimatedTime = (System.currentTimeMillis() - startTime)/1000;
@@ -243,7 +240,23 @@ public class VanetFACS implements Serializable{
 	        ArrayList<SerializableTest> testInput = (ArrayList<SerializableTest>)objectInputStream.readObject();
 	        objectInputStream.close();
 			st.setMonitor(vcm); 
-	        st.retrieve(apm,testInput,-1,-1);	
+			//******
+			String conso="";
+			PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
+			//for(int k=-1; k<2; k+=2) {
+				//writerConso.println("k = "+ k);
+				for(int i=0; i<2; i++) {
+					//((VanetFSM) fsm).afficheTestValues();
+		        	conso += st.retrieve(apm,testInput,0,0); // not rmv
+//		        	st.retrieve(apm,testInput,-1,-1);	
+		        	writerConso.print(conso);
+    				conso="";
+				}
+			// } 
+	        writerConso.print("\n");
+			writerConso.print("\n");
+			//**********
+	    
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -267,7 +280,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(10,5000,apm);
+			testsList=st.generate(1,8000,apm);
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
 	        for(MyTest curTest : testsList) {

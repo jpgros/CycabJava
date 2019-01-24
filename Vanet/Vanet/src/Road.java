@@ -113,7 +113,6 @@ public class Road implements Serializable, Iterable<Vehicle> {
 		writer+="Vehicle created at index " + (allVehicles.size() - 1);
         return allVehicles.size() - 1;
     }
-
     public boolean join(int i, int j) {
         if (i != j && allVehicles.get(i).getPlatoon() == null) {
             return allVehicles.get(i).join(allVehicles.get(j))&& allVehicles.get(i).getPlatoon() != null;
@@ -135,7 +134,13 @@ public class Road implements Serializable, Iterable<Vehicle> {
 //        return false;
 //    }
 
-
+    public void reinit() { //reinit variables in case of a new test 
+        this.distanceStation[0] = FREQUENCYSTATION;
+        this.distanceStation[1] = FREQUENCYSTATION; 
+        this.allVehicles = new ArrayList<Vehicle>();
+        this.numberPlatoon=0;
+        this.globalConso=0;
+    }
     public void tick() {
     	stepNb++;
     	tick=true;
