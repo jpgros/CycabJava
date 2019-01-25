@@ -29,7 +29,7 @@ public class Vehicle extends Entity implements Serializable {
 	final static double LOW_DIST = 200;
 	final static double VLOW_DIST = 100;
 	final static double LOW_LEADER_BATTERY = 33;
-	final static double LOW_BATTERY = 15; // should be > property3
+	final static double LOW_BATTERY = 20; // should be > property3
 	final static double HIGHPRIO = 8;
 	final static double MEDIUMPRIO = 5;
 	final static double LOWPRIO = 2;
@@ -227,7 +227,6 @@ public class Vehicle extends Entity implements Serializable {
 	public double updatevehicleAutonomie() {
 		String x="";
 		double conso = this.autonomie;
-		System.out.println(this.getDisplayString());
 		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
 		if( this.autonomie < 0){
 			x = "Error : new Battery left negative !"+"\n";
@@ -404,7 +403,7 @@ public class Vehicle extends Entity implements Serializable {
 	}
 	public String getDisplayString() {
 		String l = (myPlatoon != null && myPlatoon.leader == this) ? "*" : "";
-		return "id: " + id.toString().split("-")[0] + l + ", auto: " + autonomie + ", distance: " + distance + " platoon: " + myPlatoon + " next station: "+ road.distanceStation[0];
+		return "id: " + id.toString().split("-")[0] + l + ", auto: " + autonomie + ", distance: " + distance + " platoon: " + myPlatoon + "next station " + this.road.distanceStation[0];
 	}
 
 }

@@ -332,7 +332,7 @@ class Property3 extends VanetProperty {
                     else if(v.myPlatoon!=null) {
                     	transitionsMade[1][0]=true;
                         if (v.autonomie < MIN_LEVEL_BATTERY || v.distance == 0) {
-                            throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination.");
+                            throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination. \n vehicle's platoon reconf list " +v.myPlatoon.policies.listPolicy);
                         }
                     }
 

@@ -220,11 +220,11 @@ public class StochasticTester implements Serializable{
         PrintWriter propertiesWriterFile = new PrintWriter("./propertiesErr.txt", "UTF-8");
         LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.INFO, LogLevel.ERROR);
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
-        ((VanetFSM) fsm).getValues(this.battery, this.decBattery,this.distance, length);
         // for each of the resulting test cases
         long startTime;
         for (int i=0; i < nb; i++) {
-        	
+        	((VanetFSM) fsm).getValues(this.battery, this.decBattery,this.distance, length);
+            ((VanetFSM) fsm).getSUT().reinit();
         	x="== Generating test #" + i + " ==";
         	((VanetFSM) fsm).getSUT().addStringWriter(x);
             System.out.println(x);
@@ -275,7 +275,7 @@ public class StochasticTester implements Serializable{
 							System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
 							e.printStackTrace();
 							depopList(((VanetFSM) fsm).addedVehicles, j);
-							ret.add(currentTest);
+							//ret.add(currentTest);
 							return ret;
 						}// catch (PropertyCoveredException e) {
 							// TODO Auto-generated catch block
@@ -289,9 +289,6 @@ public class StochasticTester implements Serializable{
 								if(interruptCovered) {
 									break; //break the actual test when everything is covered
 								}
-								if(interruptCovered) {
-	        						break; //break the actual test when everything is covered
-	        					}
 							}
 						}
 	                }
@@ -299,13 +296,14 @@ public class StochasticTester implements Serializable{
                 //checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
             }while (j < length && b);       		
             // add computed test case to the result
-            ret.add(currentTest);
+        	if(ruleCov==100.0 && propCov) {
+        		ret.add(currentTest);
+        	}
             propertiesWriter.print(propertiesOutput);
             propertiesWriter.print(checkCoverageProperties(i,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
             if(reinitCov) {
             	resetCov(apm);
             }
-
         }
 		vcm.printReport();
 		propertiesWriter.close();
@@ -329,7 +327,7 @@ public class StochasticTester implements Serializable{
         String conso="";
         MyStep newStep; 
 		PrintWriter propertiesWriterFile = new PrintWriter("./propertiesErr.txt", "UTF-8");
-        LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.INFO, LogLevel.ERROR);
+        LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.VERBOSE, LogLevel.ERROR);
 //        estimatedTime = (System.currentTimeMillis() - estimatedTime - startTime);
 //        System.out.println("elapsed time header" + estimatedTime + " miliseconds " );
          System.out.println("retrieve fsm ");
@@ -345,8 +343,7 @@ public class StochasticTester implements Serializable{
 	        // reset FSM exploration
             fsm.reset(true);
 	        MyTest currentTest = new MyTest();
-			for(SerializableStep step : test.steps) {
-				cpt++;
+			for(SerializableStep step : test.steps) {				
 				j++;
 				System.out.println("step :"+step.toString());
 				newStep = computeInputTest(step);
@@ -402,11 +399,15 @@ public class StochasticTester implements Serializable{
                 }
                 catch (Exception e) {
                 	System.out.println("newstep null "+ newStep + " step " + step );
+                	System.out.println("step number "+ cpt);
+                	System.out.println("test size "+ serializableTest.get(0).size());
                 	System.out.println(" methods possible "+ actionsAndProbabilities);
+                	((VanetFSM) fsm).getSUT().consolePrint();
+                	
                 	System.exit(1);
 					// TODO: handle exception
-				}
-    			
+				}	
+                cpt++;
 			}
 
 			j=0;
@@ -420,6 +421,7 @@ public class StochasticTester implements Serializable{
 			ret.add(currentTest);
 //			estimatedTime = (System.currentTimeMillis() - estimatedTime- startTime);
 //	        System.out.println("elapsed time end " + estimatedTime + " miliseconds " );
+			
 		}
         
        // writerLog.print(strLog); 

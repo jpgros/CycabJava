@@ -152,7 +152,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
             Vehicle v = allVehicles.get(i);
             v.updateVehicleDistance();
             globalConso+=v.updatevehicleAutonomie();
-            if(logLevel!=LogLevel.ERROR) {
+            if(logLevel==LogLevel.VERBOSE) {
 	            component +="Vehicle:"+v.getId();
 	            state+= "Vehicle:"+v.getId() +"->remaining distance:"+ v.distance+";";
 	            state+= "Vehicle:"+v.getId() +"->remaining automony:"+v.autonomie+";";
@@ -178,7 +178,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
             }
             state+="\n";
         }
-        if(logLevel!=LogLevel.ERROR) {
+        if(logLevel==LogLevel.VERBOSE) {
    	 		affiche();
         } 	
         for (Vehicle v : allVehicles) {
@@ -187,7 +187,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
                 if(v.myPlatoon.lastReconf!=null) action += v.myPlatoon.lastReconf;
             }
         }
-        if(logLevel!=LogLevel.ERROR) {
+        if(logLevel==LogLevel.VERBOSE) {
 	    	component+=")\n";
 	    	binding+=")\n";
 	    	state = state.substring(0, state.length()-1); 
@@ -305,5 +305,10 @@ public class Road implements Serializable, Iterable<Vehicle> {
 	}
 	public void setDistanceStation(double[] distanceStas) {
 		distanceStation = distanceStas;
+	}
+	public void consolePrint() {
+		for (Vehicle v : allVehicles) {
+			v.getDisplayString();
+		}	        
 	}
 }

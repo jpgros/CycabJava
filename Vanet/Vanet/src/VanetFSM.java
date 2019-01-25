@@ -116,10 +116,7 @@ public class VanetFSM implements FsmModel {
     public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; } //0.87
     @Action
     public Object[] tick() {
-    	//long startTime = System.currentTimeMillis();
         sut.tick();
-        //long estimatedTime = (System.currentTimeMillis() - startTime);
-        //System.out.println("tick elapsed time  " + estimatedTime + "miliseconds");
         return new Object[]{ sut };
     }
 
@@ -168,7 +165,6 @@ public class VanetFSM implements FsmModel {
         }
         if(k>=0 ){
         	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k)+ " vehicle one auto"+ sut.allVehicles.get(j).autonomie);
-        	System.out.println("vehicle k "  +sut.getVehicle(k).getDisplayString() + "vehicle j " + sut.getVehicle(j).getDisplayString() + "next stas "+ sut.distanceStation[0]);
         	//indexjoined.add(k);
         	return new Object[]{ sut, j, k };
         }

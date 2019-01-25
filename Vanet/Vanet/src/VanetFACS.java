@@ -55,9 +55,9 @@ public class VanetFACS implements Serializable{
         String reconfChoosen="";
         String reconfChoosenRead="";
         LogPrinter writerLog = new LogPrinter(writerFileLog,LogLevel.INFO,logLevel);    	    	
-        LogPrinter writer = new LogPrinter(writerFileOut,LogLevel.INFO, logLevel);
-        LogPrinter writerErr = new LogPrinter(writerFileErr,LogLevel.INFO, logLevel);
-        LogPrinter writerReconfChoosen = new LogPrinter(writerFileReconfChoosen,LogLevel.INFO, logLevel);
+        LogPrinter writer = new LogPrinter(writerFileOut,LogLevel.VERBOSE, logLevel);
+        LogPrinter writerErr = new LogPrinter(writerFileErr,LogLevel.VERBOSE, logLevel);
+        LogPrinter writerReconfChoosen = new LogPrinter(writerFileReconfChoosen,LogLevel.VERBOSE, logLevel);
         long startTime = System.currentTimeMillis();
 
         BufferedReader br = new BufferedReader(reconfChoosenReader);
@@ -81,9 +81,8 @@ public class VanetFACS implements Serializable{
     		((VanetFSM) fsm).getSUT().k[cptK] = 0;
     	}
         //choice between generation and retrieving
-        retrieveTest(st,vcm,apm);      
-        writer.println(" str Begins : ");
-        //generatetest(st, vcm,apm);
+        //retrieveTest(st,vcm,apm);      
+        generatetest(st, vcm,apm);
         //generateAndRerunTest(st, vcm, apm,fsm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.print(strWriter);
@@ -280,7 +279,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(1,8000,apm);
+			testsList=st.generate(100,5000,apm);
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
 	        for(MyTest curTest : testsList) {

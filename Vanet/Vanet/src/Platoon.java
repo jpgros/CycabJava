@@ -199,6 +199,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					break;
 				default:
 					lastReconf = policies.listPolicy.get(0);
+					System.out.println("last reconf " + lastReconf + "size list " + policies.listPolicy.size());
 					policies.listPolicy.clear();
 				break;
 				}	
