@@ -14,8 +14,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     ArrayList<Vehicle> nextLeaderList = new ArrayList<Vehicle>();
     UUID id;
-	UUID vehicleLeader = null;
-	Vehicle leader;
+	Vehicle leader=null;
 	Road road = null;
 	AdaptationPolicy policies =new AdaptationPolicy();
 	Element lastReconf =null;
@@ -23,11 +22,11 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	boolean review = true;
 	String line;
 	//int tickCounter =0;
-	public Platoon(int consommationLeader, int numberVehicleMax,UUID id, UUID vehicleLeader) {
+	public Platoon(int consommationLeader, int numberVehicleMax,UUID id, Vehicle vehicleLeader) {
 		this.consommationLeader = consommationLeader;
 		//this.NUMBER_VEHICLE_MAX = numberVehicleMax;
 		this.id = id;
-		this.vehicleLeader = vehicleLeader;
+		leader = vehicleLeader;
 	}
 	public Platoon() {   
 
@@ -37,7 +36,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		leader = _leader;
 	    id = UUID.randomUUID();
 		vehiclesList.add(leader);
-		vehicleLeader = leader.id;
 		leader.setPlatoon(this);
 		road =r;
 		r.numberPlatoon++;
@@ -83,11 +81,11 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	}
 	
 	public int findLeader() {
-		if(vehicleLeader==null) return -1;
+		if(leader==null) return -1;
 		int index=0;
 		boolean notFounded = true;
 		while(notFounded) {
-			notFounded = !(vehiclesList.get(index).getId()==vehicleLeader);
+			notFounded = !(vehiclesList.get(index).getId()==leader.id);
 			index++;
 		}
 		return index;
@@ -134,7 +132,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					//TODO 
 				break;
 				case M12:
-					System.out.println("sizepol"+ policies.listPolicy.size()+ "line before cond " + line);
 					if(policies.listPolicy.size()>1 ) {
 						if(review) {
 							try {
@@ -199,7 +196,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					break;
 				default:
 					lastReconf = policies.listPolicy.get(0);
-					System.out.println("last reconf " + lastReconf + "size list " + policies.listPolicy.size());
 					policies.listPolicy.clear();
 				break;
 				}	
@@ -252,8 +248,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded and stays : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id + "minvalue "+ lastReconf.getVehicle().getMinValue()+ "\n"; //+ " tick : " + tickCounter;
 				//System.out.print(x);
 				road.addStringWriter(x);
-//				x = "Replaced by " + this.leader.getId();
-//				System.out.println(x);
 //				writer.println(x);
 				//tickCounter=6;
 			}
@@ -311,7 +305,13 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			//road.platoonLog+="Platoon;"+ id+";" +vehiclesList.size() +vlList+  "\n";
 //		}
 	}
-
+	//returns true is there is no leader inside platoon
+	public boolean noLeaderDetected() {
+		for(Vehicle vl : vehiclesList) {
+			if(vl.isLeader()== true) return false;
+		}
+		return true;
+	}
 	public void relayMutant() {
 		this.leader=null;
 	}
@@ -320,20 +320,20 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		if(!nextLeaderList.isEmpty()) {
 			//System.out.print("Leader vehicle "+ leader.getId());
 			if(nextLeaderList.get(0).autonomie >= leader.LOW_LEADER_BATTERY) {
+				leader.
 				road.addStringWriter("actual leader id " +leader.getId() + "next leader " + nextLeaderList.get(0).getId());
 				this.leader = nextLeaderList.remove(0);
 			}
 			else{
-				//System.out.println("No better vehicle available, Platoon deleted");
 				road.addStringWriter("No better vehicle available, Platoon deleted");
 				deletePlatoon();
 			}
 		}
 		else { // remove platoon
-			//System.out.println("No better vehicle available, Platoon deleted");
 			road.addStringWriter("No better vehicle available, Platoon deleted");
 			deletePlatoon();
 		}
+		
 	}
 	
 	public void upgradeRelay(Vehicle v) {
@@ -351,6 +351,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				if(vehiclesList.size()>0) leader = vehiclesList.get(0);
 			}
 			policies.removeForVehicle(v);
+			nextLeaderList.remove(v);
 			if (vehiclesList.size() <= 1) {
 				deletePlatoon();
 			}
@@ -471,12 +472,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	}
 	public void setId(UUID id) {
 		this.id = id;
-	}
-	public UUID getVehicleLeader() {
-		return vehicleLeader;
-	}
-	public void setVehicleLeader(UUID vehicleLeader) {
-		this.vehicleLeader = vehicleLeader;
 	}
 	
 	public AdaptationPolicy getPolicies() {

@@ -10,16 +10,17 @@ public class AdaptationPolicy implements Serializable{
 	public void addElement(Element elt) {
 		if(listPolicy.size()==0) {
 			listPolicy.add(0, elt);
-			System.out.println("elt added " + elt);
 		}
 		else {
-			int index=0;
-			boolean looping = true;
-			while(looping && index < listPolicy.size()) {
-				looping = elt.priority<listPolicy.get(index).priority;
-				index ++;
+			if(! elt.isContainedOnNameAndVehicle(listPolicy)) {
+				int index=0;
+				boolean looping = true;
+				while(looping && index < listPolicy.size()) {
+					looping = elt.priority<listPolicy.get(index).priority;
+					index ++;
+				}
+				listPolicy.add(index,elt);
 			}
-			listPolicy.add(index,elt);
 		}
 	}
 //	public void addElement(Element elt) {

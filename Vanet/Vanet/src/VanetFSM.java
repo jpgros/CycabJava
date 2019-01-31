@@ -164,7 +164,7 @@ public class VanetFSM implements FsmModel {
         	k--;
         }
         if(k>=0 ){
-        	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k)+ " vehicle one auto"+ sut.allVehicles.get(j).autonomie);
+        	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
         	//indexjoined.add(k);
         	return new Object[]{ sut, j, k };
         }
@@ -195,7 +195,7 @@ public class VanetFSM implements FsmModel {
         }
         return false;
     }
-    public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.05; }
+    public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 :0.05;} //0.05; }
     @Action
     public Object[] forceQuitPlatoon() {
         //int start = (int)(Math.random() * sut.nbVehiclesOnRoad());

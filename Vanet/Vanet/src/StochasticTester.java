@@ -239,6 +239,7 @@ public class StochasticTester implements Serializable{
             // while limit has not been reached and there exists a next step
             MyStep newStep;
         	do {
+        		//System.out.println("tick");
         		x="step " +j;
             	((VanetFSM) fsm).getSUT().addStringWriter(x);           
 	            newStep = computeNextStep();

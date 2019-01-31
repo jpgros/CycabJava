@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Element implements Serializable {
@@ -28,7 +29,6 @@ public class Element implements Serializable {
     }
    @Override
    public boolean equals(Object obj) {
-
       if (obj == null)
          return false;
       if (getClass() != obj.getClass())
@@ -41,7 +41,13 @@ public class Element implements Serializable {
     	  return false;
       }
    }
-
+   public boolean isContainedOnNameAndVehicle(ArrayList<Element> arrayElt) {
+	   for(Element elt :arrayElt) {
+		   if(this.name==elt.name && this.vehicle == elt.vehicle && this.priority<elt.priority) return true;
+	   }
+	   return false;   
+   }
+   
 	public Vehicle getVehicle() {
 		return vehicle;
 	}

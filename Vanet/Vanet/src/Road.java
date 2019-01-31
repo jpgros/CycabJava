@@ -160,6 +160,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
             }
             v.tick();
             if(v.myPlatoon!=null) { 
+            	
             	if(v.isLeader()) {
             		component +="Platoon:"+v.myPlatoon+"\n";
             	}
@@ -183,8 +184,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
         } 	
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
-                v.getPlatoon().tick();
-                if(v.myPlatoon.lastReconf!=null) action += v.myPlatoon.lastReconf;
+        		v.getPlatoon().tick();
+        		if(v.myPlatoon.lastReconf!=null) action += v.myPlatoon.lastReconf;
             }
         }
         if(logLevel==LogLevel.VERBOSE) {

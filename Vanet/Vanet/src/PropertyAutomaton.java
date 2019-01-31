@@ -179,7 +179,7 @@ class Property1 extends VanetProperty {
                     }
                     else if (v.myPlatoon !=null) {
                     	transitionsMade[1][1]=true;
-                        if (v.myPlatoon.leader == null) {
+                        if (v.myPlatoon.leader == null || v.myPlatoon.noLeaderDetected()) {
                             throw new PropertyFailedException(this, "Platoon " + v.myPlatoon + " does not have a leader.");
                         }
                     }
