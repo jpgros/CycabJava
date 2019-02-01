@@ -6,22 +6,38 @@ import org.apache.commons.collections15.functors.SwitchClosure;
 
 public class AdaptationPolicy implements Serializable{
 	ArrayList<Element> listPolicy= new ArrayList<Element>();
+	final static double COEFF_WAITING_RULE=0.3;
 	
+	// add element according to the given priority and the time rule has already waited
 	public void addElement(Element elt) {
-		if(listPolicy.size()==0) {
-			listPolicy.add(0, elt);
+		int index=elt.indexOnNameAndVehicle(listPolicy);
+		if( index !=-1) {
+			listPolicy.remove(index);
+			elt.timeWaiting++;
 		}
-		else {
-			if(! elt.isContainedOnNameAndVehicle(listPolicy)) {
-				int index=0;
-				boolean looping = true;
-				while(looping && index < listPolicy.size()) {
-					looping = elt.priority<listPolicy.get(index).priority;
-					index ++;
-				}
-				listPolicy.add(index,elt);
-			}
+		index=0;
+		boolean looping = true;
+		if (listPolicy.size() == 0) {
+			listPolicy.add(elt);
+        } else if ((listPolicy.get(0).priority+ COEFF_WAITING_RULE*listPolicy.get(0).timeWaiting) > (elt.priority+ COEFF_WAITING_RULE*elt.timeWaiting)) {
+        	listPolicy.add(0, elt);
+        } else if ((listPolicy.get(listPolicy.size() - 1).priority + COEFF_WAITING_RULE*listPolicy.get(listPolicy.size()-1).timeWaiting)< (elt.priority + COEFF_WAITING_RULE*elt.timeWaiting)) {
+        	listPolicy.add(listPolicy.size(), elt);
+        } else {
+            int i = 0;
+            while ((listPolicy.get(i).priority + listPolicy.get(i).timeWaiting) < (elt.priority +COEFF_WAITING_RULE*elt.timeWaiting) ) {
+                i++;
+            }
+            listPolicy.add(i, elt);
+        }
+	}
+	public double averageValuePolicies() {
+		if (listPolicy.size()==0) return 0;
+		double totalPolicies=0;
+		for(Element elt : listPolicy) {
+			totalPolicies+= elt.priority;
 		}
+		return totalPolicies/listPolicy.size();
 	}
 //	public void addElement(Element elt) {
 //		if(listPolicy.size()==0) {

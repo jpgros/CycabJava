@@ -11,6 +11,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	int consommationLeader = 2;
 	final static int NUMBER_VEHICLE_MAX = 5; //unused
 	final static double MINLEADERVALUE = 33;
+	final static double THRESHOLDRULESVALUE = 7;
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     ArrayList<Vehicle> nextLeaderList = new ArrayList<Vehicle>();
     UUID id;
@@ -195,8 +196,10 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					}
 					break;
 				default:
-					lastReconf = policies.listPolicy.get(0);
-					policies.listPolicy.clear();
+					if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
+						lastReconf = policies.listPolicy.get(0);
+						policies.listPolicy.clear();
+					}
 				break;
 				}	
 				

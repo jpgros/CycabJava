@@ -7,6 +7,7 @@ public class Element implements Serializable {
 	//Priority priority;
 	double priority;
 	Vehicle vehicle;
+	double timeWaiting=0;
 	
 	public Element(PolicyName n, double p) {
 		name =n;
@@ -41,11 +42,11 @@ public class Element implements Serializable {
     	  return false;
       }
    }
-   public boolean isContainedOnNameAndVehicle(ArrayList<Element> arrayElt) {
-	   for(Element elt :arrayElt) {
-		   if(this.name==elt.name && this.vehicle == elt.vehicle && this.priority<elt.priority) return true;
+   public int indexOnNameAndVehicle(ArrayList<Element> arrayElt) {
+	   for(int i=0; i<arrayElt.size(); i++) {
+		   if(this.name==arrayElt.get(i).name && this.vehicle.id == arrayElt.get(i).vehicle.id ) return i;
 	   }
-	   return false;   
+	   return -1;   
    }
    
 	public Vehicle getVehicle() {

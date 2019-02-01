@@ -204,7 +204,6 @@ class ExecutionReport {
     }
     //actual reconf
     public void notifyStepAfter(int i, Element lastReconf, Element lastTriggeredReconf) {
-    	System.out.println("adding");
     	if (steps.get(i) == null) {
             // when no reconfiguration was expected 
             steps.put(i,new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
