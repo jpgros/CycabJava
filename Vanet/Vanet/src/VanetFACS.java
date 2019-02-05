@@ -273,13 +273,14 @@ public class VanetFACS implements Serializable{
     public static void generatetest(StochasticTester st, VanetConformanceMonitor vcm,AdaptationPolicyModel apm) {
     	//attention risque d incomptatibilite nbstep 
         ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
+        int nbRules = 8;
         ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();   
 		try {
 			FileOutputStream outser = new FileOutputStream("output.ser");
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(1,15000,apm);
+			testsList=st.generate(8,1000,apm);
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
 	        for(MyTest curTest : testsList) {

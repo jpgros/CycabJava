@@ -31,6 +31,19 @@ public class AdaptationPolicy implements Serializable{
             listPolicy.add(i, elt);
         }
 	}
+	
+	public void mergeLists(ArrayList<Element> lastReconfs) {
+		if(lastReconfs.size()!=0) {
+			for(Element elt :this.listPolicy) {
+				for(Element eltLast : lastReconfs) {
+					if(elt.name == eltLast.name && elt.priority==eltLast.priority && elt.vehicle== eltLast.vehicle) {
+						elt.timeWaiting=eltLast.timeWaiting;
+					}
+				}
+			}
+		}
+		lastReconfs.clear();
+	}
 	public double averageValuePolicies() {
 		if (listPolicy.size()==0) return 0;
 		double totalPolicies=0;

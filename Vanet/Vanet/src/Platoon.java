@@ -14,10 +14,12 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	final static double THRESHOLDRULESVALUE = 7;
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     ArrayList<Vehicle> nextLeaderList = new ArrayList<Vehicle>();
+
     UUID id;
 	Vehicle leader=null;
 	Road road = null;
 	AdaptationPolicy policies =new AdaptationPolicy();
+	AdaptationPolicy previousPolicies =new AdaptationPolicy();
 	Element lastReconf =null;
 	boolean created;
 	boolean review = true;
@@ -100,9 +102,11 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		//System.out.println("tick policy: " + tickCounter);
 		//writer.println("tick policy: " + tickCounter);
 		//if(tickCounter ==0) {
+		
 		if(true) {//M3 lastReconf not reinit at the end of tick trigger so if on the next step another action than tick is used, lastreconf will apear again into actual
 			lastReconf=null;
 		}
+		policies.mergeLists(previousPolicies.listPolicy);
 			if(policies.listPolicy.size()>0) {
 				if(policies.listPolicy.size()>1 && !review) {
 					road.addReconfigurationChoosen("Tick " +road.stepNb);
@@ -195,9 +199,17 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 						policies.listPolicy.clear();
 					}
 					break;
-				default:
-					if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
+				default: //if selectionned rule correponds to threshold criterion we select it and clear the list policy
+					if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
 						lastReconf = policies.listPolicy.get(0);
+						policies.listPolicy.clear();
+					}
+					else { // else we increment the waiting time of rules
+						previousPolicies.listPolicy.clear();
+						for(Element elt : policies.listPolicy) {
+							elt.timeWaiting++;
+							previousPolicies.listPolicy.add(elt);
+						}
 						policies.listPolicy.clear();
 					}
 				break;

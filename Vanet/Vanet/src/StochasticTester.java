@@ -209,105 +209,119 @@ public class StochasticTester implements Serializable{
     public ArrayList<MyTest> generate(int nb, int length,AdaptationPolicyModel apm) throws NumberFormatException, IOException {
     	//BufferedReader inStream = new BufferedReader(readerStep);
 		init(); 
+		String conso="";
     	boolean propCov=false;
     	boolean interruptCovered = false; // do we want to stop execution when everything is covered
     	boolean reinitCov = false; //do we want rules coverage to be reinitialized
     	double ruleCov=0.0;
     	int indRules=0;
+    	int j=0;
     	int indProp=0;
     	String strLog="";
     	String x="";
         PrintWriter propertiesWriterFile = new PrintWriter("./propertiesErr.txt", "UTF-8");
+        PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
         LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.INFO, LogLevel.ERROR);
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         // for each of the resulting test cases
         long startTime;
-        for (int i=0; i < nb; i++) {
-        	((VanetFSM) fsm).getValues(this.battery, this.decBattery,this.distance, length);
-            ((VanetFSM) fsm).getSUT().reinit();
-        	x="== Generating test #" + i + " ==";
-        	((VanetFSM) fsm).getSUT().addStringWriter(x);
-            System.out.println(x);
-            x="";
-            // initialize step counter
-            int j=0;
-            // reset FSM exploration
-            fsm.reset(true);
-            // create new test case 
-            MyTest currentTest = new MyTest();
-            boolean b = true;
-            // while limit has not been reached and there exists a next step
-            MyStep newStep;
-        	do {
-        		//System.out.println("tick");
-        		x="step " +j;
-            	((VanetFSM) fsm).getSUT().addStringWriter(x);           
-	            newStep = computeNextStep();
-	            ((VanetFSM) fsm).getSUT().externalEvent="Event("+newStep.meth.getName()+");\n";               
-            	b = (newStep != null);
-                if (b) {
-                    currentTest.append(newStep);
-                    j++;
-                    if (vcm != null) { 
-                        ruleCov =vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
-                        if(ruleCov==100.0) {
-                    		indRules= indRules==0? j : indRules;
-        					if(propCov) {
-	        					depopList(((VanetFSM) fsm).addedVehicles, j);
-	        					propertiesWriter.println("coverage rules :"  + " 100%" + "at step:" + j+ "and properties at index " + indProp) ;
-	        					if(interruptCovered) {
-	        						break; //break the actual test when everything is covered
+        Double[] array = {-3.0,-1.0, 0.0, 1.0, 3.0};
+        ArrayList<Double> coeffList = new ArrayList<Double>(Arrays.asList(array));
+        
+        for(Double coeff : coeffList) {
+	        for (int i=0; i < nb; i++) {
+	        	((VanetFSM) fsm).getValues(this.battery, this.decBattery,this.distance, length);
+	            ((VanetFSM) fsm).getSUT().reinit();
+	        	x="== Generating test #" + i + " ==";
+	        	((VanetFSM) fsm).getSUT().addStringWriter(x);
+	            System.out.println(x);
+	            x="";
+	            // initialize step counter
+	            j=0;
+	            // reset FSM exploration
+	            fsm.reset(true);
+	            // create new test case 
+	            MyTest currentTest = new MyTest();
+	            boolean b = true;
+	            // while limit has not been reached and there exists a next step
+	            MyStep newStep;
+	            for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
+	        		((VanetFSM) fsm).getSUT().k[cptK] = i== cptK ? coeff :0.0;
+	        	}
+	        	do {
+	        		//System.out.println("tick");
+	        		x="step " +j;
+	            	((VanetFSM) fsm).getSUT().addStringWriter(x);           
+		            newStep = computeNextStep();
+		            ((VanetFSM) fsm).getSUT().externalEvent="Event("+newStep.meth.getName()+");\n";               
+	            	b = (newStep != null);
+	                if (b) {
+	                    currentTest.append(newStep);
+	                    j++;
+	                    if (vcm != null) { 
+	                        ruleCov =vcm.notify(newStep, ((VanetFSM) fsm).getSUT());
+	                        if(ruleCov==100.0) {
+	                    		indRules= indRules==0? j : indRules;
+	        					if(propCov) {
+		        					depopList(((VanetFSM) fsm).addedVehicles, j);
+		        					propertiesWriter.println("coverage rules :"  + " 100%" + "at step:" + j+ "and properties at index " + indProp) ;
+		        					if(interruptCovered) {
+		        						break; //break the actual test when everything is covered
+		        					}
 	        					}
-        					}
-        				}
-                    }
-                    // TODO :if newstep !=tick
-                }
-                if(newStep.meth.getName() == "tick") {//if not tick we do not do reconfiguration
-	                //ticktrigger here
-	                ((VanetFSM) fsm).getSUT().tickTrigger();
-	                for(VanetProperty prop : properties) {
-		                try {
-							prop.match(((VanetFSM) fsm).getSUT());
-							propCov=checkCoverageProperties();
-							//checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
-						} catch (PropertyFailedException e) {
-							propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
-							System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
-							e.printStackTrace();
-							depopList(((VanetFSM) fsm).addedVehicles, j);
-							//ret.add(currentTest);
-							return ret;
-						}// catch (PropertyCoveredException e) {
-							// TODO Auto-generated catch block
-						if(propCov) {	
-							//e.printStackTrace();
-							propCov=true;
-							indProp= indProp==0? j: indProp;
-							if(ruleCov==100.0) {
+	        				}
+	                    }
+	                    // TODO :if newstep !=tick
+	                }
+	                if(newStep.meth.getName() == "tick") {//if not tick we do not do reconfiguration
+		                //ticktrigger here
+		                ((VanetFSM) fsm).getSUT().tickTrigger();
+		                for(VanetProperty prop : properties) {
+			                try {
+								prop.match(((VanetFSM) fsm).getSUT());
+								propCov=checkCoverageProperties();
+								//checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
+							} catch (PropertyFailedException e) {
+								propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
+								System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
+								e.printStackTrace();
 								depopList(((VanetFSM) fsm).addedVehicles, j);
-								propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
-								if(interruptCovered) {
-									break; //break the actual test when everything is covered
+								//ret.add(currentTest);
+								return ret;
+							}// catch (PropertyCoveredException e) {
+								// TODO Auto-generated catch block
+							if(propCov) {	
+								//e.printStackTrace();
+								propCov=true;
+								indProp= indProp==0? j: indProp;
+								if(ruleCov==100.0) {
+									depopList(((VanetFSM) fsm).addedVehicles, j);
+									propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
+									if(interruptCovered) {
+										break; //break the actual test when everything is covered
+									}
 								}
 							}
-						}
+		                }
 	                }
-                }
-                //checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
-            }while (j < length && b);       		
-            // add computed test case to the result
-        	if(ruleCov==100.0 && propCov) {
-        		ret.add(currentTest);
-        	}
-            propertiesWriter.print(propertiesOutput);
-            propertiesWriter.print(checkCoverageProperties(i,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
-            if(reinitCov) {
-            	resetCov(apm);
-            }
+	                //checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
+	            }while (j < length && b);       		
+	            // add computed test case to the result
+	        	if(ruleCov==100.0 && propCov) {
+	        		ret.add(currentTest);
+	        	}
+	            propertiesWriter.print(propertiesOutput);
+	            propertiesWriter.print(checkCoverageProperties(i,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
+	            if(reinitCov) {
+	            	resetCov(apm);
+	            }
+	            conso+=((VanetFSM) fsm).getSUT().getGlobalConso()+";";
+	        }
         }
 		vcm.printReport();
 		propertiesWriter.close();
+		writerConso.print(conso);
+		writerConso.close();
         return ret;
     }
     

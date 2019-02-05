@@ -30,9 +30,9 @@ public class Vehicle extends Entity implements Serializable {
 	final static double VLOW_DIST = 100;
 	final static double LOW_LEADER_BATTERY = 33;
 	final static double LOW_BATTERY = 5; // should be > property3
-	final static double HIGHPRIO = 8;
+	final static double HIGHPRIO = 7;
 	final static double MEDIUMPRIO = 5;
-	final static double LOWPRIO = 2;
+	final static double LOWPRIO = 3;
 //	final static double HIGH_PRIO = 100;
 //	final static double MEDIUM_PRIO = 150;
 //	final static double LOW_PRIO = 200;
@@ -237,7 +237,6 @@ public class Vehicle extends Entity implements Serializable {
 	}
 	public void tick() {
 		String x ="";
-
 		// TODO
 		//Add each tick only new policies will be added
 		if(myPlatoon!=null) {
