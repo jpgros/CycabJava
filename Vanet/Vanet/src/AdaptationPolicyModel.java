@@ -35,6 +35,7 @@ public class AdaptationPolicyModel {
     }
     public double match(Road sut, ExecutionReport er) {
     	   for (Rule r : rules) {
+    		   //System.out.println("r cov "+ r.coverage +" "+ r.reconf);
                for (Vehicle v : sut.allVehicles) {
                    if (r.matches(sut, v, er)) {
                 	   r.coverage = r.coverage>0.5 ? r.coverage : 0.5;

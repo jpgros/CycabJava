@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -33,6 +34,7 @@ public class VanetFSM implements FsmModel {
     String reconfChoosen="";
     Mutant mutant;
     String reconfChoosenReader;
+    ArrayList<UUID> iD = new ArrayList<UUID>();
     ArrayList<Double> battery = new ArrayList<Double>();
     ArrayList<Double> decBattery = new ArrayList<Double>();
     ArrayList<Double> distance = new ArrayList<Double>();
@@ -63,8 +65,13 @@ public class VanetFSM implements FsmModel {
     public void reset(boolean testing) {
         sut.reset();
     }
-    public void getValues(ArrayList<Double> bat,  ArrayList<Double> decBat, ArrayList<Double> dist, int nbSteps) throws NumberFormatException, IOException {//does not work as expected
+    public void getValues(ArrayList<UUID> _id, ArrayList<Double> bat,  ArrayList<Double> decBat, ArrayList<Double> dist, int nbSteps) throws NumberFormatException, IOException {//does not work as expected
     	int cpt=0;
+    	while(cpt<nbSteps) {
+    		iD.add(cpt,_id.get(cpt));
+    		cpt++;
+    	}
+    	cpt=0;
     	while(cpt<nbSteps) {
     		battery.add(cpt,bat.get(cpt));
     		cpt++;
@@ -115,25 +122,36 @@ public class VanetFSM implements FsmModel {
     }
     public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; } //0.87
     @Action
-    public Object[] tick() {
-        sut.tick();
+    public Object[] tick(ArrayList<Object> empty) {
+
+    	sut.tick();
         return new Object[]{ sut };
     }
 
     public boolean addVehicleGuard() { return ! sut.isFull(); }
     public double addVehicleProba() { return sut.nbVehiclesOnRoad() == 0 ? 1 : 0.05; } //0.05
     @Action
-    public Object[] addVehicle() {
+    public Object[] addVehicle(ArrayList<Object> params) {
     	addedVehicles++;
-        double auto = battery.remove(0); 
-        		//(int) (Math.random() * 10) + 20;
-        //battery.add(auto);
-        double dist = distance.remove(0); 
-        		//(int)(Math.random() * 5000) + 1000;
-        //distance.add(dist);
-        double decAuto = decBattery.remove(0);
-        sut.addVehicle(auto, dist, decAuto);
-        return new Object[]{ sut, auto, dist, decAuto };
+    	UUID id = iD.remove(0);
+    	double auto=0, dist=0, decAuto=0;
+    	if(params==null) {
+	    	auto = battery.remove(0); 
+	        		//(int) (Math.random() * 10) + 20;
+	        //battery.add(auto);
+	        dist = distance.remove(0); 
+	        		//(int)(Math.random() * 5000) + 1000;
+	        //distance.add(dist);
+	        decAuto = decBattery.remove(0);
+    	}
+    	else {
+    		auto = (double) params.get(0);
+    		dist=(double) params.get(1);
+    		decAuto=(double) params.get(2);
+    	}
+        sut.addVehicle(id,auto, dist, decAuto);
+        System.out.println("AddVehicle("+auto+","+dist+","+decAuto+")");
+        return new Object[]{sut, auto, dist, decAuto };
     }
 
     public void tickTrigger(){
@@ -151,41 +169,54 @@ public class VanetFSM implements FsmModel {
         return false;
     }
     public double requestJoinProba() {
-        return 0.03;
+        return 0.07;
     }
     @Action
-    public Object[] requestJoin() {// takes vehicle with most battery and last created vehicle
-        //int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
-        //for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
-          //  int j = (i + start) % sut.nbVehiclesOnRoad();
-        int j = sut.getHighestVehicleBattery();
-        int k=sut.allVehicles.size()-1;
-        while(( !(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)) || k==j) &&k >0) {
-        	k--;
-        }
-        if(k>=0 ){
-        	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
-        	//indexjoined.add(k);
-        	return new Object[]{ sut, j, k };
-        }
-        else {
-        	return new Object[]{ sut };
-        }
-//            if ((sut.getVehicle(j).getPlatoon() == null) && (sut.getVehicle(j).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) {
-//            	int k = 0;
-//               /* do {
-//                    k = (int) (Math.random() * sut.nbVehiclesOnRoad());
-//                }*/
-//            	k= indexjoined.remove(0);
-//                while (k == j);
-//                if(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)){
-//                	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
-//                	//indexjoined.add(k);
-//                	return new Object[]{ sut, j, k };
-//                }
-//            }
-        //}
-//        return new Object[]{ sut }; // should not happen : except if vehicle did not found another vehicle
+    public Object[] requestJoin(ArrayList<Object>vl) {// takes vehicle with most battery and last created vehicle
+    	if(vl==null) {
+	        int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
+	        for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
+		        int j = (i + start) % sut.nbVehiclesOnRoad();
+		        //int j = sut.getHighestVehicleBattery();
+		//        int k=sut.allVehicles.size()-1;
+		//        while(( !(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)) || k==j) &&k >0) {
+		//        	k--;
+		//        }
+		//        if(k>=0 ){
+		//        	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
+		//        	//indexjoined.add(k);
+		//        	return new Object[]{ sut, j, k };
+		//        }
+		        
+		      if ((sut.getVehicle(j).getPlatoon() == null) && (sut.getVehicle(j).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) {
+		    	int k = 0;
+		        do {
+		            k = (int) (Math.random() * sut.nbVehiclesOnRoad());
+		        }while (k == j);
+		        
+		    	//k= indexjoined.remove(0);
+		        if(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)){
+		        	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
+		        	//indexjoined.add(k);
+		        	return new Object[]{ sut, j, k };
+		        }
+		      	}
+	        }
+	        System.out.println("Join( ) -> false");
+	        	return new Object[]{sut , -1 };// should not happen : except if vehicle did not found another vehicle
+    	}
+    	else if((int)vl.get(0)!=-1 ){
+    		if(vl.get(0)!= vl.get(1)) { //guard to improve with getminvalue
+	    		System.out.println("Join(" + vl.get(0) + ", " + vl.get(1) + ") -> " + sut.join((int)(vl.get(0)), (int)(vl.get(1))));
+	    		return new Object[]{ sut, vl.get(0), vl.get(1) };
+    		}
+    		else {
+    			System.out.println("Join( ) -> false");
+    	    	return new Object[]{sut, -1};
+    		}
+    	}
+    	System.out.println("Join( ) -> false");
+    	return new Object[]{sut, -1};// should not happen : except if vehicle did not found another vehicle
     }
     public boolean forceQuitPlatoonGuard() {
         for (Vehicle v : sut) {
@@ -195,9 +226,11 @@ public class VanetFSM implements FsmModel {
         }
         return false;
     }
-    public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 :0.05;} //0.05; }
+    public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 :0.01;} //0.05; }
     @Action
-    public Object[] forceQuitPlatoon() {
+    public Object[] forceQuitPlatoon(ArrayList<Object> vl) {
+    	System.out.println("force quit done");
+    	if(vl==null) {
         //int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
         //for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
         	int j = sut.getLowestVehicleBattery();
@@ -206,10 +239,17 @@ public class VanetFSM implements FsmModel {
         	//if (sut.getVehicle(j).getPlatoon() != null) {
                 sut.forceQuitPlatoon(j);
                 //indexKicked.add(j);
+                System.out.println("ForceQuit("+j+")");
                 return new Object[]{sut, j};
             //}
         //}
        // return new Object[]{ sut }; // should not happen
+    	}
+    	else {
+    		System.out.println("ForceQuit("+vl+")");
+    		sut.forceQuitPlatoon((int)vl.get(0));
+    		return new Object[]{sut, vl};
+    	}
     }
 
 }

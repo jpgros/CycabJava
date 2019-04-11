@@ -28,7 +28,7 @@ public class Vehicle extends Entity implements Serializable {
 	final static double LOW_LEADER_DIST = 200;
 	final static double LOW_DIST = 200;
 	final static double VLOW_DIST = 100;
-	final static double LOW_LEADER_BATTERY = 33;
+	final static double LOW_LEADER_BATTERY = 10;
 	final static double LOW_BATTERY = 5; // should be > property3
 	final static double HIGHPRIO = 7;
 	final static double MEDIUMPRIO = 5;
@@ -47,8 +47,10 @@ public class Vehicle extends Entity implements Serializable {
 		this.distance = distance;
 		this.id = id;
 		this.road=r;
-		this.DEC_ENERGY=decAuto;
-		DEC_LEADER= DEC_ENERGY * 1.2;
+		this.DEC_ENERGY=decAuto/10.0; //no /10 normally
+		double dc = decAuto/10.0;
+		DEC_LEADER= decAuto;//DEC_ENERGY * 1.2; //1.2 normally
+		//System.out.println("is " + decAuto + " and " + DEC_LEADER+" would have " + dc + " and " + dc*10.0);
 //		this.reader= new BufferedReader(this.read);
 	}
 
@@ -228,6 +230,7 @@ public class Vehicle extends Entity implements Serializable {
 		String x="";
 		double conso = this.autonomie;
 		this.autonomie -= (this.myPlatoon == null || this == this.myPlatoon.leader) ? DEC_LEADER : DEC_ENERGY;
+		//System.out.println("my auto "+ this.id + " "+ this.autonomie + " my platoon " + this.myPlatoon);
 		if( this.autonomie < 0){
 			x = "Error : new Battery left negative !"+"\n";
 			System.out.print(x);
@@ -380,7 +383,7 @@ public class Vehicle extends Entity implements Serializable {
 		else return autonomie/DEC_ENERGY;
 	}
 	public double getAutonomieDistance() {
-		if(isLeader()) {
+		if(isLeader()|| this.myPlatoon==null) {
 			return autonomie*(DEC_DISTANCE/DEC_LEADER);
 		}
 		else {

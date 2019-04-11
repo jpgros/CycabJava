@@ -6,7 +6,7 @@ import org.apache.commons.collections15.functors.SwitchClosure;
 
 public class AdaptationPolicy implements Serializable{
 	ArrayList<Element> listPolicy= new ArrayList<Element>();
-	final static double COEFF_WAITING_RULE=0.3;
+	final static double COEFF_WAITING_RULE=0.0;
 	
 	// add element according to the given priority and the time rule has already waited
 	public void addElement(Element elt) {

@@ -11,7 +11,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	int consommationLeader = 2;
 	final static int NUMBER_VEHICLE_MAX = 5; //unused
 	final static double MINLEADERVALUE = 33;
-	final static double THRESHOLDRULESVALUE = 7;
+	final static double THRESHOLDRULESVALUE = 6;
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     ArrayList<Vehicle> nextLeaderList = new ArrayList<Vehicle>();
 
@@ -202,6 +202,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				default: //if selectionned rule correponds to threshold criterion we select it and clear the list policy
 					if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
 						lastReconf = policies.listPolicy.get(0);
+						//System.out.println(lastReconf.name);
 						policies.listPolicy.clear();
 					}
 					else { // else we increment the waiting time of rules

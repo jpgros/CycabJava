@@ -81,8 +81,8 @@ public class VanetFACS implements Serializable{
     		((VanetFSM) fsm).getSUT().k[cptK] = 0;
     	}
         //choice between generation and retrieving
-        //retrieveTest(st,vcm,apm);      
-        generatetest(st, vcm,apm);
+        retrieveTest(st,vcm,apm);      
+        //generatetest(st, vcm,apm);
         //generateAndRerunTest(st, vcm, apm,fsm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.print(strWriter);
@@ -244,13 +244,13 @@ public class VanetFACS implements Serializable{
 			PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
 			//for(int k=-1; k<2; k+=2) {
 				//writerConso.println("k = "+ k);
-				for(int i=0; i<2; i++) {
+				//for(int i=0; i<2; i++) {
 					//((VanetFSM) fsm).afficheTestValues();
 		        	conso += st.retrieve(apm,testInput,0,0); // not rmv
 //		        	st.retrieve(apm,testInput,-1,-1);	
 		        	writerConso.print(conso);
     				conso="";
-				}
+				//}
 			// } 
 	        writerConso.print("\n");
 			writerConso.print("\n");
@@ -280,13 +280,17 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(8,1000,apm);
+			testsList=st.generate(1,1000,apm);
+
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
+			
 	        for(MyTest curTest : testsList) {
+	        	System.out.println("test ");
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
 	        		serializableArray.add(step);
+	        		System.out.print("step " + step+ ", ");
 	        	}
 	        	SerializableTest test = new SerializableTest(serializableArray);
 	        	testArraySer.add(test);

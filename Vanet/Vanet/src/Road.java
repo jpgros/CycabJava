@@ -31,6 +31,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
     int numberPlatoon=0;
     double globalConso=0;
+    int timePlatoon=0;
     Mutant mutant;
     String writer = "";
     //String vehicleReader = null;
@@ -107,8 +108,11 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public double getGlobalConso() {
     	return globalConso;
     }
-    public int addVehicle(double _auto, double _distance, double decAuto) {
-    	allVehicles.add(new Vehicle(_auto, _distance, randomUUID(), null,this, decAuto));
+    public double getGlobalTimePLatooned() {
+    	return timePlatoon;
+    }
+    public int addVehicle(UUID _id, double _auto, double _distance, double decAuto) {
+    	allVehicles.add(new Vehicle(_auto, _distance, _id, null,this, decAuto));
     	//System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
 		writer+="Vehicle created at index " + (allVehicles.size() - 1);
         return allVehicles.size() - 1;
@@ -140,6 +144,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
         this.allVehicles = new ArrayList<Vehicle>();
         this.numberPlatoon=0;
         this.globalConso=0;
+        this.timePlatoon=0;
     }
     public void tick() {
     	stepNb++;
@@ -160,7 +165,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
             }
             v.tick();
             if(v.myPlatoon!=null) { 
-            	
+            	timePlatoon++;
             	if(v.isLeader()) {
             		component +="Platoon:"+v.myPlatoon+"\n";
             	}
