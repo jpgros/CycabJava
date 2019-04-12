@@ -1,3 +1,4 @@
+package SUT;
 
 
 	import com.sun.tools.javac.util.Pair;
@@ -32,9 +33,9 @@
 
 	class AdaptationFailedException extends Exception {
 
-	    AdaptationAutomaton pa;
+	    AdaptationAutomaton<?> pa;
 
-	    public AdaptationFailedException(AdaptationAutomaton _pa, String msg) {
+	    public AdaptationFailedException(AdaptationAutomaton<?> _pa, String msg) {
 	        super(msg);
 	        pa = _pa;
 	    }

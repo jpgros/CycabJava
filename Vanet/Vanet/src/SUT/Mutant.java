@@ -1,3 +1,4 @@
+package SUT;
 
 public enum Mutant {
 NONE,// Normal execution

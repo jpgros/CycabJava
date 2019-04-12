@@ -1,3 +1,4 @@
+package SUT;
 import java.util.Objects;
 
 public class MiniElement {

@@ -1,3 +1,4 @@
+package SUT;
 import nz.ac.waikato.modeljunit.Action;
 import nz.ac.waikato.modeljunit.FsmModel;
 
@@ -234,7 +235,7 @@ public class StochasticTester implements Serializable{
         Double[] array = {-3.0,-1.0, 0.0, 1.0, 3.0};
         ArrayList<Double> coeffList = new ArrayList<Double>(Arrays.asList(array));
         for(int cptwriter=0 ; cptwriter<1; cptwriter++) {
-	        for(int iii=0; iii<2; iii++) {
+	        for(int iii=0; iii<1; iii++) {
         	//for(Double coeff : coeffList) {
 	        	//conso+= "k="+coeff+";";
 	        	//time+= "k="+coeff+";";
@@ -479,6 +480,7 @@ public class StochasticTester implements Serializable{
    
     public MyStep computeInputTest(SerializableStep step){
     	 HashMap<Method, Double> actionsReady = getActivableActions(fsm);
+//    	 System.out.println("into");
     	for (Method act : actionsReady.keySet()) {
 			 if(step.getMethName().contains(act.getName()) ) {
 				 try {
@@ -501,12 +503,16 @@ public class StochasticTester implements Serializable{
 				 Method meth = act;
 				 MyStep myStep = new MyStep(meth, step.getInstance(),step.getParams());
 				 return myStep;
-			 }
-			 
+			 }			 
     	 }
 		 for (Method act : actionsReady.keySet()) {
 			 //System.out.println("meth name "+ act.getName());
 		 }
+//		 System.out.println("vehicles ");
+//		 System.out.println("all vehicle on road " + ((VanetFSM) fsm).getSUT().nbVehiclesOnRoad());
+//		 for(Vehicle vl : ((VanetFSM) fsm).getSUT().allVehicles) {
+//			 System.out.println("my platoon " +vl.myPlatoon);
+//		 }
 		 System.out.println("step name " + step.getMethName());
 		 System.out.println("step = " +step );
     	 return null;
@@ -668,70 +674,4 @@ public class StochasticTester implements Serializable{
     }
 }
 
-/**
- * Simple class encapsulating a test as a sequence (ArrayList) of String representing action names. 
- */
-class MyTest implements Iterable<MyStep> ,Serializable{
 
-    ArrayList<MyStep> steps;
-    public MyTest() {
-        steps = new ArrayList<MyStep>();
-    }
-
-    public void append(MyStep step) {
-        steps.add(step);
-    }
-
-    public int size() {
-        return steps.size();
-    }
-
-    public MyStep getStepAt(int i) {
-        return steps.get(i);
-    }
-
-    public String toString() {
-        return steps.toString();
-    }
-
-    public Iterator<MyStep> iterator() {
-        return steps.iterator();
-    }
-
-}
-
-class MyStep implements Serializable{
-    Method meth;
-    Object instance;
-    Object[] params;
-
-    public MyStep(Method _m, Object _i, Object[] _p) {
-        meth = _m;
-        instance = _i;
-        params = _p;
-    }
-    public Method getMeth() {
-    	return meth;
-    }
-    public Object getInstance() {
-    	return instance;
-    }
-    public Object[] getParams() {
-    	return params;
-    }
-   
-    public void execute() throws InvocationTargetException, IllegalAccessException {
-        meth.invoke(instance, params);
-    }
-
-    public String toString() {
-        String ret = /*instance + "." +*/ meth.getName() + "(";
-        for (int i=0; i < params.length; i++) {
-            if (i > 0) {
-                ret += ",";
-            }
-            ret += params[i].toString();
-        }
-        return ret + ")";
-    }
-}

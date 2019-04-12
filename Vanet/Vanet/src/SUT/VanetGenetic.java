@@ -1,3 +1,4 @@
+package SUT;
 
 import nz.ac.waikato.modeljunit.FsmModel;
 

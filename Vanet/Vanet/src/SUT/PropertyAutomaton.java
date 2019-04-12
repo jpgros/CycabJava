@@ -1,3 +1,4 @@
+package SUT;
 import com.sun.tools.javac.util.Pair;
 
 import java.util.ArrayList;
@@ -91,9 +92,9 @@ abstract class VanetProperty implements PropertyAutomaton<Road> {
 
 class PropertyFailedException extends Exception {
 
-    PropertyAutomaton pa;
+    PropertyAutomaton<Road> pa;
 
-    public PropertyFailedException(PropertyAutomaton _pa, String msg) {
+    public PropertyFailedException(PropertyAutomaton<Road> _pa, String msg) {
         super(msg);
         pa = _pa;
     }

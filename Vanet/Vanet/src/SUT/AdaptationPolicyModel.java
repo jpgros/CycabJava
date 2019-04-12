@@ -1,3 +1,4 @@
+package SUT;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -94,7 +95,7 @@ class Rule {
         this.prio = prio;
     }
 
-    public PropertyAutomaton getConfig() {
+    public PropertyAutomaton<?> getConfig() {
         return config;
     }
 
@@ -106,7 +107,7 @@ class Rule {
         return prio;
     }
 
-    public PropertyAutomaton getTP() {
+    public PropertyAutomaton<?> getTP() {
         return TP;
     }
 
@@ -165,7 +166,7 @@ class ExecutionReport {
     	writerErr = w;
     }
     
-    public void notifyConfig(Rule rule, Vehicle v, PropertyAutomaton tp) {
+    public void notifyConfig(Rule rule, Vehicle v, PropertyAutomaton<?> tp) {
         if (occurrencesConfig.get(tp) == null) {
             occurrencesConfig.put(tp, 1);
         }
@@ -176,7 +177,7 @@ class ExecutionReport {
 
     public void notifyTP(Element e) { //Rule rule, Vehicle v, VanetProperty tp) {
     	Integer value;
-		value = (Integer)(occurrencesTP.get(e));
+		value = (occurrencesTP.get(e));
 		MiniElement miniElt=null;
 		if(e.priority <=3 && e.priority>0) {
 			miniElt = new MiniElement(e.name,Priority.LOW);
@@ -199,7 +200,7 @@ class ExecutionReport {
     //eligible reconf
     public void notifyStepBefore(int i, Rule r, Vehicle v) {
         if (steps.get(i) == null) {
-            steps.put(i, new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
+            steps.put(i, new Pair<ArrayList<Element>, ArrayList<Element>>(new ArrayList<Element>(), new ArrayList<Element>()));
         }
         steps.get(i).getFirst().add(new Element(r.reconf, r.prio, v));
     }

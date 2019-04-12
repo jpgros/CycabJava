@@ -1,3 +1,4 @@
+package SUT;
 public enum PolicyName {
 	QUITPLATOON, QUITFORSTATION, QUITFAILURE ,RELAY, UPGRADERELAY;// RUN;
 }

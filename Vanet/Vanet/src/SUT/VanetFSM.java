@@ -1,3 +1,4 @@
+package SUT;
 /**
  * Created with IntelliJ IDEA.
  * User: Frederic Dadeau
