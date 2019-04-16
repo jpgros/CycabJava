@@ -126,7 +126,6 @@ public class VanetFSM implements FsmModel {
     public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; } //0.87
     @Action
     public Object[] tick(ArrayList<Object> empty) {
-
     	sut.tick();
         return new Object[]{ sut };
     }
@@ -239,7 +238,6 @@ public class VanetFSM implements FsmModel {
     public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 :0.01;} //0.05; }
     @Action
     public Object[] forceQuitPlatoon(ArrayList<Object> vl) {
-    	System.out.println("force quit done");
     	if(vl==null) {
         //int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
         //for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {

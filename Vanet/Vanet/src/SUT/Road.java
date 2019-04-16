@@ -119,11 +119,10 @@ public class Road implements Serializable, Iterable<Vehicle> {
         return allVehicles.size() - 1;
     }
     public boolean join(int i, int j) {
-    	System.out.println("i = "+ i + "j= " + j);
-    	System.out.println(" vl i " + allVehicles.get(i).myPlatoon);
-    	System.out.println(" vl i auto" + allVehicles.get(i).autonomie);
+//    	System.out.println("i = "+ i + "j= " + j);
+//    	System.out.println(" vl i " + allVehicles.get(i).myPlatoon);
+//    	System.out.println(" vl i auto" + allVehicles.get(i).autonomie);
         if (i != j && allVehicles.get(i).getPlatoon() == null) {
-        	System.out.println("here join");
             return allVehicles.get(i).join(allVehicles.get(j))&& allVehicles.get(i).getPlatoon() != null;
         }
         return false;

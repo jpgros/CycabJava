@@ -175,7 +175,6 @@ public class Vehicle extends Entity implements Serializable {
 	
 	public void quitPlatoon(/*UUID idPlatoon*/) {
 		if (myPlatoon != null) {
-			System.out.println("forcequit pl");
 			road.addStringWriter("vehicle " + this.getId() + " force-quitted platoon "+ this.getPlatoon().id  );
 			myPlatoon.deleteVehicle(this);
 		}

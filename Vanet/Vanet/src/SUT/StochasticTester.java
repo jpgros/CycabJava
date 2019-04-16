@@ -209,6 +209,7 @@ public class StochasticTester implements Serializable{
      * @throws IOException 
      * @throws NumberFormatException 
      */
+    
     public ArrayList<MyTest> generate(int nb, int length,AdaptationPolicyModel apm) throws NumberFormatException, IOException {
     	//BufferedReader inStream = new BufferedReader(readerStep);
 		init(); 
@@ -223,7 +224,6 @@ public class StochasticTester implements Serializable{
     	int indRules=0;
     	int j=0;
     	int indProp=0;
-    	String strLog="";
     	String x="";
         PrintWriter propertiesWriterFile = new PrintWriter("./propertiesErr.txt", "UTF-8");
         PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
@@ -259,7 +259,7 @@ public class StochasticTester implements Serializable{
 	        		estimTime= System.currentTimeMillis()-startTime;
 	        		//System.out.println("loop time 1 " + estimTime);
 		            for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
-		        		((VanetFSM) fsm).getSUT().k[cptK] = 1.5;//i== cptK ? coeff :0.0;
+		        		((VanetFSM) fsm).getSUT().k[cptK] = 0;//i== cptK ? coeff :0.0;
 		        	}
 		        	do {	
 		        		//System.out.println("tick");
@@ -392,7 +392,7 @@ public class StochasticTester implements Serializable{
         for(SerializableTest test : serializableTest) {
         	System.out.println("new Test ");
         	for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
-        		((VanetFSM) fsm).getSUT().k[cptK] = ((VanetFSM) fsm).getSUT().k[cptK]== sourcePA ? sourceCoeff :0;
+        		((VanetFSM) fsm).getSUT().k[cptK] = 0; // ((VanetFSM) fsm).getSUT().k[cptK]== sourcePA ? sourceCoeff :0;
         	}
 			k++;
 	        // reset FSM exploration

@@ -284,7 +284,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					//tickCounter=6;
 				}
 				deleteVehicle(lastReconf.vehicle);
-				System.out.println("del vl reconf");
 				switch (lastReconf.name) {
 				case QUITFAILURE:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
@@ -344,7 +343,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			}
 			else{
 				road.addStringWriter("No better vehicle available, Platoon deleted");
-				System.out.println("relay dl pl");
 				deletePlatoon();
 			}
 		}
@@ -372,7 +370,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			policies.removeForVehicle(v);
 			nextLeaderList.remove(v);
 			if (vehiclesList.size() <= 1) {
-				//System.out.println("del vl");
 				deletePlatoon();
 			}
 		}
@@ -381,7 +378,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	
 	public void deletePlatoon() {
 		if(vehiclesList.size()>=1) {
-			System.out.println("Deleting platoon ");
 			road.addStringWriter("Deleting platoon" + this.vehiclesList+ "\n");
 			//vehiclesList.get(0).removePlatoonFromList();
 			//road.lastReconfList.add(this.lastReconf);
