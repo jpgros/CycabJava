@@ -119,7 +119,11 @@ public class Road implements Serializable, Iterable<Vehicle> {
         return allVehicles.size() - 1;
     }
     public boolean join(int i, int j) {
+    	System.out.println("i = "+ i + "j= " + j);
+    	System.out.println(" vl i " + allVehicles.get(i).myPlatoon);
+    	System.out.println(" vl i auto" + allVehicles.get(i).autonomie);
         if (i != j && allVehicles.get(i).getPlatoon() == null) {
+        	System.out.println("here join");
             return allVehicles.get(i).join(allVehicles.get(j))&& allVehicles.get(i).getPlatoon() != null;
         }
         return false;
@@ -129,6 +133,17 @@ public class Road implements Serializable, Iterable<Vehicle> {
         if (allVehicles.get(i).getPlatoon() != null) {
             allVehicles.get(i).quitPlatoon();
         }
+    }
+    public void forceQuitPlatoon(UUID id) {
+        if (allVehicles.get(findIndexOfId(id)).getPlatoon() != null) {
+            allVehicles.get(findIndexOfId(id)).quitPlatoon();
+        }
+    }
+    public int findIndexOfId(UUID id) {
+    	for(int i=0; i < allVehicles.size();i++) {
+    		if(allVehicles.get(i).id == id) return i;
+    	}
+    	return -1;
     }
 //why ?
 //    public boolean refill(int i) {

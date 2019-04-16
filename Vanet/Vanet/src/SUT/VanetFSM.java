@@ -8,6 +8,8 @@ package SUT;
 
 import nz.ac.waikato.modeljunit.*;
 
+import static java.util.UUID.randomUUID;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -134,25 +136,27 @@ public class VanetFSM implements FsmModel {
     @Action
     public Object[] addVehicle(ArrayList<Object> params) {
     	addedVehicles++;
-    	UUID id = iD.remove(0);
+    	UUID id = randomUUID();//iD.remove(0);
     	double auto=0, dist=0, decAuto=0;
     	if(params==null) {
-	    	auto = battery.remove(0); 
+	    	auto = (Math.random() * 10) + 20;// battery.remove(0); 
 	        		//(int) (Math.random() * 10) + 20;
 	        //battery.add(auto);
-	        dist = distance.remove(0); 
+	        dist = (Math.random() * 5000) + 1000;// distance.remove(0); 
 	        		//(int)(Math.random() * 5000) + 1000;
 	        //distance.add(dist);
-	        decAuto = decBattery.remove(0);
+	        decAuto = 1 + Math.random() / 5;//decBattery.remove(0);
+	        
     	}
     	else {
-    		auto = (double) params.get(0);
-    		dist=(double) params.get(1);
-    		decAuto=(double) params.get(2);
+    		id = (UUID) params.get(0);
+    		auto = (double) params.get(1);
+    		dist=(double) params.get(2);
+    		decAuto=(double) params.get(3);
     	}
         sut.addVehicle(id,auto, dist, decAuto);
-        System.out.println("AddVehicle("+auto+","+dist+","+decAuto+")");
-        return new Object[]{sut, auto, dist, decAuto };
+        System.out.println("AddVehicle("+id+","+auto+","+dist+","+decAuto+")");
+        return new Object[]{sut, id, auto, dist, decAuto };
     }
 
     public void tickTrigger(){
@@ -174,6 +178,8 @@ public class VanetFSM implements FsmModel {
     }
     @Action
     public Object[] requestJoin(ArrayList<Object>vl) {// takes vehicle with most battery and last created vehicle
+    	UUID tmpId= UUID.fromString( "00000000-0000-0000-0000-000000000000" );
+
     	if(vl==null) {
 	        int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
 	        for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
@@ -197,27 +203,30 @@ public class VanetFSM implements FsmModel {
 		        
 		    	//k= indexjoined.remove(0);
 		        if(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)){
-		        	System.out.println("Join(" + j + ", " + k + ") -> " + sut.join(j, k));
+		        	
+		        	System.out.println("Join(" + sut.getVehicle(j).id + ", " + sut.getVehicle(k).id + ") -> " + sut.join(j, k));
 		        	//indexjoined.add(k);
-		        	return new Object[]{ sut, j, k };
+		        	return new Object[]{ sut, sut.getVehicle(j).id, sut.getVehicle(k).id };
 		        }
 		      	}
 	        }
 	        System.out.println("Join( ) -> false");
-	        	return new Object[]{sut , -1 };// should not happen : except if vehicle did not found another vehicle
-    	}
-    	else if((int)vl.get(0)!=-1 ){
+	        	return new Object[]{sut ,UUID.fromString( "00000000-0000-0000-0000-000000000000" ) };// should not happen : except if vehicle did not found another vehicle
+    	}  	
+    	
+    	//else if((UUID)vl.get(0)!=(UUID)tmpId ){
+    	else if (vl.size() >1) {
     		if(vl.get(0)!= vl.get(1)) { //guard to improve with getminvalue
-	    		System.out.println("Join(" + vl.get(0) + ", " + vl.get(1) + ") -> " + sut.join((int)(vl.get(0)), (int)(vl.get(1))));
+    			System.out.println("Join(" + vl.get(0) + ", " + vl.get(1) + ") -> " + sut.join(sut.findIndexOfId((UUID)vl.get(0)), sut.findIndexOfId((UUID)vl.get(1))));
 	    		return new Object[]{ sut, vl.get(0), vl.get(1) };
     		}
     		else {
     			System.out.println("Join( ) -> false");
-    	    	return new Object[]{sut, -1};
+    	    	return new Object[]{sut, UUID.fromString( "00000000-0000-0000-0000-000000000000" )};
     		}
     	}
     	System.out.println("Join( ) -> false");
-    	return new Object[]{sut, -1};// should not happen : except if vehicle did not found another vehicle
+    	return new Object[]{sut, UUID.fromString( "00000000-0000-0000-0000-000000000000" )};// should not happen : except if vehicle did not found another vehicle
     }
     public boolean forceQuitPlatoonGuard() {
         for (Vehicle v : sut) {
@@ -240,15 +249,15 @@ public class VanetFSM implements FsmModel {
         	//if (sut.getVehicle(j).getPlatoon() != null) {
                 sut.forceQuitPlatoon(j);
                 //indexKicked.add(j);
-                System.out.println("ForceQuit("+j+")");
-                return new Object[]{sut, j};
+                System.out.println("ForceQuit("+sut.getVehicle(j).id+")");
+                return new Object[]{sut, sut.getVehicle(j).id};
             //}
         //}
        // return new Object[]{ sut }; // should not happen
     	}
     	else {
-    		System.out.println("ForceQuit("+vl+")");
-    		sut.forceQuitPlatoon((int)vl.get(0));
+    		System.out.println("ForceQuit("+vl.get(0)+")");
+    		sut.forceQuitPlatoon((UUID)vl.get(0));
     		return new Object[]{sut, vl};
     	}
     }
