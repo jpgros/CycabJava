@@ -71,7 +71,6 @@ public class VanetFACS implements Serializable{
         } finally {
             br.close();
         }
-        
         FsmModel fsm = new VanetFSM(strWriter, strLog, reconfChoosen, reconfChoosenRead, mutant,logLevel);       
         StochasticTester st   = new StochasticTester(fsm,writerErr,reinitCov, interruptCovered,mutant);
         AdaptationPolicyModel apm = new AdaptationPolicyModel();
@@ -208,7 +207,7 @@ public class VanetFACS implements Serializable{
 					writerConso.println("k = "+ k);
 					for(int i=0; i<8; i++) {
 						((VanetFSM) fsm).afficheTestValues();
-			        	conso += st.retrieve(apm,testArraySer,i,0);
+			        	//conso += st.retrieve(apm,testArraySer,i,0);
 	    				writerConso.print(conso);
 	    				conso="";
 //	    				estimatedTime = (System.currentTimeMillis() - startTime)/1000;
@@ -248,7 +247,10 @@ public class VanetFACS implements Serializable{
 				//writerConso.println("k = "+ k);
 				//for(int i=0; i<2; i++) {
 					//((VanetFSM) fsm).afficheTestValues();
-		        	conso += st.retrieve(apm,testInput,0,0); // not rmv
+					for(SerializableTest test : testInput) {
+						System.out.println("New Test");
+						conso += st.retrieve(apm,test,0,0); // not rmv
+		        	
 //		        	st.retrieve(apm,testInput,-1,-1);	
 		        	writerConso.print(conso);
     				conso="";
@@ -256,6 +258,7 @@ public class VanetFACS implements Serializable{
 			// } 
 	        writerConso.print("\n");
 			writerConso.print("\n");
+			}
 			//**********
 	    
 		} catch (FileNotFoundException e) {
@@ -282,7 +285,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(1,5000,apm);
+			testsList=st.generate(3,1000,apm);
 
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it

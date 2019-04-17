@@ -227,7 +227,7 @@ public class StochasticTester implements Serializable{
     	String x="";
         PrintWriter propertiesWriterFile = new PrintWriter("./propertiesErr.txt", "UTF-8");
         PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
-        LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.INFO, LogLevel.ERROR);
+        LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.ERROR, LogLevel.ERROR);
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         // for each of the resulting test cases
         long startTime=System.currentTimeMillis();
@@ -241,9 +241,11 @@ public class StochasticTester implements Serializable{
 	        	//time+= "k="+coeff+";";
 	        	//System.out.println("coeff "+ coeff);
 		        for (int i=0; i < nb; i++) {
+		        	ruleCov=0.0;
+		        	propCov=false;
 		        	((VanetFSM) fsm).getValues(this.iD,this.battery, this.decBattery,this.distance, length);
 		            ((VanetFSM) fsm).getSUT().reinit();
-		        	x="== Generating test #" + i + " ==";
+		        	x="== Generating test #" + i + " == rule cov ";
 		        	((VanetFSM) fsm).getSUT().addStringWriter(x);
 		            System.out.println(x);
 		            x="";
@@ -305,7 +307,7 @@ public class StochasticTester implements Serializable{
 										conso+="0;";
 										time+="0";
 										catched=true;
-										//return ret;
+										return ret;
 									}// catch (PropertyCoveredException e) {
 										// TODO Auto-generated catch block
 									if(propCov) {	
@@ -345,7 +347,9 @@ public class StochasticTester implements Serializable{
 		        	//}
 		            propertiesWriter.print(propertiesOutput);
 		            propertiesWriter.print(checkCoverageProperties(i,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
+		            System.out.println(checkCoverageProperties(i,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
 		            if(reinitCov) {
+		            	System.out.println("here reinit");
 		            	resetCov(apm);
 		            }
 		            if(!catched)time+=((VanetFSM) fsm).getSUT().getGlobalTimePLatooned()+";"; //conso+=((VanetFSM) fsm).getSUT().getGlobalConso()+";";
@@ -365,7 +369,7 @@ public class StochasticTester implements Serializable{
     }
     
     //retrieve the list of input steps and notify them to the SUT
-    public String retrieve(AdaptationPolicyModel apm, ArrayList<SerializableTest> serializableTest,int sourcePA,int sourceCoeff) throws NumberFormatException, IOException {
+    public String retrieve(AdaptationPolicyModel apm,SerializableTest test,int sourcePA,int sourceCoeff) throws NumberFormatException, IOException {
     	long startTime = System.currentTimeMillis();
     	long estimatedTime=0;
     	int cpt=0;
@@ -374,8 +378,8 @@ public class StochasticTester implements Serializable{
     	int indRules=0;
     	int indProp=0;
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
-        ((VanetFSM) fsm).getValues(this.iD, this.battery, this.decBattery,this.distance, serializableTest.get(0).size());
-        System.out.println("serialisable test size " + serializableTest.get(0).size());
+        //((VanetFSM) fsm).getValues(this.iD, this.battery, this.decBattery,this.distance, serializableTest.get(0).size());
+        //System.out.println("serialisable test size " + serializableTest.get(0).size());
         int j=0,k=0;
         boolean b;
         String conso="";
@@ -389,7 +393,7 @@ public class StochasticTester implements Serializable{
         init();
         ((VanetFSM) fsm).getSUT().reinit();
        
-        for(SerializableTest test : serializableTest) {
+        //for(SerializableTest test : serializableTest) {
         	System.out.println("new Test ");
         	for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
         		((VanetFSM) fsm).getSUT().k[cptK] = 0; // ((VanetFSM) fsm).getSUT().k[cptK]== sourcePA ? sourceCoeff :0;
@@ -455,7 +459,7 @@ public class StochasticTester implements Serializable{
                 catch (Exception e) {
                 	System.out.println("newstep null "+ newStep + " step " + step );
                 	System.out.println("step number "+ cpt);
-                	System.out.println("test size "+ serializableTest.get(0).size());
+                	System.out.println("test size "+ test.size());
                 	System.out.println(" methods possible "+ actionsAndProbabilities);
                 	((VanetFSM) fsm).getSUT().consolePrint();
                 	
@@ -477,7 +481,7 @@ public class StochasticTester implements Serializable{
 //			estimatedTime = (System.currentTimeMillis() - estimatedTime- startTime);
 //	        System.out.println("elapsed time end " + estimatedTime + " miliseconds " );
 			
-		}
+		//} //end for serializable test
         
        // writerLog.print(strLog); 
 		propertiesWriter.print(propertiesOutput);
