@@ -5,7 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class LocusPair {//implements Serializable
-	MyStep elt1;
-	MyStep elt2;
-	
+//	MyStep elt1; //index of step maybe
+//	MyStep elt2;
+	int ind1;
+	int ind2;
 }

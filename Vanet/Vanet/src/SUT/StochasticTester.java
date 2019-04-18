@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -490,46 +491,83 @@ public class StochasticTester implements Serializable{
         System.out.println("size test "+ cpt);
 		return conso;
     }
-   
+    private MyStep prepareInvoke(SerializableStep step, Method act) {
+    	 try {
+				Object[] tabObj=step.getParams();
+				ArrayList<Object> paramList = new ArrayList<Object>();
+				for(Object obj : tabObj) {
+					paramList.add(obj);
+				}
+				act.invoke(fsm, paramList);
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			 Method meth = act;
+			 MyStep myStep = new MyStep(meth, step.getInstance(),step.getParams());
+			 return myStep;
+    }
     public MyStep computeInputTest(SerializableStep step){
     	 HashMap<Method, Double> actionsReady = getActivableActions(fsm);
 //    	 System.out.println("into");
     	for (Method act : actionsReady.keySet()) {
 			 if(step.getMethName().contains(act.getName()) ) {
 				 try {
-					Object[] tabObj=step.getParams();
-					ArrayList<Object> paramList = new ArrayList<Object>();
-					for(Object obj : tabObj) {
-						paramList.add(obj);
+						Object[] tabObj=step.getParams();
+						ArrayList<Object> paramList = new ArrayList<Object>();
+						for(Object obj : tabObj) {
+							System.out.print(obj+" ");
+							paramList.add(obj);
+						}
+						System.out.println("");
+						act.invoke(fsm, paramList);
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					act.invoke(fsm, paramList);
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				 Method meth = act;
-				 MyStep myStep = new MyStep(meth, step.getInstance(),step.getParams());
-				 return myStep;
+					 Method meth = act;
+					 MyStep myStep = new MyStep(meth, step.getInstance(),step.getParams());
+					 return myStep;
+				 //return prepareInvoke(step, act);
 			 }			 
     	 }
-		 for (Method act : actionsReady.keySet()) {
+		 //for (Method act : actionsReady.keySet()) {
 			 //System.out.println("meth name "+ act.getName());
-		 }
+		 //}
 //		 System.out.println("vehicles ");
 //		 System.out.println("all vehicle on road " + ((VanetFSM) fsm).getSUT().nbVehiclesOnRoad());
 //		 for(Vehicle vl : ((VanetFSM) fsm).getSUT().allVehicles) {
 //			 System.out.println("my platoon " +vl.myPlatoon);
 //		 }
-		 System.out.println("step name " + step.getMethName());
-		 System.out.println("step = " +step );
-    	 return null;
-    		 
+    	
+    	//for genetic child if event was not available we replace by tick or another in case of mutation
+    	if( Math.random() <= 0.05 ) {
+    		Object[] meths = actionsReady.keySet().toArray();
+    		Method act = (Method)meths[new Random().nextInt(meths.length)];
+    		System.out.println("mutation " + act.getName() +" selected");
+    		return prepareInvoke(step, act);
+    	}
+    	else {
+    		System.out.println("external event not avaiblable taking tick instead");
+    		for (Method act : actionsReady.keySet()) {
+    			if(act.getName()=="tick") {
+    				return prepareInvoke(step, act);
+    			}
+    		}
+    		return null; //should not happen
+    	}    		 
     }
     
     /**

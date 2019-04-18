@@ -25,6 +25,9 @@ import java.util.Map;
 
 import org.apache.commons.collections15.iterators.EntrySetMapIterator;
 
+import engine.*;
+import engine.CrossOverImplem;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Frederic Dadeau
@@ -81,9 +84,9 @@ public class VanetFACS implements Serializable{
     		((VanetFSM) fsm).getSUT().k[cptK] = 0;
     	}
         //choice between generation and retrieving
-        
-		//retrieveTest(st,vcm,apm);      
-        generatetest(st, vcm,apm);
+		
+		retrieveTest(st,vcm,apm);      
+        //generatetest(st, vcm,apm);
         //generateAndRerunTest(st, vcm, apm,fsm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.print(strWriter);
@@ -247,7 +250,7 @@ public class VanetFACS implements Serializable{
 				//writerConso.println("k = "+ k);
 				//for(int i=0; i<2; i++) {
 					//((VanetFSM) fsm).afficheTestValues();
-					for(SerializableTest test : testInput) {
+			for(SerializableTest test : testInput) {
 						System.out.println("New Test");
 						conso += st.retrieve(apm,test,0,0); // not rmv
 		        	
@@ -259,7 +262,23 @@ public class VanetFACS implements Serializable{
 	        writerConso.print("\n");
 			writerConso.print("\n");
 			}
-			//**********
+			//retrieving new childs
+			CrossOverImplem crossOver= new CrossOverImplem();
+			GeneticEngine gen = null;
+			Individual parent1 = new Individual(testInput.get(0));
+			Individual parent2 = new Individual(testInput.get(1));
+			ArrayList<Individual> children = crossOver.crossover(gen, parent1, parent2);
+			ArrayList<SerializableTest> testInputChilds = new ArrayList<SerializableTest>();
+			testInputChilds.add(children.get(0).getIndividual());
+			testInputChilds.add(children.get(1).getIndividual());
+			
+			for(SerializableTest test : testInputChilds) {
+				System.out.println("child test");
+				conso += st.retrieve(apm,test,0,0); // not rmv	        	
+//	        	st.retrieve(apm,testInput,-1,-1);	
+	        	writerConso.print(conso);
+				conso="";
+			}
 	    
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -707,67 +726,8 @@ class r9p2 extends VanetProperty {
     	return "r9p2";
     }
 }
-class SerializableStep implements Serializable{
-	String meth;
-	Object instance;
-    Object[] params;
 
-    public SerializableStep(String _m, Object _i, Object[] _p) {
-        meth = _m;
-        instance = _i;
-        params = _p;
-    }
-    public String getMethName() {
-    	return meth;
-    }
-    public Object getInstance() {
-    	return instance;
-    }
-    public Object[] getParams() {
-    	return params;
-    }
-
-    public String toString() {
-        String ret = /*instance + "." +*/ meth + "(";
-        for (int i=0; i < params.length; i++) {
-            if (i > 0) {
-                ret += ",";
-            }
-            ret += params[i].toString();
-        }
-        return ret + ")";
-    }
-}
  
- class SerializableTest implements Serializable{
-	 ArrayList<SerializableStep> steps = new ArrayList<SerializableStep>();
-	    public SerializableTest(ArrayList<SerializableStep> s) {
-	    	for(SerializableStep step : s) {
-	    		steps.add(step);
-	    	}
-		}
-
-	    public void append(SerializableStep step) {
-	        steps.add(step);
-	    }
-
-	    public int size() {
-	        return steps.size();
-	    }
-
-	    public SerializableStep getStepAt(int i) {
-	        return steps.get(i);
-	    }
-
-	    public String toString() {
-	        return steps.toString();
-	    }
-
-	    public Iterator<SerializableStep> iterator() {
-	        return steps.iterator();
-	    }
- }
-
 //class r6p1 extends VanetProperty {
 //	  @Override
 //	    public double match(Road sut) throws PropertyFailedException {

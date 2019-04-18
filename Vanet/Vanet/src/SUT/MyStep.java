@@ -30,7 +30,9 @@ public class MyStep implements Serializable{
     public void execute() throws InvocationTargetException, IllegalAccessException {
         meth.invoke(instance, params);
     }
-
+    public void setParams(Object[] p) {
+    	params = p;
+    }
     public String toString() {
         String ret = /*instance + "." +*/ meth.getName() + "(";
         for (int i=0; i < params.length; i++) {

@@ -34,4 +34,8 @@ public class MyTest implements Iterable<MyStep> ,Serializable{
         return steps.iterator();
     }
 
+	public void add(MyStep step) {
+		steps.add(step);
+	}
+
 }

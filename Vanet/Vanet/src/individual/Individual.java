@@ -1,10 +1,6 @@
 package individual;
 import SUT.MyStep;
-//import com.smartesting.artifacts.tests.TestRepository;
-//import com.smartesting.standalone.engine.InitialState;
-//import com.smartesting.standalone.engine.ModelState;
-//import com.smartesting.standalone.engine.StandaloneEngine;
-
+import SUT.MyTest;
 import java.util.*;
 
 
@@ -13,20 +9,26 @@ import java.util.*;
  */
 public class Individual implements Cloneable
 {
-	private ArrayList<MyStep> calls;
+	private MyTest calls;
 	private double weight;
 	private boolean valid;
 	private int generation;
 
-
+	public Individual(MyTest test){
+		this.calls=test;
+		this.generation = 1;
+		this.weight = 0;
+		reformIndividual();
+	}
 
 	/**
 	 *
 	 */
 	public Individual(){
-		this.calls = new ArrayList<>();
+		this.calls = null;
 		this.generation = 1;
 		this.weight = 0;
+		reformIndividual();
 	}
 
 	/**
@@ -70,9 +72,9 @@ public class Individual implements Cloneable
 	 *
 	 * @param call
 	 */
-	public void addCall(MyStep call) //TestStep 
+	public void addCall(MyStep step) //TestStep 
 	{
-		this.calls.add(call);
+		this.calls.add(step);
 	}
 
 	/**
@@ -134,7 +136,22 @@ public class Individual implements Cloneable
 	public void setValid(boolean valid){
 		this.valid = valid;
 	}
-
+	
+	/**
+	 * change the calls of individual by suppressing the deterministic parameters of external events
+	 */
+	public void reformIndividual() {
+		for(MyStep step: this.calls) {
+			Object[] params =step.getParams();
+			if(params.length>1) {
+				Object param =step.getParams()[0];
+				Object[] reformedParams = {param};
+				step.setParams(reformedParams);
+			}
+		
+		}
+		
+	}
 //	/**
 //	 *
 //	 * @param engine
