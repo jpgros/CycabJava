@@ -2,6 +2,8 @@ package engine;
 
 import java.util.ArrayList;
 
+import individual.Individual;
+
 //import LocusPair;
 //import individual.Individual;
 

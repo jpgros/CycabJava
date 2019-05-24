@@ -12,8 +12,12 @@ public class SerializableStep implements Serializable{
         instance = _i;
         params = _p;
     }
-    public String getMethName() {
+    public String getMethNameWithParams() {
     	return meth;
+    }
+    public String getMethNameWithoutParams() {
+    	String[] array = meth.split("\\(");
+    	return array[0];
     }
     public Object getInstance() {
     	return instance;
@@ -32,4 +36,7 @@ public class SerializableStep implements Serializable{
         }
         return ret + ")";
     }
+	public void setParams(Object[] p) {
+	    	params = p;
+	}
 }

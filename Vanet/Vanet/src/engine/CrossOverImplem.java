@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import SUT.MyStep;
 import SUT.MyTest;
+import SUT.SerializableStep;
+import individual.Individual;
 
 public class CrossOverImplem extends CrossoverEngine{
 
@@ -13,8 +15,8 @@ public class CrossOverImplem extends CrossoverEngine{
 	public ArrayList<LocusPair> findLocuses(Individual individual_1, Individual individual_2) {
 		ArrayList<LocusPair> arrayLocus = new ArrayList<LocusPair>();
 		LocusPair locus = new LocusPair();
-		locus.ind1= individual_1.individual.size()/2;
-		locus.ind2= individual_2.individual.size()/2;
+		locus.ind1= individual_1.size()/2;
+		locus.ind2= individual_2.size()/2;
 		arrayLocus.add(locus);
 		return arrayLocus;
 	}
@@ -29,18 +31,18 @@ public class CrossOverImplem extends CrossoverEngine{
 
 		//construct child1
 		for(int i=0; i< locuses.get(0).ind1;i++) {
-			child1.individual.append(individual_1.individual.getStepAt(i));
+			child1.getCalls().append(individual_1.getCalls().getStepAt(i));
 		}
-		for(int i= locuses.get(0).ind1; i<individual_2.individual.size();i++) {
-			child1.individual.append(individual_2.individual.getStepAt(i));			
+		for(int i= locuses.get(0).ind1; i<individual_2.size();i++) {
+			child1.getCalls().append(individual_2.getCalls().getStepAt(i));			
 		}
 		
 		//construct child2
 		for(int i=0; i< locuses.get(0).ind2;i++) {
-			child2.individual.append(individual_2.individual.getStepAt(i));
+			child2.getCalls().append(individual_2.getCalls().getStepAt(i));
 		}
-		for(int i= locuses.get(0).ind2; i<individual_1.individual.size();i++) {
-			child2.individual.append(individual_1.individual.getStepAt(i));			
+		for(int i= locuses.get(0).ind2; i<individual_1.size();i++) {
+			child2.getCalls().append(individual_1.getCalls().getStepAt(i));			
 		}
 		
 		individuals.add(child1);
@@ -59,5 +61,6 @@ public class CrossOverImplem extends CrossoverEngine{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 }

@@ -491,13 +491,16 @@ public class StochasticTester implements Serializable{
         System.out.println("size test "+ cpt);
 		return conso;
     }
-    private MyStep prepareInvoke(SerializableStep step, Method act) {
-    	 try {
-				Object[] tabObj=step.getParams();
-				ArrayList<Object> paramList = new ArrayList<Object>();
-				for(Object obj : tabObj) {
-					paramList.add(obj);
-				}
+    private MyStep prepareInvoke(Method act) {//SerializableStep step, 
+    	ArrayList<Object> paramList = new ArrayList<Object>(); 
+    	try {
+				//Object[] tabObj=step.getParams();
+//				ArrayList<Object> paramList = new ArrayList<Object>();
+//				System.out.println("begin obj "+ act.getName());
+//				for(Object obj : tabObj) {
+//					paramList.add(obj);
+//					System.out.println("obj " + obj);
+//				}
 				act.invoke(fsm, paramList);
 			} catch (IllegalAccessException e) {
 				// TODO Auto-generated catch block
@@ -510,14 +513,15 @@ public class StochasticTester implements Serializable{
 				e.printStackTrace();
 			}
 			 Method meth = act;
-			 MyStep myStep = new MyStep(meth, step.getInstance(),step.getParams());
+			 MyStep myStep = new MyStep(meth, fsm, null);
 			 return myStep;
     }
     public MyStep computeInputTest(SerializableStep step){
+    	System.out.println("step before "+ step.getMethNameWithParams());
     	 HashMap<Method, Double> actionsReady = getActivableActions(fsm);
 //    	 System.out.println("into");
     	for (Method act : actionsReady.keySet()) {
-			 if(step.getMethName().contains(act.getName()) ) {
+			 if(step.getMethNameWithParams().contains(act.getName()) ) {
 				 try {
 						Object[] tabObj=step.getParams();
 						ArrayList<Object> paramList = new ArrayList<Object>();
@@ -525,7 +529,7 @@ public class StochasticTester implements Serializable{
 							System.out.print(obj+" ");
 							paramList.add(obj);
 						}
-						System.out.println("");
+						
 						act.invoke(fsm, paramList);
 					} catch (IllegalAccessException e) {
 						// TODO Auto-generated catch block
@@ -534,10 +538,12 @@ public class StochasticTester implements Serializable{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvocationTargetException e) {
+						System.out.println("act " + act.getName());
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					 Method meth = act;
+					 System.out.println("meth params inside "+ step.getMethNameWithParams());
 					 MyStep myStep = new MyStep(meth, step.getInstance(),step.getParams());
 					 return myStep;
 				 //return prepareInvoke(step, act);
@@ -553,17 +559,18 @@ public class StochasticTester implements Serializable{
 //		 }
     	
     	//for genetic child if event was not available we replace by tick or another in case of mutation
-    	if( Math.random() <= 0.05 ) {
+    	if( Math.random() <= 0.5 ) {
     		Object[] meths = actionsReady.keySet().toArray();
     		Method act = (Method)meths[new Random().nextInt(meths.length)];
     		System.out.println("mutation " + act.getName() +" selected");
-    		return prepareInvoke(step, act);
+    		System.out.println("meth params "+ step.getMethNameWithParams());
+    		return prepareInvoke(act);
     	}
     	else {
-    		System.out.println("external event not avaiblable taking tick instead");
+    		System.out.println("external event not available taking tick instead");
     		for (Method act : actionsReady.keySet()) {
     			if(act.getName()=="tick") {
-    				return prepareInvoke(step, act);
+    				return prepareInvoke(act);
     			}
     		}
     		return null; //should not happen
@@ -593,7 +600,7 @@ public class StochasticTester implements Serializable{
                 sum += actionsReady.get(act);
                 if (rand <= sum) {
                     try {
-                    	ArrayList<Object> emptylist= null;                    	
+                    	ArrayList<Object> emptylist= new ArrayList<Object>();                    	
                         Object[] tab = (Object[]) act.invoke(fsm, emptylist);
                         //long estimatedTime = (System.currentTimeMillis() - startTime);
                         //System.out.println("compute elapsed time 2  " + estimatedTime + "miliseconds" + "method name " + act.getName());

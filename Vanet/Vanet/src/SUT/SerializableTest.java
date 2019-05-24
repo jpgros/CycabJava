@@ -11,6 +11,10 @@ public class SerializableTest implements Serializable{
 	    		steps.add(step);
 	    	}
 		}
+	    
+	    public SerializableTest() {
+	    	
+	    }
 
 	    public void append(SerializableStep step) {
 	        steps.add(step);
@@ -31,4 +35,9 @@ public class SerializableTest implements Serializable{
 	    public Iterator<SerializableStep> iterator() {
 	        return steps.iterator();
 	    }
+
+		public void add(SerializableStep step) {
+			this.steps.add(step);
+			
+		}
 }

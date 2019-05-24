@@ -137,7 +137,7 @@ public class VanetFSM implements FsmModel {
     	addedVehicles++;
     	UUID id = randomUUID();//iD.remove(0);
     	double auto=0, dist=0, decAuto=0;
-    	if(params==null) {
+    	if(params.size()<=0) {
 	    	auto = (Math.random() * 10) + 20;// battery.remove(0); 
 	        		//(int) (Math.random() * 10) + 20;
 	        //battery.add(auto);
@@ -146,6 +146,15 @@ public class VanetFSM implements FsmModel {
 	        //distance.add(dist);
 	        decAuto = 1 + Math.random() / 5;//decBattery.remove(0);
 	        
+    	}
+    	else if (params.size()==1) {
+    		auto = (Math.random() * 10) + 20;// battery.remove(0); 
+    		//(int) (Math.random() * 10) + 20;
+		    //battery.add(auto);
+		    dist = (Math.random() * 5000) + 1000;// distance.remove(0); 
+		    		//(int)(Math.random() * 5000) + 1000;
+		    //distance.add(dist);
+		    decAuto = 1 + Math.random() / 5;//decBattery.remove(0);
     	}
     	else {
     		id = (UUID) params.get(0);
@@ -177,9 +186,7 @@ public class VanetFSM implements FsmModel {
     }
     @Action
     public Object[] requestJoin(ArrayList<Object>vl) {// takes vehicle with most battery and last created vehicle
-    	UUID tmpId= UUID.fromString( "00000000-0000-0000-0000-000000000000" );
-
-    	if(vl==null) {
+    	   	if(vl.size()<=0) {
 	        int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
 	        for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
 		        int j = (i + start) % sut.nbVehiclesOnRoad();
@@ -202,8 +209,8 @@ public class VanetFSM implements FsmModel {
 		        
 		    	//k= indexjoined.remove(0);
 		        if(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)){
-		        	
-		        	System.out.println("Join(" + sut.getVehicle(j).id + ", " + sut.getVehicle(k).id + ") -> " + sut.join(j, k));
+		        	System.out.println("toto");
+		        	System.out.println("Join(" + sut.getVehicle(j).id + ", " + sut.getVehicle(k).id + ") -> " + sut.join(j, k) +" -> true");
 		        	//indexjoined.add(k);
 		        	return new Object[]{ sut, sut.getVehicle(j).id, sut.getVehicle(k).id };
 		        }
@@ -212,10 +219,15 @@ public class VanetFSM implements FsmModel {
 	        System.out.println("Join( ) -> false");
 	        	return new Object[]{sut ,UUID.fromString( "00000000-0000-0000-0000-000000000000" ) };// should not happen : except if vehicle did not found another vehicle
     	}  	
-    	
+    	   	else if(vl.size() ==1) {
+    	   		System.out.println("Join( ) -> false");
+    	    	return new Object[]{sut, UUID.fromString( "00000000-0000-0000-0000-000000000000" )};// should not happen : except if vehicle did not found another vehicle
+    	   	}
     	//else if((UUID)vl.get(0)!=(UUID)tmpId ){
-    	else if (vl.size() >1) {
+    	else {
     		if(vl.get(0)!= vl.get(1)) { //guard to improve with getminvalue
+    			System.out.print("debug "+vl.get(0));
+    			System.out.print("debug 2 "+vl.get(1));
     			System.out.println("Join(" + vl.get(0) + ", " + vl.get(1) + ") -> " + sut.join(sut.findIndexOfId((UUID)vl.get(0)), sut.findIndexOfId((UUID)vl.get(1))));
 	    		return new Object[]{ sut, vl.get(0), vl.get(1) };
     		}
@@ -224,8 +236,7 @@ public class VanetFSM implements FsmModel {
     	    	return new Object[]{sut, UUID.fromString( "00000000-0000-0000-0000-000000000000" )};
     		}
     	}
-    	System.out.println("Join( ) -> false");
-    	return new Object[]{sut, UUID.fromString( "00000000-0000-0000-0000-000000000000" )};// should not happen : except if vehicle did not found another vehicle
+    	
     }
     public boolean forceQuitPlatoonGuard() {
         for (Vehicle v : sut) {
@@ -238,7 +249,7 @@ public class VanetFSM implements FsmModel {
     public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 :0.01;} //0.05; }
     @Action
     public Object[] forceQuitPlatoon(ArrayList<Object> vl) {
-    	if(vl==null) {
+    	if(vl.size()<=0) {
         //int start = (int)(Math.random() * sut.nbVehiclesOnRoad());
         //for (int i=0; i < sut.nbVehiclesOnRoad(); i++) {
         	int j = sut.getLowestVehicleBattery();

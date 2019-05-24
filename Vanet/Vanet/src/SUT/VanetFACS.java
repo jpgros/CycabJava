@@ -27,6 +27,7 @@ import org.apache.commons.collections15.iterators.EntrySetMapIterator;
 
 import engine.*;
 import engine.CrossOverImplem;
+import individual.Individual;
 
 /**
  * Created with IntelliJ IDEA.
@@ -271,6 +272,12 @@ public class VanetFACS implements Serializable{
 			ArrayList<SerializableTest> testInputChilds = new ArrayList<SerializableTest>();
 			testInputChilds.add(children.get(0).getIndividual());
 			testInputChilds.add(children.get(1).getIndividual());
+			System.out.println("input tests");
+			System.out.println(testInput.get(0));
+			System.out.println(testInput.get(1));
+			System.out.println(testInputChilds.get(0));
+			System.out.println(testInputChilds.get(1));
+			
 			
 			for(SerializableTest test : testInputChilds) {
 				System.out.println("child test");
@@ -304,7 +311,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(3,1000,apm);
+			testsList=st.generate(2,1000,apm);
 
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it

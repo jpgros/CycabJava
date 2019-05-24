@@ -1,6 +1,10 @@
 package individual;
 import SUT.MyStep;
 import SUT.MyTest;
+import SUT.SerializableStep;
+import SUT.SerializableTest;
+
+import java.lang.reflect.GenericArrayType;
 import java.util.*;
 
 
@@ -9,12 +13,12 @@ import java.util.*;
  */
 public class Individual implements Cloneable
 {
-	private MyTest calls;
+	private SerializableTest calls;
 	private double weight;
 	private boolean valid;
 	private int generation;
 
-	public Individual(MyTest test){
+	public Individual(SerializableTest test){
 		this.calls=test;
 		this.generation = 1;
 		this.weight = 0;
@@ -25,10 +29,9 @@ public class Individual implements Cloneable
 	 *
 	 */
 	public Individual(){
-		this.calls = null;
+		this.calls = new SerializableTest();
 		this.generation = 1;
 		this.weight = 0;
-		reformIndividual();
 	}
 
 	/**
@@ -72,7 +75,7 @@ public class Individual implements Cloneable
 	 *
 	 * @param call
 	 */
-	public void addCall(MyStep step) //TestStep 
+	public void addCall(SerializableStep step) //TestStep 
 	{
 		this.calls.add(step);
 	}
@@ -136,19 +139,33 @@ public class Individual implements Cloneable
 	public void setValid(boolean valid){
 		this.valid = valid;
 	}
-	
+	public SerializableTest getIndividual() {
+		return calls;
+	}
+	public SerializableTest getCalls() {
+		return calls;
+	}
 	/**
 	 * change the calls of individual by suppressing the deterministic parameters of external events
 	 */
 	public void reformIndividual() {
-		for(MyStep step: this.calls) {
-			Object[] params =step.getParams();
-			if(params.length>1) {
-				Object param =step.getParams()[0];
+		for(int i =0; i<this.calls.size(); i++) {
+//			System.out.print("params before " );
+//			for(int j =0 ; j<this.calls.getStepAt(i).getParams().length;j++) {
+//				System.out.print(this.calls.getStepAt(i).getParams()[j] + " " );
+//			}
+			Object[] params =this.calls.getStepAt(i).getParams();
+			if(params.length>1 && !this.calls.getStepAt(i).getMethNameWithoutParams().equals("addVehicle")) {
+				System.out.println("meth name "+ this.calls.getStepAt(i).getMethNameWithoutParams());
+				Object param =this.calls.getStepAt(i).getParams()[0];
 				Object[] reformedParams = {param};
-				step.setParams(reformedParams);
+				this.calls.getStepAt(i).setParams(reformedParams);
+				
 			}
-		
+//			System.out.println("params after ");
+//			for(int j =0 ; j<this.calls.getStepAt(i).getParams().length;j++) {
+//				System.out.print(this.calls.getStepAt(i).getParams()[j] + " " );
+//			}
 		}
 		
 	}
