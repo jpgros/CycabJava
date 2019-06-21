@@ -46,11 +46,11 @@ public class VanetFACS implements Serializable{
         PrintWriter writerFileErr = new PrintWriter("./outputError.txt", "UTF-8");
         PrintWriter writerFileReconfChoosen = new PrintWriter("./writerReconfChoosen.txt", "UTF-8");
         FileReader reconfChoosenReader = new FileReader("./writerReconfChoosen1.txt");
-        Mutant mutant = Mutant.NONE;
+        Mutant mutant = Mutant.M11;
         //FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         //FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         //FileReader roadReader = new FileReader("./platoonPolicies.txt");   
-        boolean reinitCov  =false; // do we want to reinit different coverages afeter each test
+        boolean reinitCov  =true; // do we want to reinit different coverages after each test
     	boolean interruptCovered =false; // do we want to stop execution when everything is covered		
         String strWriter ="";
         String vhReader="";
@@ -86,8 +86,8 @@ public class VanetFACS implements Serializable{
     	}
         //choice between generation and retrieving
 		
-		retrieveTest(st,vcm,apm);      
-        //generatetest(st, vcm,apm);
+		//retrieveTest(st,vcm,apm);      
+        generatetest(st, vcm,apm);
         //generateAndRerunTest(st, vcm, apm,fsm);
         strWriter=((VanetFSM) fsm).getSUT().getStringWriter();
         writer.print(strWriter);
@@ -117,9 +117,9 @@ public class VanetFACS implements Serializable{
     }
 
     public static void setRulesForAPM(AdaptationPolicyModel a, LogPrinter writer) {
-    	final double HIGHPRIO = 8;
+    	final double HIGHPRIO = 7;
     	final double MEDIUMPRIO = 5;
-    	final double LOWPRIO = 2;
+    	final double LOWPRIO = 3;
         // Rule: -- relai d'un vehicule qui vient d'entrer dans le peloton
         //  after join(v) until quit(v)
         //      if min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
@@ -143,20 +143,20 @@ public class VanetFACS implements Serializable{
 
 
 
-        Rule r4  = new Rule(new r4p1(), new r4p2(), PolicyName.QUITPLATOON, LOWPRIO); //or quitstation
+        Rule r4  = new Rule(new r4p1(), new r4p2(), PolicyName.QUITDISTANCE, LOWPRIO); //or quitstation
         a.addRule(r4);
         // Rule: -- départ du platoon du véhicule qui arrive à destination ou échéance
         //  after join until quit
         //      if (v.auto >= distance station[0] && v.auto < distance station[1])
         //          quit |--> high
 
-        Rule r5  = new Rule(new r5p1(), new r5p2(), PolicyName.QUITPLATOON, HIGHPRIO); //or quitstation
+        Rule r5  = new Rule(new r5p1(), new r5p2(), PolicyName.QUITENERGY, HIGHPRIO); //or quitstation
         a.addRule(r5);
 //        Rule r6  = new Rule(new r6p1(), new r6p2(), PolicyName.QUITPLATOON, Priority.MEDIUM); //or quitstation
 //        a.addRule(r6);
         
         
-        Rule r6  = new Rule(new r6p1(writer), new r6p2(writer), PolicyName.QUITFAILURE, HIGHPRIO); //or quitstation
+        Rule r6  = new Rule(new r6p1(writer), new r6p2(writer), PolicyName.QUITDISTANCE, HIGHPRIO); //or quitstation
         a.addRule(r6);
         //Rule : -- depart du vehicule qui a une batterie faible
         // after join(v) until quit(v)
@@ -268,6 +268,8 @@ public class VanetFACS implements Serializable{
 			GeneticEngine gen = null;
 			Individual parent1 = new Individual(testInput.get(0));
 			Individual parent2 = new Individual(testInput.get(1));
+			System.out.println("parent " + parent2.getCalls());
+			System.out.println("parent " + parent1.getCalls());
 			ArrayList<Individual> children = crossOver.crossover(gen, parent1, parent2);
 			ArrayList<SerializableTest> testInputChilds = new ArrayList<SerializableTest>();
 			testInputChilds.add(children.get(0).getIndividual());
@@ -311,8 +313,8 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(2,1000,apm);
-
+			testsList=st.generate(1,20000,apm);
+			System.out.println("test list size" + testsList.size());
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
 			
@@ -321,7 +323,9 @@ public class VanetFACS implements Serializable{
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
 	        		serializableArray.add(step);
-	        		System.out.print("step " + step+ ", ");
+	        		for(Object o : curStep.params) {
+	        			System.out.println(" elt " + o);
+	        		}
 	        	}
 	        	SerializableTest test = new SerializableTest(serializableArray);
 	        	testArraySer.add(test);

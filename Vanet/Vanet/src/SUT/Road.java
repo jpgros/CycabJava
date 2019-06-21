@@ -134,12 +134,12 @@ public class Road implements Serializable, Iterable<Vehicle> {
         }
     }
     public void forceQuitPlatoon(UUID id) {
-    	System.out.println("toto concerned " + id + " allvehicle size " + allVehicles.size());
-    	for(Vehicle v :allVehicles) {
-    		System.out.println(v.id);
-    	}
-    	System.out.println("vl concerned " + allVehicles.get(findIndexOfId(id)));
-    	System.out.println("pl concerned " + allVehicles.get(findIndexOfId(id)).getPlatoon());
+    	//System.out.println("toto concerned " + id + " allvehicle size " + allVehicles.size());
+//    	for(Vehicle v :allVehicles) {
+//    		System.out.println(v.id);
+//    	}
+    	//System.out.println("vl concerned " + allVehicles.get(findIndexOfId(id)));
+    	//System.out.println("pl concerned " + allVehicles.get(findIndexOfId(id)).getPlatoon());
         if (allVehicles.get(findIndexOfId(id)).getPlatoon() != null) {
             allVehicles.get(findIndexOfId(id)).quitPlatoon();
         }
@@ -277,7 +277,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
 		writer+=x;
         return allVehicles.size() -1;
     }
-    public int getLowestVehicleBattery(){
+    public int getLowestVehicleBatteryInPlatoon(){
     	double min =100;
     	int index=0;
     	int i=0;

@@ -5,39 +5,35 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class SerializableTest implements Serializable{
-	 ArrayList<SerializableStep> steps = new ArrayList<SerializableStep>();
-	    public SerializableTest(ArrayList<SerializableStep> s) {
-	    	for(SerializableStep step : s) {
-	    		steps.add(step);
-	    	}
-		}
-	    
-	    public SerializableTest() {
-	    	
-	    }
+	double score =0;
+	public ArrayList<SerializableStep> steps= new ArrayList<SerializableStep>();
+    public SerializableTest(ArrayList<SerializableStep> s) {
+    	for(SerializableStep step : s) {
+    		steps.add(step);
+    	}
+	}
+    
+    public SerializableTest() {
+    	
+    }
 
-	    public void append(SerializableStep step) {
-	        steps.add(step);
-	    }
+    public void append(SerializableStep step) {
+        steps.add(step);
+    }
 
-	    public int size() {
-	        return steps.size();
-	    }
+    public int size() {
+        return steps.size();
+    }
 
-	    public SerializableStep getStepAt(int i) {
-	        return steps.get(i);
-	    }
+    public SerializableStep getStepAt(int i) {
+        return steps.get(i);
+    }
 
-	    public String toString() {
-	        return steps.toString();
-	    }
+    public String toString() {
+        return steps.toString();
+    }
 
-	    public Iterator<SerializableStep> iterator() {
-	        return steps.iterator();
-	    }
-
-		public void add(SerializableStep step) {
-			this.steps.add(step);
-			
-		}
+    public Iterator<SerializableStep> iterator() {
+        return steps.iterator();
+    }
 }

@@ -8,7 +8,7 @@ import java.util.Iterator;
  * Simple class encapsulating a test as a sequence (ArrayList) of String representing action names. 
  */
 public class MyTest implements Iterable<MyStep> ,Serializable{
-
+	double score=0;
     ArrayList<MyStep> steps;
     public MyTest() {
         steps = new ArrayList<MyStep>();

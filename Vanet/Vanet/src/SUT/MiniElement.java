@@ -3,9 +3,9 @@ import java.util.Objects;
 
 public class MiniElement {
 	PolicyName name;
-	Priority priority;
+	double priority;
 	
-	public MiniElement(PolicyName n, Priority p) {
+	public MiniElement(PolicyName n, double p) {
 		name =n;
 		priority=p;
 	}
@@ -13,7 +13,7 @@ public class MiniElement {
 
 	public MiniElement(PolicyName n) {
 		name =n;
-		priority=null;
+		priority=0;
 	}
     @Override
     public int hashCode() {
@@ -43,11 +43,11 @@ public class MiniElement {
 		this.name = name;
 	}
 
-	public Priority getPriority() {
+	public double getPriority() {
 		return priority;
 	}
 
-	public void setPriority(Priority priority) {
+	public void setPriority(double priority) {
 		this.priority = priority;
 	}
 

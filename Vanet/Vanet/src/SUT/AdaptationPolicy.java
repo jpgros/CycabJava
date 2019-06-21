@@ -1,22 +1,18 @@
 package SUT;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.collections15.functors.SwitchClosure;
 
 public class AdaptationPolicy implements Serializable{
 	ArrayList<Element> listPolicy= new ArrayList<Element>();
-	final static double COEFF_WAITING_RULE=0.0;
+	ArrayList<Element> tmpListPolicy = new ArrayList<Element>();
+	final static double COEFF_WAITING_RULE=0.3;
 	
 	// add element according to the given priority and the time rule has already waited
 	public void addElement(Element elt) {
-		int index=elt.indexOnNameAndVehicle(listPolicy);
-		if( index !=-1) {
-			listPolicy.remove(index);
-			elt.timeWaiting++;
-		}
-		index=0;
 		boolean looping = true;
 		if (listPolicy.size() == 0) {
 			listPolicy.add(elt);
@@ -33,18 +29,32 @@ public class AdaptationPolicy implements Serializable{
         }
 	}
 	
-	public void mergeLists(ArrayList<Element> lastReconfs) {
-		if(lastReconfs.size()!=0) {
-			for(Element elt :this.listPolicy) {
-				for(Element eltLast : lastReconfs) {
-					if(elt.name == eltLast.name && elt.priority==eltLast.priority && elt.vehicle== eltLast.vehicle) {
-						elt.timeWaiting=eltLast.timeWaiting;
+	public void mergeLists() {
+		ArrayList<Element> listTmp = new ArrayList<Element>(); 
+		if(this.tmpListPolicy.size()!=0) {
+			for(Iterator<Element> itr= listPolicy.iterator(); itr.hasNext();) {
+				Element elt=itr.next();
+				for(Iterator<Element> itr2=tmpListPolicy.iterator(); itr.hasNext();) {
+					Element eltLast = itr.next();
+					Element newElt = new Element(eltLast.getName(), eltLast.getPriority(), eltLast.getVehicle());
+					if(elt.equals(eltLast)) {
+						newElt.timeWaiting=++eltLast.timeWaiting;
 					}
+					listTmp.add(newElt);
+					itr.remove();
 				}
 			}
+			for(Element elt : listTmp) {
+				addElement(elt);
+			}
+			listTmp.clear();
 		}
-		lastReconfs.clear();
+		tmpListPolicy.clear();
+		for(Element elt : this.listPolicy) {
+			tmpListPolicy.add(elt);
+		}
 	}
+	
 	public double averageValuePolicies() {
 		if (listPolicy.size()==0) return 0;
 		double totalPolicies=0;
@@ -116,7 +126,15 @@ public class AdaptationPolicy implements Serializable{
 			}
 		}
 	}
-
+	/**
+	 * clears policy and copy it in tmp list
+	 */
+	public void clearPolicy() {
+		for(int i=0; i<this.listPolicy.size();i++) { //Element elt : this.listPolicy) {
+			this.tmpListPolicy.add(this.listPolicy.remove(this.listPolicy.size()-1));
+		}
+		this.listPolicy.clear();
+	}
 
 	public String toString() {
 		return listPolicy.toString();

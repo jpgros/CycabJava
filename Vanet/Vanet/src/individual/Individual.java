@@ -13,16 +13,17 @@ import java.util.*;
  */
 public class Individual implements Cloneable
 {
-	private SerializableTest calls;
+	public SerializableTest calls;
 	private double weight;
 	private boolean valid;
 	private int generation;
 
 	public Individual(SerializableTest test){
-		this.calls=test;
+		this.calls = new SerializableTest();
 		this.generation = 1;
 		this.weight = 0;
-		reformIndividual();
+		reformIndividual(test);
+		System.out.println("calls " + this);
 	}
 
 	/**
@@ -77,7 +78,7 @@ public class Individual implements Cloneable
 	 */
 	public void addCall(SerializableStep step) //TestStep 
 	{
-		this.calls.add(step);
+		this.calls.append(step);
 	}
 
 	/**
@@ -143,30 +144,43 @@ public class Individual implements Cloneable
 		return calls;
 	}
 	public SerializableTest getCalls() {
+		System.out.println("get call " + calls.steps);
 		return calls;
 	}
 	/**
 	 * change the calls of individual by suppressing the deterministic parameters of external events
 	 */
-	public void reformIndividual() {
-		for(int i =0; i<this.calls.size(); i++) {
+	public void reformIndividual(SerializableTest test) {
+		for(int i =0; i<test.size(); i++) {
 //			System.out.print("params before " );
 //			for(int j =0 ; j<this.calls.getStepAt(i).getParams().length;j++) {
 //				System.out.print(this.calls.getStepAt(i).getParams()[j] + " " );
 //			}
-			Object[] params =this.calls.getStepAt(i).getParams();
-			if(params.length>1 && !this.calls.getStepAt(i).getMethNameWithoutParams().equals("addVehicle")) {
-				System.out.println("meth name "+ this.calls.getStepAt(i).getMethNameWithoutParams());
-				Object param =this.calls.getStepAt(i).getParams()[0];
-				Object[] reformedParams = {param};
-				this.calls.getStepAt(i).setParams(reformedParams);
-				
+//			Object[] params =this.calls.getStepAt(i).getParams();
+			SerializableStep step;
+			if(!test.getStepAt(i).getMethNameWithoutParams().equals("addVehicle")) {
+				Object[] obj = new Object[5];
+				step = new SerializableStep(test.getStepAt(i).toString(), test.getStepAt(i).getInstance(), obj);		
 			}
+			else {
+				step = new SerializableStep(test.getStepAt(i).toString(), test.getStepAt(i).getInstance(), test.getStepAt(i).getParams());
+			}
+			this.calls.append(step);
+//				
+//				System.out.println("meth name "+ this.calls.getStepAt(i).getMethNameWithoutParams());
+//				Object param =this.calls.getStepAt(i).getParams()[0];
+//				System.out.println("param " + param);
+//				Object[] reformedParams = new Object[5]; 
+//				//{param};
+//				this.calls.getStepAt(i).setParams(reformedParams);
+//				
+//			}
 //			System.out.println("params after ");
 //			for(int j =0 ; j<this.calls.getStepAt(i).getParams().length;j++) {
 //				System.out.print(this.calls.getStepAt(i).getParams()[j] + " " );
 //			}
 		}
+		System.out.println("calls ref " + this.calls.size());
 		
 	}
 //	/**

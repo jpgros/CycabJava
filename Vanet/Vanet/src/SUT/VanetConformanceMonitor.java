@@ -33,7 +33,8 @@ public class VanetConformanceMonitor {
         er.dump();
         er.sortEligibleSteps();
         try {
-			er.stats();
+			//er.stats();
+			er.statsFreq();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

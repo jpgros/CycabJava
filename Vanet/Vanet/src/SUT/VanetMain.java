@@ -20,7 +20,7 @@ public class VanetMain {
 
 
 	public static void main(String[] args) {
-		PolicyName n1 = PolicyName.QUITFAILURE;
+		PolicyName n1 = PolicyName.QUITDISTANCE;
 		Priority p1 = Priority.HIGH;
 		Priority p3 = Priority.HIGH;
 		Priority p2 =Priority.LOW;

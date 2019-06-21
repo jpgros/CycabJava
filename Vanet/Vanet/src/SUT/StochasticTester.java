@@ -78,6 +78,7 @@ public class StochasticTester implements Serializable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        init();
     }
     
     /**
@@ -95,11 +96,15 @@ public class StochasticTester implements Serializable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+        init();
     }
     
     public void setMonitor(VanetConformanceMonitor _vcm) {
         vcm = _vcm;
     }
+    /**
+     * Adds the properties to keep correct of the SUT
+     */
     public void init() {
         properties.add(new Property1(mutant));
         properties.add(new Property2(mutant));
@@ -110,19 +115,16 @@ public class StochasticTester implements Serializable{
     
     /**
      * Generates a set of test cases (object MyTest).
-     * @param testNb indicate the number of the test played
-     * @param stepNb indicate the first step of 100% coverage, or -1 if the coverage is not done yet 
-     * @return a string with the coverage information of all properties including coverage percentage, test number and step number
-
+    * @return a double with the coverage information of all properties
      */
-    public String checkCoverageProperties(int testNb, int stepNb) {
+    public double coverageProperties() {
     	double coverage=0.0;
         for(VanetProperty vProp : properties) {
         	for(int ki = 0; ki<3; ki++)
         	{
         	    for(int kj = 0; kj<2; kj++)
         	    {
-        	    	System.out.print(vProp.transitionsMade[ki][kj]);
+        	    	//System.out.print(vProp.transitionsMade[ki][kj]);
         	     if(vProp.transitionsMade[ki][kj]) 	 coverage += 1.0;
         	    // vProp.transitionsMade[i][j]=false;
         	    }
@@ -130,6 +132,25 @@ public class StochasticTester implements Serializable{
 
         	//propertiesWriter.println(Arrays.stream(vProp.transitionsMade).allMatch(s -> s.equals(vProp.transitionsMade[0])));
         }
+        coverage = (coverage/(30))*100;
+        return coverage;
+    }
+    public String checkCoverageProperties(int testNb, int stepNb) {
+    	double coverage=0.0;
+        for(VanetProperty vProp : properties) {
+        	for(int i = 0; i<3; i++)
+        	{
+        	    for(int j = 0; j<2; j++)
+        	    {
+        	    	//System.out.print(vProp.transitionsMade[ki][kj]);
+        	     if(vProp.transitionsMade[i][j]) 	 coverage += 1.0;
+        	    // vProp.transitionsMade[i][j]=false;
+        	    }
+        	}vProp.transitionsMade[0][1]=true;
+
+        	//propertiesWriter.println(Arrays.stream(vProp.transitionsMade).allMatch(s -> s.equals(vProp.transitionsMade[0])));
+        }
+        System.out.println("nb prop " +properties.size());
         coverage = (coverage/(30))*100; //magic numbers /!\
         return " Test "+ testNb+" finished with " +coverage +"% of properties covered "+ stepNb;
        // propertiesWriter.close();
@@ -213,7 +234,7 @@ public class StochasticTester implements Serializable{
     
     public ArrayList<MyTest> generate(int nb, int length,AdaptationPolicyModel apm) throws NumberFormatException, IOException {
     	//BufferedReader inStream = new BufferedReader(readerStep);
-		init(); 
+		int nbCatchedError=0;
 		String conso="";
 		String time="";
     	boolean propCov=false;
@@ -262,7 +283,7 @@ public class StochasticTester implements Serializable{
 	        		estimTime= System.currentTimeMillis()-startTime;
 	        		//System.out.println("loop time 1 " + estimTime);
 		            for(int cptK=0;cptK<((VanetFSM) fsm).getSUT().k.length;cptK++) {
-		        		((VanetFSM) fsm).getSUT().k[cptK] = 0;//i== cptK ? coeff :0.0;
+		        		((VanetFSM) fsm).getSUT().k[cptK] = 0.0;//i== cptK ? coeff :0.0;
 		        	}
 		        	do {	
 		        		//System.out.println("tick");
@@ -308,7 +329,8 @@ public class StochasticTester implements Serializable{
 										conso+="0;";
 										time+="0";
 										catched=true;
-										return ret;
+										nbCatchedError++;
+										if(interruptCovered) return ret;
 									}// catch (PropertyCoveredException e) {
 										// TODO Auto-generated catch block
 									if(propCov) {	
@@ -318,9 +340,9 @@ public class StochasticTester implements Serializable{
 										indProp= indProp==0? j: indProp;
 										//System.out.println("rules cov : "+ruleCov);
 										if(ruleCov==100.0) {
-											System.out.println("props and rules covered");
+											//System.out.println("props and rules covered");
 											depopList(((VanetFSM) fsm).addedVehicles, j);
-											propertiesWriter.print("properties covered at step " + j+ " and rules at index "+ indRules);
+											propertiesWriter.print(" catched errors "+ nbCatchedError +" properties covered at step " + j+ " and rules at index "+ indRules);
 											if(interruptCovered) {
 												break; //break the actual test when everything is covered
 											}
@@ -343,18 +365,20 @@ public class StochasticTester implements Serializable{
 		            }while (j < length && b);       		
 		            // add computed test case to the result
 		        	//if(ruleCov==100.0 && propCov) {
-			        	System.out.println("\n consummed energy : "+((VanetFSM) fsm).getSUT().getGlobalConso());
-		        		ret.add(currentTest);
+		        	currentTest.score = nbCatchedError > 0 ? nbCatchedError*-1 : coverageProperties()+ ruleCov;
+		        	System.out.println("\n consummed energy : "+((VanetFSM) fsm).getSUT().getGlobalConso());
+		        	if(!catched) ret.add(currentTest); // do not add test if contains property error
 		        	//}
 		            propertiesWriter.print(propertiesOutput);
 		            propertiesWriter.print(checkCoverageProperties(i,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
 		            System.out.println(checkCoverageProperties(i,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
+		            System.out.println("test score " +currentTest.score);
 		            if(reinitCov) {
 		            	System.out.println("here reinit");
 		            	resetCov(apm);
 		            }
 		            if(!catched)time+=((VanetFSM) fsm).getSUT().getGlobalTimePLatooned()+";"; //conso+=((VanetFSM) fsm).getSUT().getGlobalConso()+";";
-		            catched=false;
+		            catched=false;		            
 		        }
 		        conso += "\n";
 		        time +="\n";
@@ -373,6 +397,7 @@ public class StochasticTester implements Serializable{
     public String retrieve(AdaptationPolicyModel apm,SerializableTest test,int sourcePA,int sourceCoeff) throws NumberFormatException, IOException {
     	long startTime = System.currentTimeMillis();
     	long estimatedTime=0;
+		int nbCatchedError=0;
     	int cpt=0;
     	boolean propCov=false;
     	double ruleCov=0.0;
@@ -391,7 +416,6 @@ public class StochasticTester implements Serializable{
 //        System.out.println("elapsed time header" + estimatedTime + " miliseconds " );
          System.out.println("retrieve fsm ");
 		 // for each of the resulting test cases
-        init();
         ((VanetFSM) fsm).getSUT().reinit();
        
         //for(SerializableTest test : serializableTest) {
@@ -432,6 +456,7 @@ public class StochasticTester implements Serializable{
 								prop.match(((VanetFSM) fsm).getSUT());
 								propCov=checkCoverageProperties();
 							} catch (PropertyFailedException e) {
+								nbCatchedError++;
 								propertiesOutput += "Failed;" + prop.toString()+ ";" +j+"\n";
 								System.out.println("Failed;" + prop.toString()+ ";" +j+"\n");
 								// TODO Auto-generated catch block
@@ -469,10 +494,12 @@ public class StochasticTester implements Serializable{
 				}	
                 cpt++;
 			}
-
+			currentTest.score = nbCatchedError > 0 ? nbCatchedError*-1 : coverageProperties()+ ruleCov;
 			j=0;
 			propertiesWriter.print(propertiesOutput);
 	        propertiesWriter.print(checkCoverageProperties(k,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
+	        System.out.println(checkCoverageProperties(k,indProp) + "and " + ruleCov + "% of rules " + indRules +"\n");
+	        System.out.println("test score " +currentTest.score);
 	        if(reinitCov) {
             	resetCov(apm);
             }
@@ -517,7 +544,7 @@ public class StochasticTester implements Serializable{
 			 return myStep;
     }
     public MyStep computeInputTest(SerializableStep step){
-    	System.out.println("step before "+ step.getMethNameWithParams());
+ //   	System.out.println("step before "+ step.getMethNameWithParams());
     	 HashMap<Method, Double> actionsReady = getActivableActions(fsm);
 //    	 System.out.println("into");
     	for (Method act : actionsReady.keySet()) {
@@ -526,7 +553,7 @@ public class StochasticTester implements Serializable{
 						Object[] tabObj=step.getParams();
 						ArrayList<Object> paramList = new ArrayList<Object>();
 						for(Object obj : tabObj) {
-							System.out.print(obj+" ");
+							//System.out.print(obj+" ");
 							paramList.add(obj);
 						}
 						
@@ -538,12 +565,12 @@ public class StochasticTester implements Serializable{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvocationTargetException e) {
-						System.out.println("act " + act.getName());
+//						System.out.println("act " + act.getName());
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					 Method meth = act;
-					 System.out.println("meth params inside "+ step.getMethNameWithParams());
+//					 System.out.println("meth params inside "+ step.getMethNameWithParams());
 					 MyStep myStep = new MyStep(meth, step.getInstance(),step.getParams());
 					 return myStep;
 				 //return prepareInvoke(step, act);
@@ -562,12 +589,12 @@ public class StochasticTester implements Serializable{
     	if( Math.random() <= 0.5 ) {
     		Object[] meths = actionsReady.keySet().toArray();
     		Method act = (Method)meths[new Random().nextInt(meths.length)];
-    		System.out.println("mutation " + act.getName() +" selected");
-    		System.out.println("meth params "+ step.getMethNameWithParams());
+//    		System.out.println("mutation " + act.getName() +" selected");
+//    		System.out.println("meth params "+ step.getMethNameWithParams());
     		return prepareInvoke(act);
     	}
     	else {
-    		System.out.println("external event not available taking tick instead");
+//    		System.out.println("external event not available taking tick instead");
     		for (Method act : actionsReady.keySet()) {
     			if(act.getName()=="tick") {
     				return prepareInvoke(act);
@@ -595,7 +622,6 @@ public class StochasticTester implements Serializable{
         do {
         	sum = 0;
             rand = Math.random();
-
             for (Method act : actionsReady.keySet()) {
                 sum += actionsReady.get(act);
                 if (rand <= sum) {
@@ -731,5 +757,3 @@ public class StochasticTester implements Serializable{
         br.close();
     }
 }
-
-

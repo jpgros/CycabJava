@@ -27,10 +27,10 @@ public class Vehicle extends Entity implements Serializable {
 	final double DEC_LEADER;// = DEC_ENERGY * 1.2;
 	final double DEC_DISTANCE = 10;
 	final static double LOW_LEADER_DIST = 200;
-	final static double LOW_DIST = 200;
-	final static double VLOW_DIST = 100;
-	final static double LOW_LEADER_BATTERY = 10;
-	final static double LOW_BATTERY = 5; // should be > property3
+	final static double LOW_DIST = 100;
+	final static double VLOW_DIST = 50;
+	final static double LOW_LEADER_BATTERY = 20;
+	final static double LOW_BATTERY = 14; // should be > property3
 	final static double HIGHPRIO = 7;
 	final static double MEDIUMPRIO = 5;
 	final static double LOWPRIO = 3;
@@ -245,7 +245,7 @@ public class Vehicle extends Entity implements Serializable {
 		if(myPlatoon!=null) {
 			// distance < seuil --> quitte le peloton
 			if(distance < VLOW_DIST) {
-				Element elt = new Element(PolicyName.QUITFAILURE, HIGHPRIO+road.k[0], this);
+				Element elt = new Element(PolicyName.QUITDISTANCE, HIGHPRIO+road.k[0], this);
 				x = "Event : vehicle " + this.getId() + " is very close from destination [VLOW_DIST]"+"\n";
 				//System.out.print(x);
 				road.addStringWriter(x);
@@ -254,7 +254,7 @@ public class Vehicle extends Entity implements Serializable {
 				road.addStringWriter("platoon quitfail"+ myPlatoon + "distance " + distance);
 			}
 			if(distance < LOW_DIST) {
-				Element elt = new Element(PolicyName.QUITPLATOON, LOWPRIO+road.k[1], this);
+				Element elt = new Element(PolicyName.QUITDISTANCE, LOWPRIO+road.k[1], this);
 				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]"+"\n";
 				//System.out.print(x);
 				road.addStringWriter(x);
@@ -262,7 +262,7 @@ public class Vehicle extends Entity implements Serializable {
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 			}
 			if(autonomie< LOW_BATTERY) {
-				Element elt = new Element(PolicyName.QUITPLATOON, HIGHPRIO+road.k[2], this);
+				Element elt = new Element(PolicyName.QUITENERGY, HIGHPRIO+road.k[2], this);
 				x = "Event : vehicle " + this.getId() + " is low on energy [LOW]"+"\n" + "platoon reconfs "+ myPlatoon + " "+ this.myPlatoon.policies+ "\n";
 				System.out.print(x);
 				road.addStringWriter(x);
@@ -294,7 +294,7 @@ public class Vehicle extends Entity implements Serializable {
 					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
 					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 				}
-				else if(road.distanceStation[0] < 70) { //road.distanceStation[0] >= 8 && 
+				else if(road.distanceStation[0] < 90) { //road.distanceStation[0] >= 8 && 
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]"+"\n";
 					//System.out.print(x);
 					road.addStringWriter(x);

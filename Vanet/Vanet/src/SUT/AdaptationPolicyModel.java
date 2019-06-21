@@ -151,8 +151,10 @@ class RuleCoveredException extends Exception {
 class ExecutionReport {
 	ArrayList<ArrayList<Element>> eligSorted = new ArrayList<ArrayList<Element>>() ;
 	HashMap<Element,Integer> actualCountedMap = new HashMap<Element,Integer>();
+	HashMap<MiniElement,Integer> actualCountedMiniMap = new HashMap<MiniElement,Integer>();
 	HashMap<Element,Integer> eligibleSortedCountedMap = new HashMap<Element,Integer>();
 	HashMap<Element,Integer> eligibleNotSortedCountedMap = new HashMap<Element,Integer>();
+	HashMap<MiniElement,Integer> eligibleNotSortedCountedMiniMap = new HashMap<MiniElement,Integer>();
     HashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>> steps = new LinkedHashMap<Integer, Pair<ArrayList<Element>, ArrayList<Element>>>();
     HashMap<Element,Integer> occurrencesTP = new HashMap<Element, Integer>();
     HashSet<MiniElement> miniOccurrencesTP = new HashSet<MiniElement>();
@@ -179,15 +181,7 @@ class ExecutionReport {
     	Integer value;
 		value = (occurrencesTP.get(e));
 		MiniElement miniElt=null;
-		if(e.priority <=3 && e.priority>0) {
-			miniElt = new MiniElement(e.name,Priority.LOW);
-		}
-		else if(e.priority <7 && e.priority>3) {
-			miniElt = new MiniElement(e.name,Priority.MEDIUM);
-		}
-		else if(e.priority>7) {
-			miniElt = new MiniElement(e.name,Priority.HIGH);
-		}
+		miniElt=new MiniElement(e.name,e.getPriority());
         miniOccurrencesTP.add(miniElt);
 		if (value == null) {
             occurrencesTP.put(e, 1);
@@ -217,16 +211,16 @@ class ExecutionReport {
     	ArrayList<Integer> list = new ArrayList<Integer>();
     	list.add(0);
     	list.add(0);
-    	map.put(PolicyName.QUITPLATOON, 0);
+    	map.put(PolicyName.QUITENERGY, 0);
     	map.put(PolicyName.QUITFORSTATION, 0);
-    	map.put(PolicyName.QUITFAILURE, 0);
+    	map.put(PolicyName.QUITDISTANCE, 0);
     	map.put(PolicyName.RELAY, 0);
     	map.put(PolicyName.UPGRADERELAY, 0);
     	//map.put(PolicyName.RUN, 0);
     	
-    	map2.put(PolicyName.QUITPLATOON, 0);
+    	map2.put(PolicyName.QUITENERGY, 0);
     	map2.put(PolicyName.QUITFORSTATION, 0);
-    	map2.put(PolicyName.QUITFAILURE, 0);
+    	map2.put(PolicyName.QUITDISTANCE, 0);
     	map2.put(PolicyName.RELAY, 0);
     	map2.put(PolicyName.UPGRADERELAY, 0);
     	//map2.put(PolicyName.RUN, 0);
@@ -392,9 +386,75 @@ class ExecutionReport {
     	}      
     	
     }
+    public void statsFreq() throws FileNotFoundException, UnsupportedEncodingException {
+    	PrintWriter writerStatsFile = new PrintWriter("./statsShort.txt", "UTF-8");
+        LogPrinter writeStats = new LogPrinter(writerStatsFile, LogLevel.ERROR, LogLevel.ERROR);
+    	Integer value;
+    	String x="";
+    	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
+			//filling actual map
+    		
+    		if(pair.second.size()>0) {
+				MiniElement elt = new MiniElement(pair.second.get(0).name, pair.second.get(0).priority);
+				value = actualCountedMiniMap.get(elt);
+				if(value==null) {
+					actualCountedMiniMap.put(elt, 1);
+				}
+				else {
+					actualCountedMiniMap.put(elt, ++value);
+				}
+			}
+    		//filling eligible map
+				for(Element eligElt : pair.first) {
+					//System.out.println("elig elt "+ eligElt);
+					MiniElement miniElt = new MiniElement(eligElt.getName(), eligElt.priority);
+					value = eligibleNotSortedCountedMiniMap.get(miniElt);
+					if(value==null) {
+						eligibleNotSortedCountedMiniMap.put(miniElt, 1);
+					}
+					else {
+						eligibleNotSortedCountedMiniMap.put(miniElt, ++value);
+					}
+				}
+    	}
+    	
+    	//creating frequencies array (name + prio) based on actual reconf versus elig (TP+guard) reconf (not sorted ones)
+    	HashMap<MiniElement,Double> frequenciesActuEligMiniMap = new HashMap<MiniElement,Double>();
+    	Integer val=0;
+    	Double freq=0.0;
+    	for(Map.Entry<MiniElement, Integer> elt: eligibleNotSortedCountedMiniMap.entrySet()) {
+    		//System.out.println("elig not sorted " +elt.getKey());
+    		val= actualCountedMiniMap.get(elt.getKey()); 
+    		if(val!=null) {
+    			freq = (((Double)(double)(val))/((Double)(double)(elt.getValue())))*100.0;
+    			//System.out.println("freq "+ freq + " " + (Double)(double)(val) );
+    			frequenciesActuEligMiniMap.put(elt.getKey(), freq);
+    		}
+    		else {
+    			frequenciesActuEligMiniMap.put(elt.getKey(), 0.0);
+    		}
+    	}
+    	
+    	writeStats.println("-----------------Frequencies actual vs elig ---------------------------------------");
+    	for(Map.Entry<MiniElement,Double> map : frequenciesActuEligMiniMap.entrySet()){
+    		x= " key " + map.getKey() + " value "+ map.getValue();
+    		//System.out.println(x);
+    		writeStats.println(x);
+    	}
+    	writeStats.println("--------------------------------------------------------");
+    	for(Map.Entry<MiniElement, Integer> elt: eligibleNotSortedCountedMiniMap.entrySet()) {
+    		writerStatsFile.println("elt " + elt);
+    	}
+    	writeStats.println("--------------------------------------------------------");
+    	for(Map.Entry<MiniElement, Integer> elt: actualCountedMiniMap.entrySet()) {
+    		writerStatsFile.println("eltact " + elt);
+    	}
+    	
+    	writeStats.close();
+    }
     public void stats() throws FileNotFoundException, UnsupportedEncodingException {
     	PrintWriter writerStatsFile = new PrintWriter("./stats.txt", "UTF-8");
-        LogPrinter writeStats = new LogPrinter(writerStatsFile, LogLevel.INFO, LogLevel.ERROR);
+        LogPrinter writeStats = new LogPrinter(writerStatsFile, LogLevel.ERROR, LogLevel.ERROR);
     	Integer value;
     	String x="";
     	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
@@ -453,7 +513,7 @@ class ExecutionReport {
     		}
     	}
     	
-    	//creating frequencies array based on actual reconf versus elig reocnf (not sorted ones)
+    	//creating frequencies array based on actual reconf versus elig (TP+guard) reconf (not sorted ones)
     	HashMap<Element,Double> frequenciesActuEligMap = new HashMap<Element,Double>();
     	val=0;
     	freq=0.0;
@@ -469,6 +529,31 @@ class ExecutionReport {
     			frequenciesActuEligMap.put(elt.getKey(), 0.0);
     		}
     	}
+    	
+    	//creating frequencies array (name + prio) based on actual reconf versus elig (TP+guard) reconf (not sorted ones)
+    	HashMap<Element,Double> frequenciesActuEligMapShort = new HashMap<Element,Double>();
+    	val=0;
+    	freq=0.0;
+    	for(Map.Entry<Element, Integer> elt: eligibleNotSortedCountedMap.entrySet()) {
+    		//System.out.println("elig not sorted " +elt.getKey());
+    		val= actualCountedMap.get(elt.getKey()); 
+    		if(val!=null) {
+    			freq = (((Double)(double)(val))/((Double)(double)(elt.getValue())))*100.0;
+    			//System.out.println("freq "+ freq + " " + (Double)(double)(val) );
+    			frequenciesActuEligMapShort.put(elt.getKey(), freq);
+    		}
+    		else {
+    			frequenciesActuEligMapShort.put(elt.getKey(), 0.0);
+    		}
+    	}
+    	
+    	writeStats.println("-----------------Frequencies actual vs elig ---------------------------------------");
+    	for(Map.Entry<Element,Double> map : frequenciesActuEligMap.entrySet()){
+    		x= " key " + map.getKey() + " value "+ map.getValue();
+    		//System.out.println(x);
+    		writeStats.println(x);
+    	}
+    	writeStats.println("--------------------------------------------------------");
     	    	
     	//System.out.println("Counted actual map :");
     	for(Map.Entry<Element,Integer> map : actualCountedMap.entrySet()) {
@@ -502,21 +587,14 @@ class ExecutionReport {
     		x= " key " + map.getKey() + " value "+ map.getValue();
     		//System.out.println(x);
     		writeStats.println(x);
-    	}
-    	writeStats.println("--------------------------------------------------------");
-    	for(Map.Entry<Element,Double> map : frequenciesActuEligMap.entrySet()){
-    		x= " key " + map.getKey() + " value "+ map.getValue();
-    		//System.out.println(x);
-    		writeStats.println(x);
-    	}
-    	
+    	}    	
     	//detecting which TP was not triggered
-    	for (PolicyName pol : PolicyName.values()) {
-    		  for(Priority prio : Priority.values()) {// replace enum with range
-    			  MiniElement miniElt = new MiniElement(pol,prio);
-    			  possibleMiniOccurrencesTP.add(miniElt);
-    		  }
-    		}
+//    	for (PolicyName pol : PolicyName.values()) {
+//    		  for(Priority prio : Priority.values()) {// replace enum with range
+//    			  MiniElement miniElt = new MiniElement(pol,prio);
+//    			  possibleMiniOccurrencesTP.add(miniElt);
+//    		  }
+//    		}
     	for(MiniElement miniElt : possibleMiniOccurrencesTP) {
     		if(!miniOccurrencesTP.contains(miniElt)) {
     			untriggeredMiniOccurrencesTP.add(miniElt);

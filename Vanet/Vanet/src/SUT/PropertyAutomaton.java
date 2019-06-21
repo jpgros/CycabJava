@@ -336,8 +336,6 @@ class Property3 extends VanetProperty {
                             throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination. \n vehicle's platoon reconf list " +v.myPlatoon.policies.listPolicy);
                         }
                     }
-
-
                     break;
             }
             // returns the minimal value of all 

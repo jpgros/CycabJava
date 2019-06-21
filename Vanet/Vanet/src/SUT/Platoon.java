@@ -20,7 +20,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	Vehicle leader=null;
 	Road road = null;
 	AdaptationPolicy policies =new AdaptationPolicy();
-	AdaptationPolicy previousPolicies =new AdaptationPolicy();
 	Element lastReconf =null;
 	boolean created;
 	boolean review = true;
@@ -107,7 +106,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		if(true) {//M3 lastReconf not reinit at the end of tick trigger so if on the next step another action than tick is used, lastreconf will apear again into actual
 			lastReconf=null;
 		}
-		policies.mergeLists(previousPolicies.listPolicy);
+		policies.mergeLists();
 			if(policies.listPolicy.size()>0) {
 				if(policies.listPolicy.size()>1 && !review) {
 					road.addReconfigurationChoosen("Tick " +road.stepNb);
@@ -116,26 +115,30 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				switch(road.mutant) {
 				case M5:
 					if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
-					if(policies.listPolicy.size()>1) {
-						for(int i=0; i<policies.listPolicy.size();i++) {
-							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
-						}
-						road.addReconfigurationChoosen("\n");
-					}
+//					if(policies.listPolicy.size()>1) {
+//						for(int i=0; i<policies.listPolicy.size();i++) {
+//							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
+//						}
+//						road.addReconfigurationChoosen("\n");
+//					}
 					lastReconf = policies.listPolicy.get(0);
+					policies.clearPolicy();
 				}
 				break;
 				case M11:
-					if(policies.listPolicy.size()>1) {
-						for(int i=0; i<policies.listPolicy.size();i++) {
-							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
-						}
-						road.addReconfigurationChoosen("\n");
-					}
-					lastReconf=policies.listPolicy.get(policies.listPolicy.size()-1);   //M1 replaces tickTriggerM1
+//					if(policies.listPolicy.size()>1) {
+//						for(int i=0; i<policies.listPolicy.size();i++) {
+//							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
+//						}
+//						road.addReconfigurationChoosen("\n");
+//					}
+					lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
+					policies.clearPolicy();
 				break;
 				case M10:// chooses randomly a reconf
-					//TODO 
+					lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
+					//System.out.println(lastReconf.name);
+					policies.clearPolicy();
 				break;
 				case M12:
 					if(policies.listPolicy.size()>1 ) {
@@ -168,7 +171,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 									lastReconf = policies.listPolicy.get(i);
 									reconf[i+1] =reconf[i+1].replaceAll("OK", "KO");
 									line="";
-									policies.listPolicy.clear();
+									policies.clearPolicy();
 									for(String vector : reconf){
 							             line += vector+"/";
 							       }
@@ -190,29 +193,24 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 							}
 							road.addReconfChoosenWrite("\n");
 							road.addReconfigurationChoosen("\n");
-							policies.listPolicy.clear();
+							policies.clearPolicy();
 						}
 					break;
 					
 					}
 					else {
 						lastReconf = policies.listPolicy.get(0);
-						policies.listPolicy.clear();
+						policies.clearPolicy();
 					}
 					break;
-				default: //if selectionned rule correponds to threshold criterion we select it and clear the list policy
-					if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
-						lastReconf = policies.listPolicy.get(0);
+				default: //if selected rule corresponds to threshold criterion we select it and clear the list policy
+					if(true) {//policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
+						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
 						//System.out.println(lastReconf.name);
-						policies.listPolicy.clear();
+						policies.clearPolicy();
 					}
 					else { // else we increment the waiting time of rules
-						previousPolicies.listPolicy.clear();
-						for(Element elt : policies.listPolicy) {
-							elt.timeWaiting++;
-							previousPolicies.listPolicy.add(elt);
-						}
-						policies.listPolicy.clear();
+						policies.clearPolicy();
 					}
 				break;
 				}	
@@ -275,7 +273,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				road.addStringWriter(x);
 				//tickCounter=6;
 			}
-			else if(lastReconf.name == PolicyName.QUITFAILURE || lastReconf.name == PolicyName.QUITPLATOON || lastReconf.name == PolicyName.QUITFORSTATION) {
+			else if(lastReconf.name == PolicyName.QUITDISTANCE || lastReconf.name == PolicyName.QUITENERGY || lastReconf.name == PolicyName.QUITFORSTATION) {
 				if(lastReconf.vehicle == leader) {
 					relay();
 					x = "Reconfiguration : vehicle leader" + lastReconf.vehicle.getId() + " downgraded before quitting : [RELAY] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
@@ -285,7 +283,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				}
 				deleteVehicle(lastReconf.vehicle);
 				switch (lastReconf.name) {
-				case QUITFAILURE:
+				case QUITDISTANCE:
 					x = "Reconfiguration : vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to failure : [QUITFAILURE] ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
 					//System.out.print(x);
 					road.addStringWriter(x);
@@ -297,7 +295,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					road.addStringWriter(x);
 					//tickCounter+=5;
 					break;
-				case QUITPLATOON:
+				case QUITENERGY:
 					x = "Reconfiguration :vehicle " + lastReconf.vehicle.getId() + " quitted platoon due to user : [QUITPLATOON]  ; priority : {" + lastReconf.getPriority()+ "} "+ this.id+ "\n";
 					//System.out.print(x); // or distance reached
 					road.addStringWriter(x);
