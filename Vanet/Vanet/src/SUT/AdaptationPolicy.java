@@ -12,24 +12,45 @@ public class AdaptationPolicy implements Serializable{
 	final static double COEFF_WAITING_RULE=0.3;
 	
 	// add element according to the given priority and the time rule has already waited
-	public void addElement(Element elt) {
-		boolean looping = true;
-		if (listPolicy.size() == 0) {
-			listPolicy.add(elt);
-        } else if ((listPolicy.get(0).priority+ COEFF_WAITING_RULE*listPolicy.get(0).timeWaiting) > (elt.priority+ COEFF_WAITING_RULE*elt.timeWaiting)) {
-        	listPolicy.add(0, elt);
-        } else if ((listPolicy.get(listPolicy.size() - 1).priority + COEFF_WAITING_RULE*listPolicy.get(listPolicy.size()-1).timeWaiting)< (elt.priority + COEFF_WAITING_RULE*elt.timeWaiting)) {
-        	listPolicy.add(listPolicy.size(), elt);
-        } else {
-            int i = 0;
-            while ((listPolicy.get(i).priority + listPolicy.get(i).timeWaiting) < (elt.priority +COEFF_WAITING_RULE*elt.timeWaiting) ) {
-                i++;
-            }
-            listPolicy.add(i, elt);
-        }
+	public void addElement(Element elt, Mutant mutant) {
+		if(mutant == Mutant.M14) {
+//			listPolicy.add(0,elt); //platoon takes last so put first for fifo
+//			System.out.println("list policy nb"+ listPolicy.size());
+			
+			if (listPolicy.size() == 0) {
+				listPolicy.add(elt);
+	        } else if ((listPolicy.get(0).priority+ COEFF_WAITING_RULE*listPolicy.get(0).timeWaiting) > (elt.priority+ COEFF_WAITING_RULE*elt.timeWaiting)) {
+	        	listPolicy.add(0, elt);
+	        } else if ((listPolicy.get(listPolicy.size() - 1).priority + COEFF_WAITING_RULE*listPolicy.get(listPolicy.size()-1).timeWaiting)< (elt.priority + COEFF_WAITING_RULE*elt.timeWaiting)) {
+	        	listPolicy.add(listPolicy.size(), elt);
+	        } else {
+	            int i = 0;
+	            while ((listPolicy.get(i).priority + listPolicy.get(i).timeWaiting) < (elt.priority +COEFF_WAITING_RULE*elt.timeWaiting) ) {
+	                i++;
+	            }
+	            listPolicy.add(i, elt);
+	        }
+		}
+		else {
+			//System.out.println("list policy nb"+ listPolicy.size());
+			boolean looping = true;
+			if (listPolicy.size() == 0) {
+				listPolicy.add(elt);
+	        } else if ((listPolicy.get(0).priority+ COEFF_WAITING_RULE*listPolicy.get(0).timeWaiting) > (elt.priority+ COEFF_WAITING_RULE*elt.timeWaiting)) {
+	        	listPolicy.add(0, elt);
+	        } else if ((listPolicy.get(listPolicy.size() - 1).priority + COEFF_WAITING_RULE*listPolicy.get(listPolicy.size()-1).timeWaiting)< (elt.priority + COEFF_WAITING_RULE*elt.timeWaiting)) {
+	        	listPolicy.add(listPolicy.size(), elt);
+	        } else {
+	            int i = 0;
+	            while ((listPolicy.get(i).priority + listPolicy.get(i).timeWaiting) < (elt.priority +COEFF_WAITING_RULE*elt.timeWaiting) ) {
+	                i++;
+	            }
+	            listPolicy.add(i, elt);
+	        }
+		}
 	}
 	
-	public void mergeLists() {
+	public void mergeLists(Mutant mutant) {
 		ArrayList<Element> listTmp = new ArrayList<Element>(); 
 		if(this.tmpListPolicy.size()!=0) {
 			for(Iterator<Element> itr= listPolicy.iterator(); itr.hasNext();) {
@@ -45,7 +66,7 @@ public class AdaptationPolicy implements Serializable{
 				}
 			}
 			for(Element elt : listTmp) {
-				addElement(elt);
+				addElement(elt, mutant);
 			}
 			listTmp.clear();
 		}

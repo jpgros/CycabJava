@@ -106,26 +106,29 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		if(true) {//M3 lastReconf not reinit at the end of tick trigger so if on the next step another action than tick is used, lastreconf will apear again into actual
 			lastReconf=null;
 		}
-		policies.mergeLists();
+		policies.mergeLists(road.mutant);
 			if(policies.listPolicy.size()>0) {
 				if(policies.listPolicy.size()>1 && !review) {
 					road.addReconfigurationChoosen("Tick " +road.stepNb);
 					road.addReconfChoosenWrite("Tick " +road.stepNb );
 				}
 				switch(road.mutant) {
-				case M5:
-					if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
+				case M5: // does not do a reconf with 10%
+					if(new Random().nextDouble() <=0.) {
+						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
+						policies.clearPolicy();	
+					}
+					//if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
 //					if(policies.listPolicy.size()>1) {
 //						for(int i=0; i<policies.listPolicy.size();i++) {
 //							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
 //						}
 //						road.addReconfigurationChoosen("\n");
 //					}
-					lastReconf = policies.listPolicy.get(0);
-					policies.clearPolicy();
-				}
+
+				
 				break;
-				case M11:
+				case M11: // takes reconfiguration in inverted priority
 //					if(policies.listPolicy.size()>1) {
 //						for(int i=0; i<policies.listPolicy.size();i++) {
 //							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
@@ -203,15 +206,31 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 						policies.clearPolicy();
 					}
 					break;
+				case M15: // sometimes chooses in inverted order
+					if(new Random().nextDouble() <=0.8) {
+						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
+					}
+					else {
+						lastReconf = policies.listPolicy.get(0);
+					}
+					policies.clearPolicy();	
+				break;
+				case M16: // sometimes chooses randomly
+					if(new Random().nextDouble() <=0.8) {
+						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
+					}
+					else {
+						lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
+					}
+					policies.clearPolicy();
+				break;
+					
 				default: //if selected rule corresponds to threshold criterion we select it and clear the list policy
-					if(true) {//policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
+					//if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
 						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
 						//System.out.println(lastReconf.name);
 						policies.clearPolicy();
-					}
-					else { // else we increment the waiting time of rules
-						policies.clearPolicy();
-					}
+						//System.out.println("list pl nb" + policies.listPolicy.size());
 				break;
 				}	
 				

@@ -46,7 +46,7 @@ public class VanetFACS implements Serializable{
         PrintWriter writerFileErr = new PrintWriter("./outputError.txt", "UTF-8");
         PrintWriter writerFileReconfChoosen = new PrintWriter("./writerReconfChoosen.txt", "UTF-8");
         FileReader reconfChoosenReader = new FileReader("./writerReconfChoosen1.txt");
-        Mutant mutant = Mutant.M11;
+        Mutant mutant = Mutant.NONE;
         //FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         //FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         //FileReader roadReader = new FileReader("./platoonPolicies.txt");   
@@ -313,7 +313,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(1,20000,apm);
+			testsList=st.generate(5,20000,apm);
 			System.out.println("test list size" + testsList.size());
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
