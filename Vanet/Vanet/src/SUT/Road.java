@@ -1,6 +1,8 @@
 package SUT;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.UUID;
 
@@ -30,6 +32,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
 	final static double FREQUENCYSTATION = 100;
     double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
+    ArrayList<StepElt> steps = new ArrayList<StepElt>();
+    
     int numberPlatoon=0;
     double globalConso=0;
     int timePlatoon=0;
@@ -214,6 +218,21 @@ public class Road implements Serializable, Iterable<Vehicle> {
         		if(v.myPlatoon.lastReconf!=null) action += v.myPlatoon.lastReconf;
             }
         }
+		StepElt step = new StepElt();
+        step.pair = new Pair(new ArrayList<Element>(), new ArrayList<Element>());
+		step.step=stepNb;
+        for (Vehicle v : allVehicles) {
+            if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
+        		for(Element elt : v.getPlatoon().step.pair.first) {
+        			step.pair.first.add(elt);
+        		}
+        		if(v.getPlatoon().step.pair.second.size()>0) {
+	        		step.pair.second.add(v.getPlatoon().step.pair.second.get(0));
+	        		v.getPlatoon().clearStep();
+        		}
+            }
+        }
+        steps.add(step);
         if(logLevel==LogLevel.VERBOSE) {
 	    	component+=")\n";
 	    	binding+=")\n";
@@ -338,4 +357,5 @@ public class Road implements Serializable, Iterable<Vehicle> {
 			v.getDisplayString();
 		}	        
 	}
+
 }

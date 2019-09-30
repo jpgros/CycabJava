@@ -28,7 +28,17 @@ public class VanetConformanceMonitor {
         sut.setStepName(newStep.meth.getName());
         return cov;
     }
-
+    public void populateGraph(int j) {
+    	er.populateGraph(j);
+    }
+    
+    public void printReconfNB(int j) {
+    	er.printReconfNB(j);
+    }
+    
+    public void printGraph() throws FileNotFoundException, UnsupportedEncodingException {
+    	er.printGraph();
+    }
     public void printReport() {
         er.dump();
         er.sortEligibleSteps();

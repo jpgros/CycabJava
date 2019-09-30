@@ -5,8 +5,12 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
+
+import SUT.ExecutionReport.FreqStep;
+
 
 public class Platoon extends Entity implements Serializable{ //implements Runnable {
 	int consommationLeader = 2;
@@ -15,7 +19,8 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	final static double THRESHOLDRULESVALUE = 6;
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     ArrayList<Vehicle> nextLeaderList = new ArrayList<Vehicle>();
-
+    int[] arrayPoints = new int[8];
+    StepElt step = new StepElt();
     UUID id;
 	Vehicle leader=null;
 	Road road = null;
@@ -42,6 +47,8 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		leader.setPlatoon(this);
 		road =r;
 		r.numberPlatoon++;
+		Arrays.fill(arrayPoints, 0);
+		arrayPoints[3]=1;
 		for (Vehicle v : others) {
 			vehiclesList.add(v);
 			eligibleLeader(v);
@@ -82,7 +89,20 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			road.addStringWriter(x);
 		}
 	}
-	
+	public void fillStep() {
+		step.step=road.stepNb;
+		step.pair.second.add(lastReconf);
+		for(Element elt : policies.listPolicy) {
+			if (!policies.tmpListPolicy.contains(elt)) {
+				step.pair.second.add(elt);
+			}
+			//if(policies.tmpListPolicy.size()>0) System.out.println("tmpListPolicy NOT EMPTY");
+		}
+	}
+	public void clearStep() {
+		step.pair.second.clear();
+		step.pair.first.clear();
+	}
 	public int findLeader() {
 		if(leader==null) return -1;
 		int index=0;
@@ -98,6 +118,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 //	}
 	
 	public void tick(){
+
 		//vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
 		//System.out.println("tick policy: " + tickCounter);
 		//writer.println("tick policy: " + tickCounter);
@@ -116,6 +137,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				case M5: // does not do a reconf with 10%
 					if(new Random().nextDouble() <=0.) {
 						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
+						fillStep();
 						policies.clearPolicy();	
 					}
 					//if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
@@ -136,11 +158,13 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 //						road.addReconfigurationChoosen("\n");
 //					}
 					lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
+					fillStep();
 					policies.clearPolicy();
 				break;
 				case M10:// chooses randomly a reconf
 					lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
 					//System.out.println(lastReconf.name);
+					fillStep();
 					policies.clearPolicy();
 				break;
 				case M12:
@@ -203,9 +227,15 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					}
 					else {
 						lastReconf = policies.listPolicy.get(0);
+						fillStep();
 						policies.clearPolicy();
 					}
 					break;
+				case M14: // takes reconf in FIFO order
+					lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
+					fillStep();
+					policies.clearPolicy();
+				break;
 				case M15: // sometimes chooses in inverted order
 					if(new Random().nextDouble() <=0.8) {
 						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
@@ -213,6 +243,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					else {
 						lastReconf = policies.listPolicy.get(0);
 					}
+					fillStep();
 					policies.clearPolicy();	
 				break;
 				case M16: // sometimes chooses randomly
@@ -222,12 +253,22 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					else {
 						lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
 					}
+					fillStep();
 					policies.clearPolicy();
 				break;
+				case M18:
+					int index = getReconf(policies.listPolicy.size()-1);
+					lastReconf = policies.listPolicy.get(index);
+					fillStep();
+					//System.out.println(lastReconf.name);
+					policies.clearPolicy();
 					
+				break;
 				default: //if selected rule corresponds to threshold criterion we select it and clear the list policy
 					//if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
+
 						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
+						fillStep();
 						//System.out.println(lastReconf.name);
 						policies.clearPolicy();
 						//System.out.println("list pl nb" + policies.listPolicy.size());
@@ -450,6 +491,70 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			return array.get(index).equals(elt) ? index : -1;
 			}
 		return -1;
+	}
+	
+	public int getReconf(int index) {
+	int indDeb= index;
+	Element elt = policies.listPolicy.get(policies.listPolicy.size()-1);
+	Double prio = elt.priority;
+	int maxPoint = elt.fairnessPoint;
+	int indexMaxPt=index;
+	if(index == policies.listPolicy.size()-1) {// normal mode is choosen
+			while(elt.priority==prio && index >0) {
+				index--;
+				elt = policies.listPolicy.get(index);
+				if(elt.fairnessPoint>maxPoint) {
+					indexMaxPt=index;
+					maxPoint=elt.fairnessPoint;
+				}
+			}
+			int indFin = index;
+			for(int i=indDeb; i<indFin; i++) {
+					switch(policies.listPolicy.get(i).toStringShort()) {
+			    		case "RELAY 7.0":
+			    			if(i!=indexMaxPt) arrayPoints[0]++;
+			    			else arrayPoints[0]=0;
+			        		break;
+			    		case "QUITENERGY 7.0":
+			    			if(i!=indexMaxPt) arrayPoints[1]++;
+			    			else arrayPoints[1]=0;
+			        		break;
+			    		case "QUITDISTANCE 7.0":
+			    			if(i!=indexMaxPt) arrayPoints[2]++;
+			    			else arrayPoints[2]=0;
+			        		break;
+			    		case "QUITFORSTATION 7.0":
+			    			if(i!=indexMaxPt) arrayPoints[3]++;
+			    			else arrayPoints[3]=0;
+			        		break;
+			    		case "QUITFORSTATION 5.0":
+			    			if(i!=indexMaxPt) arrayPoints[4]++;
+			    			else arrayPoints[4]=0;
+			        		break;
+			    		case "UPGRADERELAY 5.0":
+			    			if(i!=indexMaxPt) arrayPoints[5]++;
+			    			else arrayPoints[5]=0;
+			        		break;
+			    		case "QUITFORSTATION 3.0":
+			    			if(i!=indexMaxPt) arrayPoints[6]++;
+			    			else arrayPoints[6]=0;
+			        		break;
+			    		case "QUITDISTANCE 3.0":
+			    			if(i!=indexMaxPt) arrayPoints[7]++;
+			    			else arrayPoints[7]=0;
+			        		break;
+			        		default:
+			        			System.out.println("shouldn't happen platoon class " );
+			            		break;	
+		    		}
+			}
+		}
+		
+		else { //random mode is choosen
+			System.out.println("no other case taken case of");
+			System.exit(0);
+		}
+		return indexMaxPt;
 	}
 		
 	public void accept(Vehicle v) {

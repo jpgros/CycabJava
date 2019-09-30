@@ -1,6 +1,7 @@
 package SUT;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,9 +10,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.UUID;
 
 import com.sun.tools.internal.ws.wsdl.document.soap.SOAPStyle;
+import com.sun.tools.internal.xjc.model.SymbolSpace;
 
 /**
  * Created with IntelliJ IDEA.
@@ -149,6 +152,18 @@ class RuleCoveredException extends Exception {
     }
 }
 class ExecutionReport {
+	class FreqSteps{
+		ArrayList<FreqStep> list = new ArrayList<FreqStep>();
+		String name=null;
+	}
+	class FreqStep{
+		public int index;
+		public Double freq;
+		public FreqStep(int i, Double d) {
+			index=i;
+			freq=d;
+		}
+	}
 	ArrayList<ArrayList<Element>> eligSorted = new ArrayList<ArrayList<Element>>() ;
 	HashMap<Element,Integer> actualCountedMap = new HashMap<Element,Integer>();
 	HashMap<MiniElement,Integer> actualCountedMiniMap = new HashMap<MiniElement,Integer>();
@@ -161,11 +176,23 @@ class ExecutionReport {
     HashSet<MiniElement> possibleMiniOccurrencesTP = new HashSet<MiniElement>();
     HashSet<MiniElement> untriggeredMiniOccurrencesTP = new HashSet<MiniElement>();
     HashMap<PropertyAutomaton,Integer> occurrencesConfig = new HashMap<PropertyAutomaton, Integer>();
-    int nb=0;
+    HashMap<Element, Integer> eligNoRepeat = new LinkedHashMap<Element,Integer>();
+
+    ArrayList<FreqStep> r1Fr = new ArrayList<FreqStep>();
+    ArrayList<FreqStep> r2Fr = new ArrayList<FreqStep>();
+    ArrayList<FreqStep> r3Fr = new ArrayList<FreqStep>();
+    ArrayList<FreqStep> r4Fr = new ArrayList<FreqStep>();
+    ArrayList<FreqStep> r5Fr = new ArrayList<FreqStep>();
+    ArrayList<FreqStep> r6Fr = new ArrayList<FreqStep>();
+    ArrayList<FreqStep> r7Fr = new ArrayList<FreqStep>();
+    ArrayList<FreqStep> r8Fr = new ArrayList<FreqStep>();
+    
+	int nb=0;
     LogPrinter writerErr =null;
     boolean property =true;
     public ExecutionReport(LogPrinter w) {
     	writerErr = w;
+    	
     }
     
     public void notifyConfig(Rule rule, Vehicle v, PropertyAutomaton<?> tp) {
@@ -358,9 +385,15 @@ class ExecutionReport {
 //    	}
     	    
     }
+//    public void fillEligNoRepeat(){
+//    	for (Element step :steps.keySet()) {
+//    		
+//    	}
+//    }
+    
     public void sortEligibleSteps() {
        	ArrayList<Element> prevElig = new ArrayList<Element>();
-       	
+		
        	ArrayList<Element> tmpList = new ArrayList<Element>();
        	for (Integer step : steps.keySet()) {
 	        ArrayList<Element> elt = steps.get(step).getFirst();       
@@ -386,6 +419,206 @@ class ExecutionReport {
     	}      
     	
     }
+    public void printReconfNB(int j) {
+    	Integer value;
+    	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
+			//filling actual map
+    		
+    		if(pair.second.size()>0) {
+				MiniElement elt = new MiniElement(pair.second.get(0).name, pair.second.get(0).priority);
+				value = actualCountedMiniMap.get(elt);
+				if(value==null) {
+					actualCountedMiniMap.put(elt, 1);
+				}
+				else {
+					actualCountedMiniMap.put(elt, ++value);
+				}
+			}
+    		//filling eligible map
+				for(Element eligElt : pair.first) {
+					MiniElement miniElt = new MiniElement(eligElt.getName(), eligElt.priority);
+					value = eligibleNotSortedCountedMiniMap.get(miniElt);
+					if(value==null) {
+						eligibleNotSortedCountedMiniMap.put(miniElt, 1);
+					}
+					else {
+						eligibleNotSortedCountedMiniMap.put(miniElt, ++value);
+					}
+				}
+    	}
+    	Integer val=0;
+    	for(Map.Entry<MiniElement, Integer> elt: eligibleNotSortedCountedMiniMap.entrySet()) {
+    		//System.out.println("elig not sorted " +elt.getKey());
+    		val= actualCountedMiniMap.get(elt.getKey());
+    		if(val!=null) {
+    			System.out.println("val = " +val+ " value = "  + elt.getValue() + " elt= " +elt.toString());
+    		}
+    	}
+    }
+    public void populateGraph(int j) {
+    	
+    	Integer value;
+    	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
+			//filling actual map
+    		
+    		if(pair.second.size()>0) {
+				MiniElement elt = new MiniElement(pair.second.get(0).name, pair.second.get(0).priority);
+				value = actualCountedMiniMap.get(elt);
+				if(value==null) {
+					actualCountedMiniMap.put(elt, 1);
+				}
+				else {
+					actualCountedMiniMap.put(elt, ++value);
+				}
+			}
+    		//filling eligible map
+				for(Element eligElt : pair.first) {
+					MiniElement miniElt = new MiniElement(eligElt.getName(), eligElt.priority);
+					value = eligibleNotSortedCountedMiniMap.get(miniElt);
+					if(value==null) {
+						eligibleNotSortedCountedMiniMap.put(miniElt, 1);
+					}
+					else {
+						eligibleNotSortedCountedMiniMap.put(miniElt, ++value);
+					}
+				}
+    	}
+    	
+    	//creating frequencies array (name + prio) based on actual reconf versus elig (TP+guard) reconf (not sorted ones)
+    	HashMap<MiniElement,Double> frequenciesActuEligMiniMap = new HashMap<MiniElement,Double>();
+    	Integer val=0;
+    	Double freq=0.0;
+    	for(Map.Entry<MiniElement, Integer> elt: eligibleNotSortedCountedMiniMap.entrySet()) {
+    		//System.out.println("elig not sorted " +elt.getKey());
+    		val= actualCountedMiniMap.get(elt.getKey());
+    		if(val!=null) {
+    			freq = (((Double)(double)(val))/((Double)(double)(elt.getValue())))*100.0;
+    			if(freq<0) System.out.println("freq neg " + "actual nb" + val + "elig nb "+elt.getValue() + " " +elt.getKey());
+
+    			if(freq>100) System.out.println("freq too high " + "actual nb" + val + "elig nb "+elt.getValue() + " " +elt.getKey());
+    			//System.out.println("freq "+ freq + " " + (Double)(double)(val) );
+    			frequenciesActuEligMiniMap.put(elt.getKey(), freq);
+    		}
+    		else {
+    			frequenciesActuEligMiniMap.put(elt.getKey(), 0.0);
+    		}
+    	}
+    	eligibleNotSortedCountedMap.clear();
+    	Double d=0.0;
+    	FreqStep fs;
+    	for(Map.Entry<MiniElement,Double> map : frequenciesActuEligMiniMap.entrySet()){
+    		
+    		switch(map.getKey().toString()) {
+    		case "RELAY 7.0":
+    			d=map.getValue();
+    			fs = new FreqStep(j, d);
+    			r1Fr.add(fs);
+        		break;
+    		case "QUITENERGY 7.0":
+    			d=map.getValue();
+    			fs = new FreqStep(j, d);
+    			r2Fr.add(fs);
+    			break;
+    		case "QUITDISTANCE 7.0":
+    			d=map.getValue();
+    			fs = new FreqStep(j, d);
+    			r3Fr.add(fs);
+        		break;
+    		case "QUITFORSTATION 7.0":
+    			d=map.getValue();
+    			fs = new FreqStep(j, d);
+    			r4Fr.add(fs);
+        		break;
+    		case "QUITFORSTATION 6.0"://6.0
+    			d=map.getValue();
+    			fs = new FreqStep(j, d);
+    			r5Fr.add(fs);
+        		break;
+    		case "UPGRADERELAY 5.4": //5.4
+    			d=map.getValue();
+    			fs = new FreqStep(j, d);
+    			r6Fr.add(fs);
+        		break;
+    		case "QUITFORSTATION 3.0":
+    			d=map.getValue();
+    			fs = new FreqStep(j, d);
+    			r7Fr.add(fs);
+        		break;
+    		case "QUITDISTANCE 3.0":
+    			d=map.getValue();
+    			fs = new FreqStep(j, d);
+    			r8Fr.add(fs);
+        		break;
+        		default:
+        			System.out.println("shouldn't haappen adaptationPolicyModel class " + map.getKey().toString());
+            		break;	
+    		}
+    			
+		}
+    	eligibleNotSortedCountedMiniMap.clear();
+    	actualCountedMiniMap.clear();
+    	
+	}
+    
+    public void printGraph() throws FileNotFoundException, UnsupportedEncodingException {
+    	PrintWriter writerGraphFile = new PrintWriter("./statsGraph.tex", "UTF-8");
+        LogPrinter writeGraph = new LogPrinter(writerGraphFile, LogLevel.ERROR, LogLevel.ERROR);
+        PrintWriter writerGraphFile2 = new PrintWriter("./statsGraph2.tex", "UTF-8");
+        LogPrinter writeGraph2 = new LogPrinter(writerGraphFile2, LogLevel.ERROR, LogLevel.ERROR);
+        PrintWriter writerGraphFile3 = new PrintWriter("./statsGraph3.tex", "UTF-8");
+        LogPrinter writeGraph3 = new LogPrinter(writerGraphFile3, LogLevel.ERROR, LogLevel.ERROR);
+        PrintWriter writerGraphFile4 = new PrintWriter("./statsGraph4.tex", "UTF-8");
+        LogPrinter writeGraph4 = new LogPrinter(writerGraphFile4, LogLevel.ERROR, LogLevel.ERROR);
+        PrintWriter writerGraphFile5 = new PrintWriter("./statsGraph5.tex", "UTF-8");
+        LogPrinter writeGraph5 = new LogPrinter(writerGraphFile5, LogLevel.ERROR, LogLevel.ERROR);
+        PrintWriter writerGraphFile6 = new PrintWriter("./statsGraph6.tex", "UTF-8");
+        LogPrinter writeGraph6 = new LogPrinter(writerGraphFile6, LogLevel.ERROR, LogLevel.ERROR);
+        PrintWriter writerGraphFile7 = new PrintWriter("./statsGraph7.tex", "UTF-8");
+        LogPrinter writeGraph7 = new LogPrinter(writerGraphFile7, LogLevel.ERROR, LogLevel.ERROR);
+        PrintWriter writerGraphFile8 = new PrintWriter("./statsGraph8.tex", "UTF-8");
+        LogPrinter writeGraph8 = new LogPrinter(writerGraphFile8, LogLevel.ERROR, LogLevel.ERROR);
+        for(int i=0; i<r1Fr.size();i++) {
+        	if(i==0 || i%100==0) writeGraph.println("("+ r1Fr.get(i).index + ","+r1Fr.get(i).freq+")");
+        }
+        
+        for(int i=0; i<r2Fr.size();i++) {
+        	if(i==0 || i%100==0) writeGraph2.println("("+ r2Fr.get(i).index + ","+r2Fr.get(i).freq+")");
+        }
+
+        for(int i=0; i<r3Fr.size();i++) {
+        	if(i==0 || i%100==0) writeGraph3.println("("+ r3Fr.get(i).index + ","+r3Fr.get(i).freq+")");
+        }
+
+        for(int i=0; i<r4Fr.size();i++) {
+        	if(i==0 || i%100==0) writeGraph4.println("("+ r4Fr.get(i).index + ","+r4Fr.get(i).freq+")");
+        }
+ 
+        for(int i=0; i<r5Fr.size();i++) {
+        	if(i==0 || i%100==0) writeGraph5.println("("+ r5Fr.get(i).index + ","+r5Fr.get(i).freq+")");
+        }
+   
+        for(int i=0; i<r6Fr.size();i++) {
+        	if(i==0 || i%100==0) writeGraph6.println("("+ r6Fr.get(i).index + ","+r6Fr.get(i).freq+")");
+        }
+
+        for(int i=0; i<r7Fr.size();i++) {
+        	if(i==0 || i%100==0) writeGraph7.println("("+ r7Fr.get(i).index + ","+r7Fr.get(i).freq+")");
+        }
+
+        for(int i=0; i<r8Fr.size();i++) {
+        	if(i==0 || i%100==0) writeGraph8.println("("+ r8Fr.get(i).index + ","+r8Fr.get(i).freq+")");
+        }
+       
+        writeGraph.close();
+        writeGraph2.close();
+        writeGraph3.close();
+        writeGraph4.close();
+        writeGraph5.close();
+        writeGraph6.close();
+        writeGraph7.close();
+        writeGraph8.close();
+    }
+    	
     public void statsFreq() throws FileNotFoundException, UnsupportedEncodingException {
     	PrintWriter writerStatsFile = new PrintWriter("./statsShort.txt", "UTF-8");
         LogPrinter writeStats = new LogPrinter(writerStatsFile, LogLevel.ERROR, LogLevel.ERROR);
@@ -615,7 +848,7 @@ class ExecutionReport {
 }
 
 
-class Pair<K, V> {
+class Pair<K, V> implements Serializable{
     K first;
     V second;
 

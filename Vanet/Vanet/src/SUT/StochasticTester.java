@@ -359,10 +359,12 @@ public class StochasticTester implements Serializable{
 		                	System.exit(1);
 							// TODO: handle exception
 						}
+						vcm.populateGraph(j);
 		                estimTime= System.currentTimeMillis()-startTime;
 		        		//System.out.println("loop time 4 " + estimTime);
 		                //checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
-		            }while (j < length && b);       		
+		            }while (j < length && b);
+		        	vcm.printReconfNB(j);
 		            // add computed test case to the result
 		        	//if(ruleCov==100.0 && propCov) {
 		        	currentTest.score = nbCatchedError > 0 ? nbCatchedError*-1 : coverageProperties()+ ruleCov;
@@ -386,6 +388,7 @@ public class StochasticTester implements Serializable{
 	        writerConso.println();
         }
 		vcm.printReport();
+		vcm.printGraph();
 		propertiesWriter.close();
 		writerConso.print(time);
 		writerConso.close();

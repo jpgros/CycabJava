@@ -17,5 +17,7 @@ M12,// Can redo same scenario with other reconf : DONE but bugs
 M13,// NOT A MUTANT This mutant changes the test generation probabilities, in some case we reduced the probability of event to occur, in other cases we increased the probability.
 M14,// Chooses reconfiguration in fifo order 
 M15,// Chooses the inverted reconfig with x% either chooses right reconf
-M16// Chooses random reconfig with x% either chooses right reconf
+M16,// Chooses random reconfig with x% either chooses right reconf
+M17, // does not take time waiting of a reconf into account
+M18 // adds fairness in reconfiguration selection
 }

@@ -9,6 +9,7 @@ public class Element implements Serializable {
 	double priority;
 	Vehicle vehicle;
 	double timeWaiting=0;
+	int fairnessPoint =0;
 	
 	public Element(PolicyName n, double p) {
 		name =n;
@@ -78,5 +79,9 @@ public class Element implements Serializable {
 	public String toString() {
 		return name + "(" + vehicle.id + ") -> " + priority;
 	}
-
+	
+	public String toStringShort() {
+		return name + " " + priority;
+	}
+	
 }

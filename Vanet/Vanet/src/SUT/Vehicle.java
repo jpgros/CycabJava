@@ -250,7 +250,7 @@ public class Vehicle extends Entity implements Serializable {
 				//System.out.print(x);
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt,road.mutant);
-				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
+				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				road.addStringWriter("platoon quitfail"+ myPlatoon + "distance " + distance);
 			}
 			if(distance < LOW_DIST) {
@@ -259,7 +259,7 @@ public class Vehicle extends Entity implements Serializable {
 				//System.out.print(x);
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt,road.mutant);
-				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
+				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 			}
 			if(autonomie< LOW_BATTERY) {
 				Element elt = new Element(PolicyName.QUITENERGY, HIGHPRIO+road.k[2], this);
@@ -267,7 +267,7 @@ public class Vehicle extends Entity implements Serializable {
 				System.out.print(x);
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt,road.mutant);
-				System.out.println(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
+				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 
 			}
@@ -292,16 +292,16 @@ public class Vehicle extends Entity implements Serializable {
 					Element elt = new Element(PolicyName.QUITFORSTATION, HIGHPRIO+road.k[4], this);
 					myPlatoon.policies.addElement(elt,road.mutant);
 					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
-					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
+					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
 				else if(road.distanceStation[0] <= 90) { //road.distanceStation[0] >= 8 && 
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]"+"\n";
 					//System.out.print(x);
 					road.addStringWriter(x);
-					Element elt = new Element(PolicyName.QUITFORSTATION, MEDIUMPRIO+road.k[5], this);
+					Element elt = new Element(PolicyName.QUITFORSTATION, MEDIUMPRIO+road.k[5]+1.0, this);
 					myPlatoon.policies.addElement(elt,road.mutant);
 					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
-					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
+					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
 				else if(road.distanceStation[0] <= 100) {
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [LOW]"+"\n";
@@ -310,7 +310,7 @@ public class Vehicle extends Entity implements Serializable {
 					Element elt = new Element(PolicyName.QUITFORSTATION, LOWPRIO+road.k[6], this);
 					myPlatoon.policies.addElement(elt,road.mutant);
 					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
-					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
+					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
 				else {
 					x = "Error : Should not happen QuitToStation policy problem " + road.distanceStation[0]+"\n";
@@ -320,7 +320,7 @@ public class Vehicle extends Entity implements Serializable {
 			}									
 			
 			if(!this.isLeader() && myPlatoon.vehiclesList.size()>=3 && ((this.getMinValue()/DEC_LEADER)> myPlatoon.leader.getMinValue())) {
-				Element elt = new Element(PolicyName.UPGRADERELAY, MEDIUMPRIO+road.k[7], this);
+				Element elt = new Element(PolicyName.UPGRADERELAY, MEDIUMPRIO+road.k[7]+0.4, this);
 				myPlatoon.policies.addElement(elt,road.mutant);
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 				road.addStringWriter("upgrade decleader = " + DEC_LEADER);

@@ -46,7 +46,7 @@ public class VanetFACS implements Serializable{
         PrintWriter writerFileErr = new PrintWriter("./outputError.txt", "UTF-8");
         PrintWriter writerFileReconfChoosen = new PrintWriter("./writerReconfChoosen.txt", "UTF-8");
         FileReader reconfChoosenReader = new FileReader("./writerReconfChoosen1.txt");
-        Mutant mutant = Mutant.NONE;
+        Mutant mutant = Mutant.M15;
         //FileReader vehicleReader = new FileReader("./vehiclePolicies.txt"); // /Vanet
         //FileReader platoonReader = new FileReader("./platoonPolicies.txt");
         //FileReader roadReader = new FileReader("./platoonPolicies.txt");   
@@ -116,75 +116,6 @@ public class VanetFACS implements Serializable{
         System.out.println("elapsed time " + estimatedTime + "seconds");
     }
 
-    public static void setRulesForAPM(AdaptationPolicyModel a, LogPrinter writer) {
-    	final double HIGHPRIO = 7;
-    	final double MEDIUMPRIO = 5;
-    	final double LOWPRIO = 3;
-        // Rule: -- relai d'un vehicule qui vient d'entrer dans le peloton
-        //  after join(v) until quit(v)
-        //      if min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
-        //          relay |--> medium
-        Rule r1 = new Rule(new r1p1(writer), new r1p2(writer), PolicyName.UPGRADERELAY, MEDIUMPRIO);
-        a.addRule(r1);
-
-        Rule r2  = new Rule(new r2p1(writer), new r2p2(writer), PolicyName.RELAY, HIGHPRIO); //or quitstation
-        a.addRule(r2);
-        // Rule: -- relai du leader qui arrive à destination ou échéance
-        //  after relay(v) until quit(v) | relay
-        //      if min(v.distance, v.auto) < 100
-        //          relay |--> low
-
-//        Rule r3  = new Rule(new r3p1(), new r3p2(), PolicyName.RELAY, Priority.LOW); //or quitstation
-//        a.addRule(r3);
-        // Rule: -- relai du leader qui arrive à destination ou échéance
-        //  after relay(v) until quit(v) | relay
-        //      if min(v.distance, v.auto) < 50
-        //          relay |--> high
-
-
-
-        Rule r4  = new Rule(new r4p1(), new r4p2(), PolicyName.QUITDISTANCE, LOWPRIO); //or quitstation
-        a.addRule(r4);
-        // Rule: -- départ du platoon du véhicule qui arrive à destination ou échéance
-        //  after join until quit
-        //      if (v.auto >= distance station[0] && v.auto < distance station[1])
-        //          quit |--> high
-
-        Rule r5  = new Rule(new r5p1(), new r5p2(), PolicyName.QUITENERGY, HIGHPRIO); //or quitstation
-        a.addRule(r5);
-//        Rule r6  = new Rule(new r6p1(), new r6p2(), PolicyName.QUITPLATOON, Priority.MEDIUM); //or quitstation
-//        a.addRule(r6);
-        
-        
-        Rule r6  = new Rule(new r6p1(writer), new r6p2(writer), PolicyName.QUITDISTANCE, HIGHPRIO); //or quitstation
-        a.addRule(r6);
-        //Rule : -- depart du vehicule qui a une batterie faible
-        // after join(v) until quit(v)
-        // if v.autonomy <15
-        // quitfailure |----> high
-        
-        Rule r7  = new Rule(new r7p1(writer), new r7p2(writer), PolicyName.QUITFORSTATION, HIGHPRIO); //or quitstation
-        a.addRule(r7);
-        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
-        // after join(v) until quit(v)
-        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 50
-        // quitforstation |----> high
-        
-        Rule r8  = new Rule(new r8p1(writer), new r8p2(writer), PolicyName.QUITFORSTATION, MEDIUMPRIO); //or quitstation
-        a.addRule(r8);
-        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
-        // after join(v) until quit(v)
-        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 70
-        // quitforstation |----> medium
-        
-        Rule r9  = new Rule(new r9p1(writer), new r9p2(writer), PolicyName.QUITFORSTATION, LOWPRIO); //or quitstation
-        a.addRule(r9);
-        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
-        // after join(v) until quit(v)
-        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 100
-        // quitforstation |----> low
-
-    }
     public static void generateAndRerunTest(StochasticTester st, VanetConformanceMonitor vcm,AdaptationPolicyModel apm,FsmModel fsm) {
     	ArrayList<SerializableStep> serializableArray = new ArrayList<SerializableStep>();
     	ArrayList<SerializableTest> testArraySer = new ArrayList<SerializableTest>();  
@@ -193,7 +124,7 @@ public class VanetFACS implements Serializable{
 		st.setMonitor(vcm);
 		try {
 			PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
-			testsList=st.generate(1,100,apm);
+			testsList=st.generate(1,1000,apm);
 			((VanetFSM) fsm).afficheTestValues();
 			for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
@@ -313,7 +244,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(5,20000,apm);
+			testsList=st.generate(1,100000,apm);
 			System.out.println("test list size" + testsList.size());
 			//stats should be verified : may be done globaly		
 			//convert initial in a serializable list and writing it
@@ -341,6 +272,76 @@ public class VanetFACS implements Serializable{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
+    }
+    
+    public static void setRulesForAPM(AdaptationPolicyModel a, LogPrinter writer) {
+    	final double HIGHPRIO = 7;
+    	final double MEDIUMPRIO = 5;
+    	final double LOWPRIO = 3;
+        // Rule: -- relai d'un vehicule qui vient d'entrer dans le peloton
+        //  after join(v) until quit(v)
+        //      if min(v.distance, v.auto) > min(v.platoon.leader.distance, v.platoon.leader.auto)
+        //          relay |--> medium
+        Rule r1 = new Rule(new r1p1(writer), new r1p2(writer), PolicyName.UPGRADERELAY, MEDIUMPRIO+0.4);
+        a.addRule(r1);
+
+        Rule r2  = new Rule(new r2p1(writer), new r2p2(writer), PolicyName.RELAY, HIGHPRIO); //or quitstation
+        a.addRule(r2);
+        // Rule: -- relai du leader qui arrive à destination ou échéance
+        //  after relay(v) until quit(v) | relay
+        //      if min(v.distance, v.auto) < 100
+        //          relay |--> low
+
+//        Rule r3  = new Rule(new r3p1(), new r3p2(), PolicyName.RELAY, Priority.LOW); //or quitstation
+//        a.addRule(r3);
+        // Rule: -- relai du leader qui arrive à destination ou échéance
+        //  after relay(v) until quit(v) | relay
+        //      if min(v.distance, v.auto) < 50
+        //          relay |--> high
+
+
+
+        Rule r4  = new Rule(new r4p1(), new r4p2(), PolicyName.QUITDISTANCE, LOWPRIO); //or quitstation
+        a.addRule(r4);
+        // Rule: -- départ du platoon du véhicule qui arrive à destination ou échéance
+        //  after join until quit
+        //      if (v.auto >= distance station[0] && v.auto < distance station[1])
+        //          quit |--> high
+
+        Rule r5  = new Rule(new r5p1(), new r5p2(), PolicyName.QUITENERGY, HIGHPRIO); //or quitstation
+        a.addRule(r5);
+//        Rule r6  = new Rule(new r6p1(), new r6p2(), PolicyName.QUITPLATOON, Priority.MEDIUM); //or quitstation
+//        a.addRule(r6);
+        
+        
+        Rule r6  = new Rule(new r6p1(writer), new r6p2(writer), PolicyName.QUITDISTANCE, HIGHPRIO); //or quitstation
+        a.addRule(r6);
+        //Rule : -- depart du vehicule qui a une batterie faible
+        // after join(v) until quit(v)
+        // if v.autonomy <15
+        // quitfailure |----> high
+        
+        Rule r7  = new Rule(new r7p1(writer), new r7p2(writer), PolicyName.QUITFORSTATION, HIGHPRIO); //or quitstation
+        a.addRule(r7);
+        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
+        // after join(v) until quit(v)
+        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 50
+        // quitforstation |----> high
+        
+        Rule r8  = new Rule(new r8p1(writer), new r8p2(writer), PolicyName.QUITFORSTATION, MEDIUMPRIO+1.0); //or quitstation
+        a.addRule(r8);
+        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
+        // after join(v) until quit(v)
+        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 70
+        // quitforstation |----> medium
+        
+        Rule r9  = new Rule(new r9p1(writer), new r9p2(writer), PolicyName.QUITFORSTATION, LOWPRIO); //or quitstation
+        a.addRule(r9);
+        //Rule : -- depart du vehicule ayant besoin de se recharger et proche d une station
+        // after join(v) until quit(v)
+        // if ((v.autonomie -10.0) > (v.distanceStation[0] + v.distanceStation[1])) && v.distanceStation[0] < 100
+        // quitforstation |----> low
+
     }
 }
 
@@ -677,7 +678,7 @@ class r8p2 extends VanetProperty {
 	 }
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.road.distanceStation[0] >= 70) {
+	        if ( currentVehicle.road.distanceStation[0] > 90) {
 	        	writer.println("TP KO for quitStas MEDIUM");
 	        	throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        }
