@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.UUID;
 
+import javax.print.StreamPrintServiceFactory;
+
 import com.sun.tools.internal.ws.wsdl.document.soap.SOAPStyle;
 import com.sun.tools.internal.xjc.model.SymbolSpace;
 
@@ -153,15 +155,39 @@ class RuleCoveredException extends Exception {
 }
 class ExecutionReport {
 	class FreqSteps{
-		ArrayList<FreqStep> list = new ArrayList<FreqStep>();
-		String name=null;
+		HashSet<FreqStep> freqSet = new HashSet<FreqStep>();
+		
+		/**
+		 * return the corresponding element based on string parameter and suppress it from set
+		 * @param str
+		 * @return FreqStep hashmap
+		 */
+		FreqStep containsRule(String str) {
+			for(FreqStep elt : freqSet) {
+				
+				if(elt.NamePrio.equals(str)) {
+					freqSet.remove(elt);
+					return elt;
+				}
+			}
+			return null;
+		}
+		void printConcernedRules() {
+			System.out.println("printing freqset ");
+			for(FreqStep elt : freqSet) {
+				System.out.println(elt.NamePrio);
+			}
+		}
 	}
 	class FreqStep{
-		public int index;
-		public Double freq;
-		public FreqStep(int i, Double d) {
-			index=i;
-			freq=d;
+		String NamePrio="";
+		LinkedHashMap<Integer,Double> freqMap = new LinkedHashMap<Integer,Double>();
+		//public int index;
+		//public Double freq;
+		public FreqStep(String name) {
+			NamePrio=name;
+			//index=i;
+			//freq=d;
 		}
 	}
 	ArrayList<ArrayList<Element>> eligSorted = new ArrayList<ArrayList<Element>>() ;
@@ -177,16 +203,7 @@ class ExecutionReport {
     HashSet<MiniElement> untriggeredMiniOccurrencesTP = new HashSet<MiniElement>();
     HashMap<PropertyAutomaton,Integer> occurrencesConfig = new HashMap<PropertyAutomaton, Integer>();
     HashMap<Element, Integer> eligNoRepeat = new LinkedHashMap<Element,Integer>();
-
-    ArrayList<FreqStep> r1Fr = new ArrayList<FreqStep>();
-    ArrayList<FreqStep> r2Fr = new ArrayList<FreqStep>();
-    ArrayList<FreqStep> r3Fr = new ArrayList<FreqStep>();
-    ArrayList<FreqStep> r4Fr = new ArrayList<FreqStep>();
-    ArrayList<FreqStep> r5Fr = new ArrayList<FreqStep>();
-    ArrayList<FreqStep> r6Fr = new ArrayList<FreqStep>();
-    ArrayList<FreqStep> r7Fr = new ArrayList<FreqStep>();
-    ArrayList<FreqStep> r8Fr = new ArrayList<FreqStep>();
-    
+    FreqSteps freqSteps = new FreqSteps();    
 	int nb=0;
     LogPrinter writerErr =null;
     boolean property =true;
@@ -313,7 +330,7 @@ class ExecutionReport {
 //            		
 //            	}
 //            }
-            // when the eligible reconfiguration is empty and not actual
+// when the eligible reconfiguration is empty and not actual
             if(steps.get(step).getSecond().size()>0 && steps.get(step).getFirst().size() ==0) {
             	writerErr.println("*** Step " + step + " encountered a problem : reconfiguration occured but was nout founded eligible");
                 writerErr.println("Eligible reconfigurations: " + steps.get(step).getFirst());
@@ -459,8 +476,7 @@ class ExecutionReport {
     	
     	Integer value;
     	for(Pair<ArrayList<Element>,ArrayList<Element>> pair : steps.values()) {
-			//filling actual map
-    		
+			//filling actual map    		
     		if(pair.second.size()>0) {
 				MiniElement elt = new MiniElement(pair.second.get(0).name, pair.second.get(0).priority);
 				value = actualCountedMiniMap.get(elt);
@@ -505,55 +521,26 @@ class ExecutionReport {
     	}
     	eligibleNotSortedCountedMap.clear();
     	Double d=0.0;
-    	FreqStep fs;
     	for(Map.Entry<MiniElement,Double> map : frequenciesActuEligMiniMap.entrySet()){
-    		
-    		switch(map.getKey().toString()) {
-    		case "RELAY 7.0":
-    			d=map.getValue();
-    			fs = new FreqStep(j, d);
-    			r1Fr.add(fs);
-        		break;
-    		case "QUITENERGY 7.0":
-    			d=map.getValue();
-    			fs = new FreqStep(j, d);
-    			r2Fr.add(fs);
-    			break;
-    		case "QUITDISTANCE 7.0":
-    			d=map.getValue();
-    			fs = new FreqStep(j, d);
-    			r3Fr.add(fs);
-        		break;
-    		case "QUITFORSTATION 7.0":
-    			d=map.getValue();
-    			fs = new FreqStep(j, d);
-    			r4Fr.add(fs);
-        		break;
-    		case "QUITFORSTATION 6.0"://6.0
-    			d=map.getValue();
-    			fs = new FreqStep(j, d);
-    			r5Fr.add(fs);
-        		break;
-    		case "UPGRADERELAY 5.4": //5.4
-    			d=map.getValue();
-    			fs = new FreqStep(j, d);
-    			r6Fr.add(fs);
-        		break;
-    		case "QUITFORSTATION 3.0":
-    			d=map.getValue();
-    			fs = new FreqStep(j, d);
-    			r7Fr.add(fs);
-        		break;
-    		case "QUITDISTANCE 3.0":
-    			d=map.getValue();
-    			fs = new FreqStep(j, d);
-    			r8Fr.add(fs);
-        		break;
-        		default:
-        			System.out.println("shouldn't haappen adaptationPolicyModel class " + map.getKey().toString());
-            		break;	
+    		String nameKey = map.getKey().toString();
+    		FreqStep elt = freqSteps.containsRule(nameKey);
+    		d=map.getValue();
+    		if(elt !=null) {
+    			elt.freqMap.put(j, d);
+    			freqSteps.freqSet.add(elt);  
     		}
+    		else {
+    	    	FreqStep fs = new FreqStep(nameKey);
+    			fs.freqMap.put(j, map.getValue());
+    			freqSteps.freqSet.add(fs);
     			
+    			for(FreqStep eltSteps : freqSteps.freqSet) {
+    				System.out.println("eltSteps "+ eltSteps.NamePrio);
+    				for(Map.Entry <Integer,Double> eltLoop :eltSteps.freqMap.entrySet()) {
+    					System.out.println("elt loop" +eltLoop);
+    				}
+    			}System.out.println("end");
+    		}    			
 		}
     	eligibleNotSortedCountedMiniMap.clear();
     	actualCountedMiniMap.clear();
@@ -561,62 +548,20 @@ class ExecutionReport {
 	}
     
     public void printGraph() throws FileNotFoundException, UnsupportedEncodingException {
-    	PrintWriter writerGraphFile = new PrintWriter("./statsGraph.tex", "UTF-8");
-        LogPrinter writeGraph = new LogPrinter(writerGraphFile, LogLevel.ERROR, LogLevel.ERROR);
-        PrintWriter writerGraphFile2 = new PrintWriter("./statsGraph2.tex", "UTF-8");
-        LogPrinter writeGraph2 = new LogPrinter(writerGraphFile2, LogLevel.ERROR, LogLevel.ERROR);
-        PrintWriter writerGraphFile3 = new PrintWriter("./statsGraph3.tex", "UTF-8");
-        LogPrinter writeGraph3 = new LogPrinter(writerGraphFile3, LogLevel.ERROR, LogLevel.ERROR);
-        PrintWriter writerGraphFile4 = new PrintWriter("./statsGraph4.tex", "UTF-8");
-        LogPrinter writeGraph4 = new LogPrinter(writerGraphFile4, LogLevel.ERROR, LogLevel.ERROR);
-        PrintWriter writerGraphFile5 = new PrintWriter("./statsGraph5.tex", "UTF-8");
-        LogPrinter writeGraph5 = new LogPrinter(writerGraphFile5, LogLevel.ERROR, LogLevel.ERROR);
-        PrintWriter writerGraphFile6 = new PrintWriter("./statsGraph6.tex", "UTF-8");
-        LogPrinter writeGraph6 = new LogPrinter(writerGraphFile6, LogLevel.ERROR, LogLevel.ERROR);
-        PrintWriter writerGraphFile7 = new PrintWriter("./statsGraph7.tex", "UTF-8");
-        LogPrinter writeGraph7 = new LogPrinter(writerGraphFile7, LogLevel.ERROR, LogLevel.ERROR);
-        PrintWriter writerGraphFile8 = new PrintWriter("./statsGraph8.tex", "UTF-8");
-        LogPrinter writeGraph8 = new LogPrinter(writerGraphFile8, LogLevel.ERROR, LogLevel.ERROR);
-        for(int i=0; i<r1Fr.size();i++) {
-        	if(i==0 || i%100==0) writeGraph.println("("+ r1Fr.get(i).index + ","+r1Fr.get(i).freq+")");
+        int i=0;
+        for(ExecutionReport.FreqStep elt:freqSteps.freqSet) {
+        	i++;
+        	PrintWriter writerGraphFile = new PrintWriter("./statsGraph"+i+".tex", "UTF-8");
+            LogPrinter writeGraph = new LogPrinter(writerGraphFile, LogLevel.ERROR, LogLevel.ERROR);
+            freqSteps.printConcernedRules();
+            String splits[] = elt.NamePrio.split(" ");
+            writeGraph.println("!"+splits[1]);
+            for(int key: elt.freqMap.keySet()) {
+                	if(key ==0 || key%100==0) writeGraph.println("("+ key + ","+ elt.freqMap.get(key)+")");
+            }
+            writerGraphFile.close();
+            writeGraph.close();
         }
-        
-        for(int i=0; i<r2Fr.size();i++) {
-        	if(i==0 || i%100==0) writeGraph2.println("("+ r2Fr.get(i).index + ","+r2Fr.get(i).freq+")");
-        }
-
-        for(int i=0; i<r3Fr.size();i++) {
-        	if(i==0 || i%100==0) writeGraph3.println("("+ r3Fr.get(i).index + ","+r3Fr.get(i).freq+")");
-        }
-
-        for(int i=0; i<r4Fr.size();i++) {
-        	if(i==0 || i%100==0) writeGraph4.println("("+ r4Fr.get(i).index + ","+r4Fr.get(i).freq+")");
-        }
- 
-        for(int i=0; i<r5Fr.size();i++) {
-        	if(i==0 || i%100==0) writeGraph5.println("("+ r5Fr.get(i).index + ","+r5Fr.get(i).freq+")");
-        }
-   
-        for(int i=0; i<r6Fr.size();i++) {
-        	if(i==0 || i%100==0) writeGraph6.println("("+ r6Fr.get(i).index + ","+r6Fr.get(i).freq+")");
-        }
-
-        for(int i=0; i<r7Fr.size();i++) {
-        	if(i==0 || i%100==0) writeGraph7.println("("+ r7Fr.get(i).index + ","+r7Fr.get(i).freq+")");
-        }
-
-        for(int i=0; i<r8Fr.size();i++) {
-        	if(i==0 || i%100==0) writeGraph8.println("("+ r8Fr.get(i).index + ","+r8Fr.get(i).freq+")");
-        }
-       
-        writeGraph.close();
-        writeGraph2.close();
-        writeGraph3.close();
-        writeGraph4.close();
-        writeGraph5.close();
-        writeGraph6.close();
-        writeGraph7.close();
-        writeGraph8.close();
     }
     	
     public void statsFreq() throws FileNotFoundException, UnsupportedEncodingException {
@@ -846,7 +791,6 @@ class ExecutionReport {
     	return false;
     }
 }
-
 
 class Pair<K, V> implements Serializable{
     K first;

@@ -44,13 +44,6 @@ public class AdaptationPolicy implements Serializable{
 	            	break;	
 			}
 		}
-//		if(mutant == Mutant.M14) {
-//			//System.out.println("list policy nb"+ listPolicy.size());
-//			listPolicy.add(elt);
-//			
-//		}
-//		else {
-			//System.out.println("list policy nb"+ listPolicy.size());
 			if (listPolicy.size() == 0 || mutant== Mutant.M14) {
 				listPolicy.add(elt);
 	        } else if ((listPolicy.get(0).priority+ COEFF_WAITING_RULE*listPolicy.get(0).timeWaiting) > (elt.priority+ COEFF_WAITING_RULE*elt.timeWaiting)) {
@@ -63,7 +56,6 @@ public class AdaptationPolicy implements Serializable{
 	                i++;
 	            }
 	            listPolicy.add(i, elt);
-	        //}
 		}
 	}
 	
@@ -103,50 +95,6 @@ public class AdaptationPolicy implements Serializable{
 		}
 		return totalPolicies/listPolicy.size();
 	}
-//	public void addElement(Element elt) {
-//		if(listPolicy.size()==0) {
-//			listPolicy.add(0, elt);
-//			System.out.println("elt added " + elt);
-//		}
-//		//if the element is already present with a higher or equal priority, no need to add the selected elt
-//		else {
-//			int index=0;
-//			boolean looping = true;
-//			//int indexElt= this.containsName(elt.name);
-//			
-//			//if(indexElt !=-1) {
-//				switch(elt.priority) {
-//				case HIGH :
-//					listPolicy.add(0, elt);
-//					System.out.println("elt added high " + index + "size list" + listPolicy.size()+ " " + elt);
-//				break;
-//				case MEDIUM :
-//					index=0;
-//					do{
-//					looping = listPolicy.get(index).getPriority()==Priority.HIGH;
-//					index++;
-//				}while(looping && index<listPolicy.size());
-//				listPolicy.add(--index, elt);
-//				System.out.println("elt added med " + elt + " " + index + "size list" + listPolicy.size());
-//				index=0;
-//				break;
-//				
-//				case LOW :	
-////					while(looping && index<listPolicy.size()) {
-////					index--;
-////					looping = listPolicy.get(index).getPriority()==Priority.LOW;
-////				}
-//				index= listPolicy.size();
-//				listPolicy.add(index, elt);
-//				System.out.println("elt added low " + elt+ " " + index + "size list" + listPolicy.size());
-//				break;
-//				
-//				default :
-//					
-//					break;
-//				}
-//		}
-//	}
 	
 	public int containsName(PolicyName n) {
 		for(int i=0; i< listPolicy.size(); i++) {
