@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
@@ -19,7 +20,8 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	final static double THRESHOLDRULESVALUE = 6;
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
     ArrayList<Vehicle> nextLeaderList = new ArrayList<Vehicle>();
-    int[] arrayPoints = new int[8];
+    //int[] arrayPoints = new int[8];
+    HashMap<String, Integer> hashPoints= new HashMap<String, Integer>();
     StepElt step = new StepElt();
     UUID id;
 	Vehicle leader=null;
@@ -47,8 +49,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		leader.setPlatoon(this);
 		road =r;
 		r.numberPlatoon++;
-		Arrays.fill(arrayPoints, 0);
-		arrayPoints[3]=1;
 		for (Vehicle v : others) {
 			vehiclesList.add(v);
 			eligibleLeader(v);
@@ -510,43 +510,14 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			}
 			int indFin = index;
 			for(int i=indDeb; i<indFin; i++) {
-					switch(policies.listPolicy.get(i).toStringShort()) {
-			    		case "RELAY 7.0":
-			    			if(i!=indexMaxPt) arrayPoints[0]++;
-			    			else arrayPoints[0]=0;
-			        		break;
-			    		case "QUITENERGY 7.0":
-			    			if(i!=indexMaxPt) arrayPoints[1]++;
-			    			else arrayPoints[1]=0;
-			        		break;
-			    		case "QUITDISTANCE 7.0":
-			    			if(i!=indexMaxPt) arrayPoints[2]++;
-			    			else arrayPoints[2]=0;
-			        		break;
-			    		case "QUITFORSTATION 7.0":
-			    			if(i!=indexMaxPt) arrayPoints[3]++;
-			    			else arrayPoints[3]=0;
-			        		break;
-			    		case "QUITFORSTATION 5.0":
-			    			if(i!=indexMaxPt) arrayPoints[4]++;
-			    			else arrayPoints[4]=0;
-			        		break;
-			    		case "UPGRADERELAY 5.0":
-			    			if(i!=indexMaxPt) arrayPoints[5]++;
-			    			else arrayPoints[5]=0;
-			        		break;
-			    		case "QUITFORSTATION 3.0":
-			    			if(i!=indexMaxPt) arrayPoints[6]++;
-			    			else arrayPoints[6]=0;
-			        		break;
-			    		case "QUITDISTANCE 3.0":
-			    			if(i!=indexMaxPt) arrayPoints[7]++;
-			    			else arrayPoints[7]=0;
-			        		break;
-			        		default:
-			        			System.out.println("shouldn't happen platoon class " );
-			            		break;	
-		    		}
+				Integer val;
+				if(i!=indexMaxPt) {
+					val = hashPoints.get(policies.listPolicy.get(i).toStringShort())+1;	
+				}
+				else {
+					val=0;
+				}
+				hashPoints.put(policies.listPolicy.get(i).toStringShort(), val);
 			}
 		}
 		
