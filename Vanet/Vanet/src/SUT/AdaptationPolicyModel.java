@@ -1,4 +1,5 @@
 package SUT;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -244,6 +245,7 @@ class ExecutionReport {
     }
     //actual reconf
     public void notifyStepAfter(int i, Element lastReconf, Element lastTriggeredReconf) {
+    	//if(lastReconf.toStringShort().contains("QUITFORSTATION")) System.out.println("quitstas in steps "+ lastReconf.toStringShort());
     	if (steps.get(i) == null) {
             // when no reconfiguration was expected 
             steps.put(i,new Pair(new ArrayList<Element>(), new ArrayList<Element>()));
@@ -273,7 +275,6 @@ class ExecutionReport {
     public void dump() {
     	Map<PolicyName, Integer> eligibleMap = new HashMap<PolicyName, Integer>();
     	Map<PolicyName, Integer> actualMap = new HashMap<PolicyName, Integer>();
-    	
     	//eligible map were successive eligible reconfigurations are suppressed
     	int eligLow=0;
     	int eligMed=0;
@@ -296,7 +297,6 @@ class ExecutionReport {
             //System.out.println(x);
             //writerErr.println(x);
             ArrayList<Element> elt = steps.get(step).getFirst();
-
             ArrayList<Element> elt2 = steps.get(step).getSecond();
             x ="Eligible reconfigurations: " + elt;
             //System.out.println(x);
@@ -479,6 +479,9 @@ class ExecutionReport {
 			//filling actual map    		
     		if(pair.second.size()>0) {
 				MiniElement elt = new MiniElement(pair.second.get(0).name, pair.second.get(0).priority);
+//				if(elt.toString().contains("QUITFORSTATION")) {
+//					System.out.println("quitstas populate " + elt.toString());
+//				}
 				value = actualCountedMiniMap.get(elt);
 				if(value==null) {
 					actualCountedMiniMap.put(elt, 1);
@@ -490,7 +493,13 @@ class ExecutionReport {
     		//filling eligible map
 				for(Element eligElt : pair.first) {
 					MiniElement miniElt = new MiniElement(eligElt.getName(), eligElt.priority);
+//					if(eligElt.toString().contains("QUITFORSTATION")) {
+//					System.out.println("quitstas populate " + eligElt.toString());
+//					}
 					value = eligibleNotSortedCountedMiniMap.get(miniElt);
+//					if(miniElt.toString().contains("QUITFORSTATION")) {
+//					System.out.println("quitstas populate " + miniElt.toString());
+//				}
 					if(value==null) {
 						eligibleNotSortedCountedMiniMap.put(miniElt, 1);
 					}
@@ -546,12 +555,27 @@ class ExecutionReport {
     	actualCountedMiniMap.clear();
     	
 	}
-    
-    public void printGraph() throws FileNotFoundException, UnsupportedEncodingException {
+    public void cleanGraph() {
+    	steps.clear();
+    	freqSteps.freqSet.clear();
+    }
+    public void printGraph(int ind) throws FileNotFoundException, UnsupportedEncodingException {
         int i=0;
         for(ExecutionReport.FreqStep elt:freqSteps.freqSet) {
+        	File theDir = new File("test" +ind);
+        	// if the directory does not exist, create it
+        	if (!theDir.exists()) {
+        		System.out.println("creating file");
+        	    try{
+        	        theDir.mkdir();
+        	    } 
+        	    catch(SecurityException se){
+        	        System.out.println("problem creating directory");
+        	    }        
+        	}
         	i++;
-        	PrintWriter writerGraphFile = new PrintWriter("./statsGraph"+i+".tex", "UTF-8");
+        	System.out.println("elt in file "+elt.NamePrio);
+        	PrintWriter writerGraphFile = new PrintWriter("./test" +ind+"/statsGraph"+i+".tex", "UTF-8");
             LogPrinter writeGraph = new LogPrinter(writerGraphFile, LogLevel.ERROR, LogLevel.ERROR);
             freqSteps.printConcernedRules();
             String splits[] = elt.NamePrio.split(" ");
@@ -559,9 +583,13 @@ class ExecutionReport {
             for(int key: elt.freqMap.keySet()) {
                 	if(key ==0 || key%100==0) writeGraph.println("("+ key + ","+ elt.freqMap.get(key)+")");
             }
+            elt.freqMap.clear();
             writerGraphFile.close();
             writeGraph.close();
         }
+        freqSteps.freqSet.clear();
+        
+        
     }
     	
     public void statsFreq() throws FileNotFoundException, UnsupportedEncodingException {

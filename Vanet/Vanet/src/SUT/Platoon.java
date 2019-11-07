@@ -15,7 +15,7 @@ import SUT.ExecutionReport.FreqStep;
 
 public class Platoon extends Entity implements Serializable{ //implements Runnable {
 	int consommationLeader = 2;
-	final static int NUMBER_VEHICLE_MAX = 5; //unused
+	final static int NUMBER_VEHICLE_MAX = 5; 
 	final static double MINLEADERVALUE = 33;
 	final static double THRESHOLDRULESVALUE = 6;
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
@@ -57,11 +57,15 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		//System.out.println("Platoon created " + id);
 		road.addStringWriter("Platoon created " + id);
 	}
-
-	public void addVehicle(Vehicle v){
-		vehiclesList.add(v);
-		eligibleLeader(v);
+	public void cleanPl() {
+		vehiclesList.clear();
+		nextLeaderList.clear();
+		hashPoints.clear();
 	}
+//	public void addVehicle(Vehicle v){
+//		vehiclesList.add(v);
+//		eligibleLeader(v);
+//	}
 //	public void removeVehicle(Vehicle v) {
 //		v.myPlatoon=null;
 //		if(v==leader) {
@@ -128,19 +132,19 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			lastReconf=null;
 		}
 		policies.mergeLists(road.mutant);
-			if(policies.listPolicy.size()>0) {
-				if(policies.listPolicy.size()>1 && !review) {
-					road.addReconfigurationChoosen("Tick " +road.stepNb);
-					road.addReconfChoosenWrite("Tick " +road.stepNb );
+		if(policies.listPolicy.size()>0) {
+			if(policies.listPolicy.size()>1 && !review) {
+				road.addReconfigurationChoosen("Tick " +road.stepNb);
+				road.addReconfChoosenWrite("Tick " +road.stepNb );
+			}
+			switch(road.mutant) {
+			case M5: // does not do a reconf with 10%
+				if(new Random().nextDouble() <=0.) {
+					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
+					fillStep();
+					policies.clearPolicy(road.mutant);	
 				}
-				switch(road.mutant) {
-				case M5: // does not do a reconf with 10%
-					if(new Random().nextDouble() <=0.) {
-						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
-						fillStep();
-						policies.clearPolicy();	
-					}
-					//if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
+				//if((int) Math.floor(Math.random() * 101)> 100) {// M2 randomly does not do a reconf
 //					if(policies.listPolicy.size()>1) {
 //						for(int i=0; i<policies.listPolicy.size();i++) {
 //							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
@@ -148,134 +152,144 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 //						road.addReconfigurationChoosen("\n");
 //					}
 
-				
-				break;
-				case M11: // takes reconfiguration in inverted priority
+			
+			break;
+			case M11: // takes reconfiguration in inverted priority
 //					if(policies.listPolicy.size()>1) {
 //						for(int i=0; i<policies.listPolicy.size();i++) {
 //							road.addReconfigurationChoosen("|"+i +";" +policies.listPolicy.get(i).getName()+";"+policies.listPolicy.get(i).getPriority()+ ";OK");
 //						}
 //						road.addReconfigurationChoosen("\n");
 //					}
-					lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
-					fillStep();
-					policies.clearPolicy();
-				break;
-				case M10:// chooses randomly a reconf
-					lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
-					//System.out.println(lastReconf.name);
-					fillStep();
-					policies.clearPolicy();
-				break;
-				case M12:
-					if(policies.listPolicy.size()>1 ) {
-						if(review) {
-							try {
-								line = road.getLineReconfChoosenRead();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							String[] reconf;
-							try {
-							reconf= line.split("/");
-							}catch (NullPointerException e) {
-					            System.out.print("Caught the NullPointerException line " + line);
-					            break;
-					        }
-	//						System.out.println("line "+ line);
-	//						System.out.println("reconfs " +reconf[0] + " "+ reconf[1] + "  "+reconf[2] + "size" + reconf.length);
-							int i=0;
-							boolean looping=true;
-							do {
-								String splits[]=reconf[i+1].split(";");
-	//							for(int k=0; k<splits.length;k++) {
-	//								System.out.println("split "+ splits[k]);
-	//							}	
-								if(splits[splits.length-1].equals("OK")) {
-									looping=false;
-									//System.out.println("ok ko " +splits[splits.length-1]);
-									lastReconf = policies.listPolicy.get(i);
-									reconf[i+1] =reconf[i+1].replaceAll("OK", "KO");
-									line="";
-									policies.clearPolicy();
-									for(String vector : reconf){
-							             line += vector+"/";
-							       }
-									//System.out.println("adding line "+ line);
-									road.addReconfChoosenWrite(line+"\n");
-									road.addReconfigurationChoosen(line+"\n");
-								}
-								else {
-									
-								}
-							i++;
-							}while(looping && i<policies.listPolicy.size());
-						}//list>1
-						else {
-							lastReconf = policies.listPolicy.get(0);
-							for(Element elt : policies.listPolicy) {
-								road.addReconfChoosenWrite("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
-								road.addReconfigurationChoosen("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
-							}
-							road.addReconfChoosenWrite("\n");
-							road.addReconfigurationChoosen("\n");
-							policies.clearPolicy();
+				lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
+				fillStep();
+				policies.clearPolicy(road.mutant);
+			break;
+			case M10:// chooses randomly a reconf
+				lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
+				//System.out.println(lastReconf.name);
+				fillStep();
+				policies.clearPolicy(road.mutant);
+			break;
+			case M12:
+				if(policies.listPolicy.size()>1 ) {
+					if(review) {
+						try {
+							line = road.getLineReconfChoosenRead();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-					break;
-					
-					}
+						String[] reconf;
+						try {
+						reconf= line.split("/");
+						}catch (NullPointerException e) {
+				            System.out.print("Caught the NullPointerException line " + line);
+				            break;
+				        }
+//						System.out.println("line "+ line);
+//						System.out.println("reconfs " +reconf[0] + " "+ reconf[1] + "  "+reconf[2] + "size" + reconf.length);
+						int i=0;
+						boolean looping=true;
+						do {
+							String splits[]=reconf[i+1].split(";");
+//							for(int k=0; k<splits.length;k++) {
+//								System.out.println("split "+ splits[k]);
+//							}	
+							if(splits[splits.length-1].equals("OK")) {
+								looping=false;
+								//System.out.println("ok ko " +splits[splits.length-1]);
+								lastReconf = policies.listPolicy.get(i);
+								reconf[i+1] =reconf[i+1].replaceAll("OK", "KO");
+								line="";
+								policies.clearPolicy(road.mutant);
+								for(String vector : reconf){
+						             line += vector+"/";
+						       }
+								//System.out.println("adding line "+ line);
+								road.addReconfChoosenWrite(line+"\n");
+								road.addReconfigurationChoosen(line+"\n");
+							}
+							else {
+								
+							}
+						i++;
+						}while(looping && i<policies.listPolicy.size());
+					}//list>1
 					else {
 						lastReconf = policies.listPolicy.get(0);
-						fillStep();
-						policies.clearPolicy();
+						for(Element elt : policies.listPolicy) {
+							road.addReconfChoosenWrite("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
+							road.addReconfigurationChoosen("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
+						}
+						road.addReconfChoosenWrite("\n");
+						road.addReconfigurationChoosen("\n");
+						policies.clearPolicy(road.mutant);
 					}
-					break;
-				case M14: // takes reconf in FIFO order
-					lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
-					fillStep();
-					policies.clearPolicy();
 				break;
-				case M15: // sometimes chooses in inverted order
-					if(new Random().nextDouble() <=0.8) {
-						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
-					}
-					else {
-						lastReconf = policies.listPolicy.get(0);
-					}
+				
+				}
+				else {
+					lastReconf = policies.listPolicy.get(0);
 					fillStep();
-					policies.clearPolicy();	
+					policies.clearPolicy(road.mutant);
+				}
 				break;
-				case M16: // sometimes chooses randomly
-					if(new Random().nextDouble() <=0.8) {
-						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
+			case M14: // takes reconf in FIFO order
+				lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
+				fillStep();
+				policies.clearPolicy(road.mutant);
+			break;
+			case M15: // sometimes chooses in inverted order
+				if(new Random().nextDouble() <=0.8) {
+					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
+				}
+				else {
+					lastReconf = policies.listPolicy.get(0);
+				}
+				fillStep();
+				policies.clearPolicy(road.mutant);	
+			break;
+			case M16: // sometimes chooses randomly
+				if(new Random().nextDouble() <=0.8) {
+					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
+				}
+				else {
+					lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
+				}
+				fillStep();
+				policies.clearPolicy(road.mutant);
+			break;
+			case M18:
+				int index = getReconf(policies.listPolicy.size()-1);
+				lastReconf = policies.listPolicy.get(index);
+				fillStep();
+				//System.out.println(lastReconf.name);
+				policies.clearPolicy(road.mutant);
+				
+			break;
+			default: //if selected rule corresponds to threshold criterion we select it and clear the list policy
+				//if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
+
+					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
+					if(lastReconf.toStringShort().equals("QUITFORSTATION 6.0")) System.out.println("quit 6" +lastReconf.toString());
+					else if(lastReconf.toStringShort().equals("QUITFORSTATION 7.0")) {
+						System.out.println("quit 7" +lastReconf.toString());
+						
 					}
-					else {
-						lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
-					}
-					fillStep();
-					policies.clearPolicy();
-				break;
-				case M18:
-					int index = getReconf(policies.listPolicy.size()-1);
-					lastReconf = policies.listPolicy.get(index);
+//					System.out.println("begin list");
+//					for(Element p :policies.listPolicy) {
+//						System.out.println(p.toString());
+//					}System.out.println("end list");
+					//System.out.println("reconf taken " + lastReconf.name + " " + lastReconf.vehicle.id+ " of platoon "+ this.id);
 					fillStep();
 					//System.out.println(lastReconf.name);
-					policies.clearPolicy();
-					
-				break;
-				default: //if selected rule corresponds to threshold criterion we select it and clear the list policy
-					//if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
-
-						lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
-						fillStep();
-						//System.out.println(lastReconf.name);
-						policies.clearPolicy();
-						//System.out.println("list pl nb" + policies.listPolicy.size());
-				break;
-				}	
-				
-			}//list >0
+					policies.clearPolicy(road.mutant);
+					//System.out.println("list pl nb" + policies.listPolicy.size());
+			break;
+			}	
+			
+		}//list >0
 				//verification that vehicle Leader wants to relay and quit platoon:
 	//			if(lastReconf.vehicle.isLeader() && lastReconf.name == PolicyName.RELAY) {
 	//				Element elt = new Element(PolicyName.QUITFAILURE,Priority.HIGH);
@@ -533,9 +547,18 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		if (vehiclesList.size() < NUMBER_VEHICLE_MAX) {
 			vehiclesList.add(v);
 			v.setPlatoon(this);
-			//System.out.println("Vehicle " + v + " joined platoon" + this);
+			//System.out.println("Vehicle " + v + " joined platoon" + this + "pl size" + this.vehiclesList.size());
 			road.addStringWriter("Vehicle " + v + " joined platoon" + this+ "\n");
 		}
+	}
+	public String mergePlatoons(Platoon pl) {
+		road.addStringWriter("Platoon " + pl + " merged platoon" + this+ "\n");
+		System.out.println("Platoon " + pl + " merged platoon" + this+ "\n");
+		for(Vehicle v : pl.vehiclesList) {
+			this.accept(v);
+		}
+		pl.deletePlatoon();
+		return "true";
 	}
 
 	public String toString() {

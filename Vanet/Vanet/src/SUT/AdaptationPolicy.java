@@ -18,6 +18,10 @@ public class AdaptationPolicy implements Serializable{
 			if(val!=null) elt.fairnessPoint=val;
 			else elt.fairnessPoint=0; // if quitforstation high should be 1
 		}
+//		System.out.println("element to add " +elt.toString()+ "into ");
+//		for(Element e : listPolicy) {
+//			System.out.println(e.toString());
+//		}
 		if (listPolicy.size() == 0 || mutant== Mutant.M14) {
 			listPolicy.add(elt);
         } else if ((listPolicy.get(0).priority+ COEFF_WAITING_RULE*listPolicy.get(0).timeWaiting) > (elt.priority+ COEFF_WAITING_RULE*elt.timeWaiting)) {
@@ -91,11 +95,14 @@ public class AdaptationPolicy implements Serializable{
 	/**
 	 * clears policy and copy it in tmp list
 	 */
-	public void clearPolicy() {
+	public void clearPolicy(Mutant mutant) {
 		for(int i=0; i<this.listPolicy.size();i++) { //Element elt : this.listPolicy) {
 			this.tmpListPolicy.add(this.listPolicy.remove(this.listPolicy.size()-1));
 		}
 		this.listPolicy.clear();
+//		for(Element elt : tmpListPolicy) {
+//			addElement(elt, mutant);
+//		}
 	}
 
 	public String toString() {

@@ -33,11 +33,13 @@ public class VanetFSM implements FsmModel {
     String vehicleReader =null;
     String platoonReader =null;
     String roadReader =null;
+    
     String writerLog=null;
     String reconfChoosen="";
     Mutant mutant;
     String reconfChoosenReader;
     ArrayList<UUID> iD = new ArrayList<UUID>();
+    ArrayList<UUID> iDPl = new ArrayList<UUID>();
     ArrayList<Double> battery = new ArrayList<Double>();
     ArrayList<Double> decBattery = new ArrayList<Double>();
     ArrayList<Double> distance = new ArrayList<Double>();
@@ -50,6 +52,12 @@ public class VanetFSM implements FsmModel {
         mutant=m;
         reconfChoosenReader=rcr;
         sut = new Road(w,wl,rc,rcr,m,logL);
+        try {
+			getTestValues();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     public String getStringWriter() {
     	return sut.getStringWriter();
@@ -68,58 +76,79 @@ public class VanetFSM implements FsmModel {
     public void reset(boolean testing) {
         sut.reset();
     }
-    public void getValues(ArrayList<UUID> _id, ArrayList<Double> bat,  ArrayList<Double> decBat, ArrayList<Double> dist, int nbSteps) throws NumberFormatException, IOException {//does not work as expected
-    	int cpt=0;
-    	while(cpt<nbSteps) {
-    		iD.add(cpt,_id.get(cpt));
-    		cpt++;
-    	}
-    	cpt=0;
-    	while(cpt<nbSteps) {
-    		battery.add(cpt,bat.get(cpt));
-    		cpt++;
-    	}
-//    	for(int i=0; i< 100; i++) {
-//    		System.out.println("added battery "+ battery + "\n existing battery " +bat.get(i));
+//    public void getValues(ArrayList<UUID> _id, ArrayList<Double> bat,  ArrayList<Double> decBat, ArrayList<Double> dist,ArrayList<UUID> idpl, int nbSteps) throws NumberFormatException, IOException {//does not work as expected
+//    	int cpt=0;
+//    	while(cpt<nbSteps) {
+//    		iD.add(cpt,_id.get(cpt));
+//    		cpt++;
 //    	}
-    	cpt=0;
-    	while(cpt<nbSteps) {
-    		decBattery.add(cpt,decBat.get(cpt));
-    		cpt++;
-    	}
-    	cpt=0;
-    	while(cpt<nbSteps) {
-    		distance.add(cpt,dist.get(cpt));
-    		cpt++;
-    	}
-    }
+//    	cpt=0;
+//    	while(cpt<nbSteps) {
+//    		battery.add(cpt,bat.get(cpt));
+//    		cpt++;
+//    	}
+////    	for(int i=0; i< 100; i++) {
+////    		System.out.println("added battery "+ battery + "\n existing battery " +bat.get(i));
+////    	}
+//    	cpt=0;
+//    	while(cpt<nbSteps) {
+//    		decBattery.add(cpt,decBat.get(cpt));
+//    		cpt++;
+//    	}
+//    	cpt=0;
+//    	while(cpt<nbSteps) {
+//    		distance.add(cpt,dist.get(cpt));
+//    		cpt++;
+//    	}
+//    	cpt=0;
+//    	while(cpt<nbSteps) {
+//    		iDPl.add(cpt,idpl.get(cpt));
+//    		cpt++;
+//    	}
+//    	System.out.println("sizes fsm "+ iD.size() + " "+ distance.size());
+//    }
     public void afficheTestValues() {
     	System.out.println("print test values ");
     	System.out.println(battery);
     	System.out.println(decBattery);
     	System.out.println(distance);
     }
-    public void printValues() throws FileNotFoundException, UnsupportedEncodingException {
-    	PrintWriter writerFile = new PrintWriter("./outputVals.txt", "UTF-8");
-        LogPrinter writer = new LogPrinter(writerFile, LogLevel.INFO, LogLevel.ERROR);
-    	writer.println("Battery");
-    	for(double bat : battery) {
-    		writer.println(bat);
+//    public void printValues() throws FileNotFoundException, UnsupportedEncodingException {
+//    	PrintWriter writerFile = new PrintWriter("./outputVals.txt", "UTF-8");
+//        LogPrinter writer = new LogPrinter(writerFile, LogLevel.INFO, LogLevel.ERROR);
+//    	writer.println("Battery");
+//    	for(double bat : battery) {
+//    		writer.println(bat);
+//    	}
+//    	writer.println("Distance");
+//    	for(double i : distance) {
+//    		writer.println(i);
+//    	}
+//    	writer.println("indexJoined");
+//    	for(double i : indexjoined) {
+//    		writer.println(i);
+//    	}
+//    	writer.println("indexKicked");
+//    	for(double i : indexKicked) {
+//    		writer.println(i);
+//    	}
+//    	writer.close();
+//    }
+    
+    public void initSystem(){
+    	int nbpl=8;
+    	int nbvl=4;
+    	for(int i=0; i<50;i++) {
+    		sut.addVehicle(iD.remove(0),this.battery.remove(0), this.distance.remove(0), this.decBattery.remove(0));
     	}
-    	writer.println("Distance");
-    	for(double i : distance) {
-    		writer.println(i);
+    	for(int i=0;i<(nbpl*nbvl);i=i+nbvl) { //forming 3 plts
+    		for(int j=i+1; j<(i+nbvl); j++) {	//platoon of 3 vls
+    			if(i==j)j++;
+    	       	System.out.println("Join(" + sut.allVehicles.get(i).id + ", " + sut.allVehicles.get(j).id + ") -> " + sut.join(j, i));
+    		}
     	}
-    	writer.println("indexJoined");
-    	for(double i : indexjoined) {
-    		writer.println(i);
-    	}
-    	writer.println("indexKicked");
-    	for(double i : indexKicked) {
-    		writer.println(i);
-    	}
-    	writer.close();
     }
+    
     public boolean tickGuard() {
         return true;
     }
@@ -180,6 +209,39 @@ public class VanetFSM implements FsmModel {
             }
         }
         return false;
+    }
+    public void getTestValues() throws IOException {
+    	FileReader vehicleReader = new FileReader("./outputVals.txt");
+        BufferedReader br = new BufferedReader(vehicleReader);
+        String sCurrentLine;
+        sCurrentLine = br.readLine();
+        sCurrentLine = br.readLine();
+        while(!sCurrentLine.contains("Battery")) {
+    		iD.add(UUID.fromString(sCurrentLine));
+    		sCurrentLine = br.readLine();
+    	}
+        sCurrentLine = br.readLine();
+        while(!sCurrentLine.contains("DecAuto")) {
+    		battery.add(Double.parseDouble(sCurrentLine));
+    		sCurrentLine = br.readLine();
+    	}
+        sCurrentLine = br.readLine();
+        while(!sCurrentLine.contains("Distance")) {
+    		decBattery.add(Double.parseDouble(sCurrentLine));
+    		sCurrentLine = br.readLine();
+    	}
+        sCurrentLine = br.readLine();
+        while (!sCurrentLine.contains("IdPl")){
+        	distance.add(Double.parseDouble(sCurrentLine));
+        	sCurrentLine = br.readLine();
+        }
+        sCurrentLine = br.readLine();
+        while ((sCurrentLine = br.readLine()) != null){
+        	iDPl.add(UUID.fromString(sCurrentLine));
+        	sCurrentLine = br.readLine();
+        }
+        System.out.println("sizes "+ iD.size() + " "+ battery.size()+" "+ decBattery.size()+ " " + distance.size());
+        br.close();
     }
     public double requestJoinProba() {
         return 0.075;

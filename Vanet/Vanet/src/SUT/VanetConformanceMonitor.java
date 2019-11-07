@@ -31,13 +31,15 @@ public class VanetConformanceMonitor {
     public void populateGraph(int j) {
     	er.populateGraph(j);
     }
-    
+    public void cleanGraph() {
+    	er.cleanGraph();
+    }
     public void printReconfNB(int j) {
     	er.printReconfNB(j);
     }
     
-    public void printGraph() throws FileNotFoundException, UnsupportedEncodingException {
-    	er.printGraph();
+    public void printGraph(int nb) throws FileNotFoundException, UnsupportedEncodingException {
+    	er.printGraph(nb);
     }
     public void printReport() {
         er.dump();
