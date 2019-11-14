@@ -93,6 +93,19 @@ public class Road implements Serializable, Iterable<Vehicle> {
         reconfChoosenRead="";
         reconfChoosenWrite="";
     	
+    }/** Say if a vehicle on road answers the requirement to merge
+    @return index of vehicle adequate for merging
+    */
+    public int containsVehicleToJoin() {
+    	int index =-1;
+    	double maxBat=0;
+    	for(int i=0; i<allVehicles.size();i++) {
+    		if(allVehicles.get(i).autonomie>80&& allVehicles.get(i).autonomie>maxBat && allVehicles.get(i).autonomie<99) { // if autonomy is 100 means that vl is inside station
+    			index=i;
+    			maxBat= allVehicles.get(i).autonomie;
+    		}
+    	}
+    	return index;
     }
     public void initCoeffRules(int nbRules) {
     	k= new double [nbRules];
@@ -256,8 +269,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
         } 	
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
-            	if(stepNb%500==0) {
-            		System.out.println("size of pl "+ v.myPlatoon.id + " "+v.myPlatoon.vehiclesList.size());
+            	if(stepNb%50==0) {
+            		System.out.println("size of pl "+v.myPlatoon.vehiclesList.size()+ " "+ v.myPlatoon.id );
             		for(Vehicle eltVl:v.myPlatoon.vehiclesList) {
             			System.out.print(" vl " + eltVl.id);
             		}

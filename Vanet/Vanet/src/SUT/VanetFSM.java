@@ -33,7 +33,6 @@ public class VanetFSM implements FsmModel {
     String vehicleReader =null;
     String platoonReader =null;
     String roadReader =null;
-    
     String writerLog=null;
     String reconfChoosen="";
     Mutant mutant;
@@ -136,13 +135,14 @@ public class VanetFSM implements FsmModel {
 //    }
     
     public void initSystem(){
-    	int nbpl=8;
-    	int nbvl=4;
-    	for(int i=0; i<50;i++) {
+    	int nbVehicleOnRoad=100; //1600 vl on a 50k step test
+    	int nbPlatoonOnRoad=8;
+    	int nbVehicleInPlatoon=4;
+    	for(int i=0; i<nbVehicleOnRoad;i++) {
     		sut.addVehicle(iD.remove(0),this.battery.remove(0), this.distance.remove(0), this.decBattery.remove(0));
     	}
-    	for(int i=0;i<(nbpl*nbvl);i=i+nbvl) { //forming 3 plts
-    		for(int j=i+1; j<(i+nbvl); j++) {	//platoon of 3 vls
+		for(int i=0;i<(nbPlatoonOnRoad*nbVehicleInPlatoon);i=i+nbVehicleInPlatoon) { //forming 3 plts
+    		for(int j=i+1; j<(i+nbVehicleInPlatoon); j++) {	//platoon of 3 vls
     			if(i==j)j++;
     	       	System.out.println("Join(" + sut.allVehicles.get(i).id + ", " + sut.allVehicles.get(j).id + ") -> " + sut.join(j, i));
     		}
@@ -152,15 +152,46 @@ public class VanetFSM implements FsmModel {
     public boolean tickGuard() {
         return true;
     }
-    public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.87; } //0.87
+    public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.995; } //0.87
     @Action
     public Object[] tick(ArrayList<Object> empty) {
-    	sut.tick();
+    	//replace tick by request join if a vehicule is available to join
+    	int index = sut.containsVehicleToJoin();
+    	if(index!=-1 && sut.stepNb%10==0) {
+
+    		ArrayList<Object> paramList = new ArrayList<Object>();
+    		paramList.add(sut.allVehicles.get(index));
+    		if ((sut.getVehicle(index).getPlatoon() == null) && (sut.getVehicle(index).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) {
+    			int k;
+    			do {
+		            k = (int) (Math.random() * sut.nbVehiclesOnRoad());
+		        }while (k == index);
+		        
+		    	//k= indexjoined.remove(0);
+		        if(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) && sut.getVehicle(k).autonomie<99 && sut.getVehicle(index).autonomie<99){
+		        	//if autonomie equals 100 its means vl is inside pl
+		        	System.out.println("Join(" + sut.getVehicle(index).id + ", " + sut.getVehicle(k).id + ") -> " + sut.join(index, k) +" -> true");
+		        	//indexjoined.add(k);
+		    		sut.tick=false;
+		        	return new Object[]{ sut, index, k };
+		        }
+		        sut.tick();
+		        return new Object[]{ sut };
+        		
+    		}
+    		sut.tick();
+    		//requestJoin(paramList); //TODO maybe specify the two vehicles to join ie best bat of solo vl and a random pl
+    	}
+    	else {
+    		sut.tick();
+    	}
+    	//sut.tick();
         return new Object[]{ sut };
     }
 
     public boolean addVehicleGuard() { return ! sut.isFull(); }
-    public double addVehicleProba() { return sut.nbVehiclesOnRoad() == 0 ? 1 : 0.05; } //0.05
+   // public double addVehicleProba() { return sut.nbVehiclesOnRoad() == 0 ? 1 : 0.05; } //0.05
+    public double addVehicleProba() { return 0;}
     @Action
     public Object[] addVehicle(ArrayList<Object> params) {
     	addedVehicles++;
@@ -244,7 +275,7 @@ public class VanetFSM implements FsmModel {
         br.close();
     }
     public double requestJoinProba() {
-        return 0.075;
+        return 0.0; //0.075 0.12
     }
     @Action
     public Object[] requestJoin(ArrayList<Object>vl) {// takes vehicle with most battery and last created vehicle
@@ -278,7 +309,7 @@ public class VanetFSM implements FsmModel {
 		      	}
 	        }
 	        System.out.println("did not found another vehicle Join( ) -> false");
-	        	return new Object[]{sut ,-1 };// should not happen : except if vehicle did not found another vehicle
+        	return new Object[]{sut ,-1 };// should not happen : except if vehicle did not found another vehicle
     	}  	
     	   	else if(vl.size() ==1) {
     	   		System.out.println(" size 1 Join( ) -> false" + vl.toString());

@@ -272,11 +272,11 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				//if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
 
 					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
-					if(lastReconf.toStringShort().equals("QUITFORSTATION 6.0")) System.out.println("quit 6" +lastReconf.toString());
-					else if(lastReconf.toStringShort().equals("QUITFORSTATION 7.0")) {
-						System.out.println("quit 7" +lastReconf.toString());
-						
-					}
+//					if(lastReconf.toStringShort().equals("QUITFORSTATION 6.0")) System.out.println("quit 6" +lastReconf.toString());
+//					else if(lastReconf.toStringShort().equals("QUITFORSTATION 7.0")) {
+//						System.out.println("quit 7" +lastReconf.toString());
+//						
+//					}
 //					System.out.println("begin list");
 //					for(Element p :policies.listPolicy) {
 //						System.out.println(p.toString());

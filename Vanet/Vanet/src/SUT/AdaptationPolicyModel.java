@@ -579,7 +579,7 @@ class ExecutionReport {
             LogPrinter writeGraph = new LogPrinter(writerGraphFile, LogLevel.ERROR, LogLevel.ERROR);
             freqSteps.printConcernedRules();
             String splits[] = elt.NamePrio.split(" ");
-            writeGraph.println("!"+splits[1]);
+            writeGraph.println("!"+splits[1] + ";" + elt.NamePrio);
             for(int key: elt.freqMap.keySet()) {
                 	if(key ==0 || key%100==0) writeGraph.println("("+ key + ","+ elt.freqMap.get(key)+")");
             }

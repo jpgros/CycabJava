@@ -61,7 +61,7 @@ public class Vehicle extends Entity implements Serializable {
 	public void refill() {
 		if(this.myPlatoon==null) {
 			String x="Refill vehicle " + id;
-			//System.out.println();
+			//System.out.println(x);
 			road.addStringWriter(x);
 			this.autonomie =100;
 		}
@@ -310,7 +310,6 @@ public class Vehicle extends Entity implements Serializable {
 					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, HIGHPRIO+road.k[4], this);
 					myPlatoon.policies.addElement(elt,road.mutant);
-					System.out.println("quitStation 7 here");
 					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
 					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
@@ -318,7 +317,6 @@ public class Vehicle extends Entity implements Serializable {
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]"+"\n";
 					//System.out.print(x);
 					road.addStringWriter(x);
-					System.out.println("quitStation 6 here");
 					Element elt = new Element(PolicyName.QUITFORSTATION, MEDIUMPRIO+road.k[5]+1.0, this);
 					myPlatoon.policies.addElement(elt,road.mutant);
 					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");

@@ -255,21 +255,16 @@ public class StochasticTester implements Serializable{
 		        for (int i=0; i < nb; i++) {
 		        	ruleCov=0.0;
 		        	propCov=false;
+		            // reset FSM exploration
+		            fsm.reset(true);
 		            ((VanetFSM) fsm).getSUT().cleanRoad();
 		            ((VanetFSM) fsm).initSystem();
-		            System.out.println("created vls");
-		            for(Vehicle v:((VanetFSM) fsm).getSUT().allVehicles) {
-		            	
-		            	System.out.println(v.toString());
-		            }
 		        	x="== Generating test #" + i + " == rule cov ";
 		        	((VanetFSM) fsm).getSUT().addStringWriter(x);
 		            System.out.println(x);
 		            x="";
 		            // initialize step counter
 		            j=0;
-		            // reset FSM exploration
-		            fsm.reset(true);
 		            // create new test case 
 		            MyTest currentTest = new MyTest();
 		            boolean b = true;
@@ -280,8 +275,8 @@ public class StochasticTester implements Serializable{
 		            	//((VanetFSM) fsm).getSUT().k[cptK] = i== 5 ? coeff :0.0;
 		        	//}
 		        	do {	
-		        		//System.out.println("tick");
 		        		x="step " +j;
+		        		//System.out.println(x);
 		            	((VanetFSM) fsm).getSUT().addStringWriter(x);
 			            newStep = computeNextStep();
 			            estimTimeOld= estimTime;
@@ -355,7 +350,8 @@ public class StochasticTester implements Serializable{
 						}
 		            	vcm.populateGraph(j);
 		                //checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
-		            }while (j < length && b);
+		            }while(((VanetFSM) fsm).getSUT().allVehicles.size()>10); //(j < length && b);
+		        	System.out.println("size of test " + j);
 //	                estimTime= System.currentTimeMillis()-startTime;
 //	        		System.out.println("loop time 4 " + estimTime);
 		        	vcm.printReconfNB(j);
@@ -383,6 +379,7 @@ public class StochasticTester implements Serializable{
 		            //stringTime+= "Estim time test " +i + " "+ estimTime+ "\n"; 
 		            currentTest.steps.clear();
 		            currentTest.score=0;
+		            System.out.println("added vehicles " + ((VanetFSM) fsm).addedVehicles);
 		        }
 		        conso += "\n";
 		        time =time.substring(0,time.length()-1);
