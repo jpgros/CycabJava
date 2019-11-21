@@ -157,11 +157,11 @@ public class VanetFSM implements FsmModel {
     public Object[] tick(ArrayList<Object> empty) {
     	//replace tick by request join if a vehicule is available to join
     	int index = sut.containsVehicleToJoin();
-    	if(index!=-1 && sut.stepNb%10==0) {
+    	if(index!=-1 && sut.stepNb%20==0) {
 
     		ArrayList<Object> paramList = new ArrayList<Object>();
     		paramList.add(sut.allVehicles.get(index));
-    		if ((sut.getVehicle(index).getPlatoon() == null) && (sut.getVehicle(index).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) {
+    		if ((sut.getVehicle(index).getPlatoon() == null) && (sut.getVehicle(index).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) { //
     			int k;
     			do {
 		            k = (int) (Math.random() * sut.nbVehiclesOnRoad());
@@ -173,7 +173,7 @@ public class VanetFSM implements FsmModel {
 		        	System.out.println("Join(" + sut.getVehicle(index).id + ", " + sut.getVehicle(k).id + ") -> " + sut.join(index, k) +" -> true");
 		        	//indexjoined.add(k);
 		    		sut.tick=false;
-		        	return new Object[]{ sut, index, k };
+		        	return new Object[]{ sut};//, index, k };
 		        }
 		        sut.tick();
 		        return new Object[]{ sut };
@@ -234,12 +234,13 @@ public class VanetFSM implements FsmModel {
         if (sut.nbVehiclesOnRoad() < 2) {
             return false;
         }
-        for (Vehicle v : sut) {
+        return true; //remove last condition to let merging of platoons
+        /*for (Vehicle v : sut) {
             if (v.getPlatoon() == null) {
                 return true;
             }
         }
-        return false;
+        return false;*/
     }
     public void getTestValues() throws IOException {
     	FileReader vehicleReader = new FileReader("./outputVals.txt");

@@ -15,7 +15,7 @@ import SUT.ExecutionReport.FreqStep;
 
 public class Platoon extends Entity implements Serializable{ //implements Runnable {
 	int consommationLeader = 2;
-	final static int NUMBER_VEHICLE_MAX = 5; 
+	final static int NUMBER_VEHICLE_MAX = 7; 
 	final static double MINLEADERVALUE = 33;
 	final static double THRESHOLDRULESVALUE = 6;
 	ArrayList<Vehicle> vehiclesList = new ArrayList<Vehicle>();
@@ -409,20 +409,18 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		if(!nextLeaderList.isEmpty()) {
 			//System.out.print("Leader vehicle "+ leader.getId());
 			if(nextLeaderList.get(0).autonomie >= leader.LOW_LEADER_BATTERY) {
-				leader.
 				road.addStringWriter("actual leader id " +leader.getId() + "next leader " + nextLeaderList.get(0).getId());
 				this.leader = nextLeaderList.remove(0);
 			}
 			else{
 				road.addStringWriter("No better vehicle available, Platoon deleted");
-				deletePlatoon();
+				this.deletePlatoon();
 			}
 		}
 		else { // remove platoon
 			road.addStringWriter("No better vehicle available, Platoon deleted");
-			deletePlatoon();
-		}
-		
+			this.deletePlatoon();
+		}		
 	}
 	
 	public void upgradeRelay(Vehicle v) {
@@ -431,9 +429,14 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	
 	public void deleteVehicle(Vehicle v){
 		if(this.vehiclesList!=null) {
+			road.numberQuitPlatoon++;
 			v.idPlatoon = null;
 			v.myPlatoon = null;
 			this.vehiclesList.remove(v);
+			if(vehiclesList.size() <= 1 || (v==leader && vehiclesList.size()<=0)) {
+				this.deletePlatoon();
+				return;
+			}
 			if(v==leader) { // if deleted vehicle was leader, we elect randomly a new leader, the adaptation policies will elect a new one if he does not fits the requirements
 				//Random random = new Random();
 				//int index = Math.abs(random.nextInt(vehiclesList.size()));
@@ -441,30 +444,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			}
 			policies.removeForVehicle(v);
 			nextLeaderList.remove(v);
-			if (vehiclesList.size() <= 1) {
-				deletePlatoon();
-			}
 		}
+	}
 
-	}
-	
-	public void deletePlatoon() {
-		if(vehiclesList.size()>=1) {
-			road.addStringWriter("Deleting platoon" + this.vehiclesList+ "\n");
-			//vehiclesList.get(0).removePlatoonFromList();
-			//road.lastReconfList.add(this.lastReconf);
-			for(int i =0; i<vehiclesList.size(); i++) {
-				vehiclesList.get(i).deletePlatoon();
-			}
-			this.leader=null;
-			this.vehiclesList=null;
-			this.policies=null;
-			road.numberPlatoon--;
-		}
-		else {
-			System.out.println("Case not taken care of");
-		}
-	}
 
 //	public int containsVehicleOnBatteryLevel(ArrayList<Vehicle> platoonList, double batteryExiged) {
 //		for (int i=0; i < platoonList.size(); i++) {
@@ -551,14 +533,41 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			road.addStringWriter("Vehicle " + v + " joined platoon" + this+ "\n");
 		}
 	}
+	/**
+	 * Merge vehicles of two platoon in one if conditions are respected
+	 * In case of merging the platoon in parameters will be removed
+	 * @param pl platoon to merge
+	 * @return true if merged happened else false
+	 */
 	public String mergePlatoons(Platoon pl) {
+		if(this.vehiclesList.size()+ pl.vehiclesList.size() > NUMBER_VEHICLE_MAX) {
+			return "false";
+		}
 		road.addStringWriter("Platoon " + pl + " merged platoon" + this+ "\n");
 		System.out.println("Platoon " + pl + " merged platoon" + this+ "\n");
-		for(Vehicle v : pl.vehiclesList) {
+		for(Vehicle v : pl.vehiclesList) {// verify if  it happens
 			this.accept(v);
 		}
 		pl.deletePlatoon();
 		return "true";
+	}
+	
+	public void deletePlatoon() {
+		if(vehiclesList.size()>=1) {
+			road.addStringWriter("Deleting platoon" + this.vehiclesList+ "\n");
+			//vehiclesList.get(0).removePlatoonFromList();
+			//road.lastReconfList.add(this.lastReconf);
+			for(int i =0; i<vehiclesList.size(); i++) {
+				vehiclesList.get(i).deletePlatoon();
+			}
+			this.leader=null;
+			this.vehiclesList=null;
+			this.policies=null;
+			road.numberPlatoon--;
+		}
+		else {
+			System.out.println("Case not taken care of");
+		}
 	}
 
 	public String toString() {

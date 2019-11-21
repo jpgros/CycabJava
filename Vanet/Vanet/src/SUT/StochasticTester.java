@@ -220,6 +220,7 @@ public class StochasticTester implements Serializable{
 		int nbCatchedError=0;
 		String conso="";
 		String time="";
+		String occQuitted="";
 		String stringTime="";
     	boolean propCov=false;
     	boolean catched = false;
@@ -283,7 +284,7 @@ public class StochasticTester implements Serializable{
 			            estimTime= System.currentTimeMillis()-startTime;
 		        		//if(estimTime > 2L*estimTimeOld)System.out.println("loop time 2 " + estimTime);         
 		            	b = (newStep != null);
-		            	try {
+		            	//try {
 			                if (b) {
 			                    currentTest.append(newStep);
 			                    j++;
@@ -318,6 +319,7 @@ public class StochasticTester implements Serializable{
 										//ret.add(currentTest);
 										conso+="0;";
 										time+="0";
+										occQuitted+="0";
 										catched=true;
 										nbCatchedError++;
 										if(interruptCovered) return ret;
@@ -340,14 +342,14 @@ public class StochasticTester implements Serializable{
 									}
 				                }
 			                }
-		            	}
+		            	/*}
 		                catch (Exception e) {
 		                	System.out.println("step FAIL value "+ newStep );
 		                	System.out.println(" methods possible "+ actionsAndProbabilities);
 		                	((VanetFSM) fsm).getSUT().consolePrint();
 		                	System.exit(1);
 							// TODO: handle exception
-						}
+						}*/
 		            	vcm.populateGraph(j);
 		                //checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
 		            }while(((VanetFSM) fsm).getSUT().allVehicles.size()>10); //(j < length && b);
@@ -369,7 +371,10 @@ public class StochasticTester implements Serializable{
 		            	System.out.println("here reinit");
 		            	resetCov(apm);
 		            }
-		            if(!catched)time+=((VanetFSM) fsm).getSUT().getGlobalTimePLatooned()+";"; //conso+=((VanetFSM) fsm).getSUT().getGlobalConso()+";";
+		            if(!catched) {
+		            	time+=((VanetFSM) fsm).getSUT().getGlobalTimePLatooned()+";"; //conso+=((VanetFSM) fsm).getSUT().getGlobalConso()+";";
+		            	occQuitted+=((VanetFSM) fsm).getSUT().getGlobalNumberPlatoonQuit()+";";
+		            }
 		            catched=false;	
 		    		vcm.printGraph(i);
 		            vcm.cleanGraph();
@@ -390,8 +395,20 @@ public class StochasticTester implements Serializable{
 					averageTime+= Double.parseDouble(valTime);
 				}
 				averageTime/=splits.length;
-		        writerConso.print(time + " ; average " + averageTime + "\n");
+		        writerConso.print("time platooned" +time + " ; average " + averageTime + "conso " + conso +"\n");
 		        time="";
+		        
+		        occQuitted =occQuitted.substring(0,occQuitted.length()-1);
+				String[] splits2 = occQuitted.split(";");
+		        Double averageNb=0.0;
+				for(String valNb : splits2) {
+					System.out.println("number occurences "+ valNb);
+					averageNb+= Double.parseDouble(valNb);
+				}
+				averageNb/=splits2.length;
+		        writerConso.print("number occurences quitted" + occQuitted+ " ; average " + averageNb +"\n");
+		        occQuitted="";
+		        
 				writerConso.print("coeffs: ");
 				for(Double coeff : coeffList) {
 					writerConso.print(coeff + " ");

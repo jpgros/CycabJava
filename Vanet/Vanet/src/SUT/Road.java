@@ -37,6 +37,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     int numberPlatoon=0;
     double globalConso=0;
     int timePlatoon=0;
+    int numberQuitPlatoon=0;
     Mutant mutant;
     String writer = "";
     //String vehicleReader = null;
@@ -70,6 +71,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
         this.numberPlatoon=0;
         this.globalConso=0;
         this.timePlatoon=0;
+        this.numberQuitPlatoon=0;
     }
     public void cleanRoad() {
         this.distanceStation[0] = FREQUENCYSTATION;
@@ -80,6 +82,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	allVehicles.clear();
     	steps.clear();
     	timePlatoon=0;
+    	this.numberQuitPlatoon=0;
     	globalConso=0;
     	numberPlatoon=0;
         writerLog ="";
@@ -166,6 +169,9 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public double getGlobalTimePLatooned() {
     	return timePlatoon;
     }
+    public int getGlobalNumberPlatoonQuit(){
+    	return numberQuitPlatoon;
+    }
     public int addVehicle(UUID _id, double _auto, double _distance, double decAuto) {
     	allVehicles.add(new Vehicle(_auto, _distance, _id, null,this, decAuto));
     	//System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
@@ -190,7 +196,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
 //    	System.out.println("i = "+ i + "j= " + j);
 //    	System.out.println(" vl i " + allVehicles.get(i).myPlatoon);
 //    	System.out.println(" vl i auto" + allVehicles.get(i).autonomie);
-        if (i != j && allVehicles.get(i).getPlatoon() == null) {
+        if (i != j) { // && allVehicles.get(i).getPlatoon() == null) {  removed condition to make possible platoon merging
             return allVehicles.get(i).join(allVehicles.get(j))&& allVehicles.get(i).getPlatoon() != null;
         }
         return false;
@@ -218,14 +224,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	}
     	return -1;
     }
-//why ?
-//    public boolean refill(int i) {
-//        if (allVehicles.get(i).getPlatoon() == null) {
-//            allVehicles.get(i).refill();
-//            return true;
-//        }
-//        return false;
-//    }
+
     public void tick() {
     	stepNb++;
     	tick=true;
@@ -244,7 +243,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
 	            state+= "Vehicle:"+v.getId() +"->status:"+v.getStatus()+";";
             }
             v.tick();
-            if(v.myPlatoon!=null) { 
+            if(v.myPlatoon!=null && !v.isLeader()) { // is vehicle is in solo mode or leader it does not count has platooned time
             	timePlatoon++;
             	if(v.isLeader()) {
             		component +="Platoon:"+v.myPlatoon+"\n";

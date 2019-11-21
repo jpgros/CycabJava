@@ -188,8 +188,14 @@ public class Vehicle extends Entity implements Serializable {
 	}
 
 	public boolean join(Vehicle v) {
-		if (this.myPlatoon != null || this.isTakingNextStation() || v.isTakingNextStation()) return false;
-		if (v.myPlatoon != null) {
+		if (this.isTakingNextStation() || v.isTakingNextStation()) return false;
+		else if((this.myPlatoon != null && v.myPlatoon!=null)) { // if two vehicle are inside a platoon, we ask to merge platoons if possible
+			//TODO add condition to see which vehicle add
+			System.out.println("merging occuring");
+			v.myPlatoon.mergePlatoons(this.myPlatoon);
+			return true;
+		}
+		else if (v.myPlatoon != null) {
 			v.myPlatoon.accept(this);
 			return true;
 		}
@@ -228,11 +234,28 @@ public class Vehicle extends Entity implements Serializable {
 	public void removePlatoonFromList() {
 		vehiclePlatoonList.remove(myPlatoon);
 	}
+	
 	public void deletePlatoon() {
 		if(myPlatoon.leader==this) myPlatoon.leader=null;
 		myPlatoon=null;
 		idPlatoon=null;
 	}
+	
+	/*public void deletePlatoon() {
+		road.addStringWriter("Deleting platoon" + myPlatoon.vehiclesList+ "\n");
+		//vehiclesList.get(0).removePlatoonFromList();
+		//road.lastReconfList.add(this.lastReconf);
+		for(int i =0; i<myPlatoon.vehiclesList.size(); i++) {
+			myPlatoon.vehiclesList.get(i).idPlatoon=null;
+		}
+		myPlatoon.leader=null;
+		myPlatoon.vehiclesList.clear();
+		myPlatoon.policies=null;
+		road.numberPlatoon--;
+		myPlatoon=null;
+		idPlatoon=null;
+	}*/
+
 	public void updateVehicleDistance(){ //put this method inside tick to have mutant
 											// the vehicles may compare their battery with the leader but his the leader did not ticked, the value may change with the monitor
 		String x ="";
