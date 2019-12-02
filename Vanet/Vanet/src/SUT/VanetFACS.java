@@ -601,8 +601,8 @@ class r7p1 extends VanetProperty {
 		  	if(! sut.tick) { //remove to have mutant
 	    		throw new PropertyFailedException(this, "Road is using another action than tick");
 	    	}
-	    	else if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
-	        	writer.println("Config KO for quitStas HIGH" + " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+	    	else if (currentVehicle.myPlatoon == null || (!currentVehicle.isTakingNextStation())) {
+	        	writer.println("Config KO for quitStas HIGH" + " " +currentVehicle.getAutonomieDistance() + " 2 next stations ticks: "+currentVehicle.getTwoNextStationsTicks());
 	            throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
 	        }
 	        else {
@@ -616,7 +616,7 @@ class r7p1 extends VanetProperty {
 	    }
 }
 
-class r7p2 extends VanetProperty {
+class r7p2 extends VanetProperty {	
 	LogPrinter writer =null;
      //  after join(v) until quit(v)
 	 public r7p2(LogPrinter w) {
@@ -624,7 +624,9 @@ class r7p2 extends VanetProperty {
 	 }
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.road.distanceStation[0] >= 70) {
+		 	int indNextStation = sut.getNextStation(currentVehicle.position);		
+			double distance=sut.stationPositions.get(indNextStation) + sut.stationPositions.get(indNextStation+1);
+	        if ( sut.stationPositions.get(indNextStation) - currentVehicle.position >= 70) {
 	        	writer.println("TP KO for quitStas HIGH");
 	        	throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        }
@@ -638,7 +640,7 @@ class r7p2 extends VanetProperty {
 	    	return "r7p2";
 	    }
 }
-class r8p1 extends VanetProperty {
+class r8p1 extends VanetProperty {	
 	LogPrinter writer =null;
      //  after join(v) until quit(v)
 	 public r8p1(LogPrinter w) {
@@ -649,18 +651,18 @@ class r8p1 extends VanetProperty {
 		    if(! sut.tick) { //remove to have mutant
 	    		throw new PropertyFailedException(this, "Road is using another action than tick");
 	    	}
-	    	else if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) > (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
-	        	writer.println("config KO for quitStas MEDIUM"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+	    	else if (currentVehicle.myPlatoon == null || (!currentVehicle.isTakingNextStation())) {
+	        	writer.println("config KO for quitStas MEDIUM"+ " " +currentVehicle.getAutonomieDistance() + " 2 next stations ticks: "+currentVehicle.getTwoNextStationsTicks());
 	        	throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
 	        }
 	        else {
-	        	writer.println("config OK for quitStas MEDIUM"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+	        	writer.println("config OK for quitStas MEDIUM"+ " " +currentVehicle.getAutonomieDistance()+ " 2 next stations ticks: "+currentVehicle.getTwoNextStationsTicks());
 	        }
 	        return 0;
 	    }
 	  public String toString(){
 	    	return "TP QuitForStation MEDIUM";
-	    }
+	  }
 }
 
 class r8p2 extends VanetProperty {
@@ -671,7 +673,8 @@ class r8p2 extends VanetProperty {
 	 }
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
-	        if ( currentVehicle.road.distanceStation[0] > 85) {
+		 	int indNextStation = sut.getNextStation(currentVehicle.position);
+	        if ( currentVehicle.road.stationPositions.get(indNextStation) > 85) {
 	        	writer.println("TP KO for quitStas MEDIUM");
 	        	throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        }
@@ -695,8 +698,8 @@ class r9p1 extends VanetProperty {
 		  	if(! sut.tick) { //remove to have mutant
 	    		throw new PropertyFailedException(this, "Road is using another action than tick");
 	    	}
-	    	else if (currentVehicle.myPlatoon == null || ((currentVehicle.getAutonomieDistance() - 10) >= (currentVehicle.road.distanceStation[0] +currentVehicle.road.distanceStation[1]))) {
-	        	writer.println("Config KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+	    	else if (currentVehicle.myPlatoon == null || (!currentVehicle.isTakingNextStation())) {
+	        	writer.println("Config KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " 2 next stations ticks: "+currentVehicle.getTwoNextStationsTicks());
 	        	throw new PropertyFailedException(this, "Vehicle not in platoon or do not need to quit for station");
 	        }
 	        else {
@@ -717,12 +720,13 @@ class r9p2 extends VanetProperty {
 	 }
 	 @Override
     public double match(Road sut) throws PropertyFailedException {
-        if ( currentVehicle.road.distanceStation[0] > 100) { //>= to have mutant
-        	writer.println("TP KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+	 	int indNextStation = sut.getNextStation(currentVehicle.position);
+        if ( currentVehicle.road.stationPositions.get(indNextStation) > 100) { //>= to have mutant
+        	writer.println("TP KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " 2 next stations ticks: "+currentVehicle.getTwoNextStationsTicks());
             throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
         }
         else {
-        	writer.println("TP OK for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " "+currentVehicle.road.distanceStation[0] + " " + currentVehicle.road.distanceStation[1]);
+        	writer.println("TP OK for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " 2 next stations ticks: "+currentVehicle.getTwoNextStationsTicks());
         }
         return 0;
     }

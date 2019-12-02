@@ -39,6 +39,9 @@ public class VanetFSM implements FsmModel {
     String reconfChoosenReader;
     ArrayList<UUID> iD = new ArrayList<UUID>();
     ArrayList<UUID> iDPl = new ArrayList<UUID>();
+    ArrayList<Double> roadStations = new ArrayList<Double>();
+    ArrayList<Double> speed = new ArrayList<Double>();
+    ArrayList<Double> position = new ArrayList<Double>();
     ArrayList<Double> battery = new ArrayList<Double>();
     ArrayList<Double> decBattery = new ArrayList<Double>();
     ArrayList<Double> distance = new ArrayList<Double>();
@@ -138,8 +141,12 @@ public class VanetFSM implements FsmModel {
     	int nbVehicleOnRoad=100; //1600 vl on a 50k step test
     	int nbPlatoonOnRoad=8;
     	int nbVehicleInPlatoon=4;
+    	
+		for(double posStas:roadStations) {
+			sut.stationPositions.add(posStas);
+		}
     	for(int i=0; i<nbVehicleOnRoad;i++) {
-    		sut.addVehicle(iD.remove(0),this.battery.remove(0), this.distance.remove(0), this.decBattery.remove(0));
+    		sut.addVehicle(iD.remove(0),this.battery.remove(0), this.distance.remove(0), this.decBattery.remove(0),this.position.remove(0),this.speed.remove(0));
     	}
 		for(int i=0;i<(nbPlatoonOnRoad*nbVehicleInPlatoon);i=i+nbVehicleInPlatoon) { //forming 3 plts
     		for(int j=i+1; j<(i+nbVehicleInPlatoon); j++) {	//platoon of 3 vls
@@ -161,14 +168,14 @@ public class VanetFSM implements FsmModel {
 
     		ArrayList<Object> paramList = new ArrayList<Object>();
     		paramList.add(sut.allVehicles.get(index));
-    		if ((sut.getVehicle(index).getPlatoon() == null) && (sut.getVehicle(index).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) { //
+    		if ((sut.getVehicle(index).getPlatoon() == null) && !(sut.getVehicle(index).isTakingNextStation())) { //
     			int k;
     			do {
 		            k = (int) (Math.random() * sut.nbVehiclesOnRoad());
 		        }while (k == index);
 		        
 		    	//k= indexjoined.remove(0);
-		        if(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) && sut.getVehicle(k).autonomie<99 && sut.getVehicle(index).autonomie<99){
+		        if(!sut.getVehicle(k).isTakingNextStation() && sut.getVehicle(k).autonomie<99 && sut.getVehicle(index).autonomie<99){
 		        	//if autonomie equals 100 its means vl is inside pl
 		        	System.out.println("Join(" + sut.getVehicle(index).id + ", " + sut.getVehicle(k).id + ") -> " + sut.join(index, k) +" -> true");
 		        	//indexjoined.add(k);
@@ -197,6 +204,7 @@ public class VanetFSM implements FsmModel {
     	addedVehicles++;
     	UUID id = randomUUID();//iD.remove(0);
     	double auto=0, dist=0, decAuto=0;
+    	int position=0, speed=0;
     	if(params.size()<=0) {
 	    	auto = (Math.random() * 10) + 20;// battery.remove(0); 
 	        		//(int) (Math.random() * 10) + 20;
@@ -205,7 +213,8 @@ public class VanetFSM implements FsmModel {
 	        		//(int)(Math.random() * 5000) + 1000;
 	        //distance.add(dist);
 	        decAuto = 1 + Math.random() / 5;//decBattery.remove(0);
-	        
+	        position=(int) ((Math.random() * 40)+5);
+	        speed=(int) ((Math.random() * 10)+5);
     	}
     	else if (params.size()==1) {
     		auto = (Math.random() * 10) + 20;// battery.remove(0); 
@@ -215,16 +224,20 @@ public class VanetFSM implements FsmModel {
 		    		//(int)(Math.random() * 5000) + 1000;
 		    //distance.add(dist);
 		    decAuto = 1 + Math.random() / 5;//decBattery.remove(0);
+		    position=(int) ((Math.random() * 40)+5);
+	        speed=(int) ((Math.random() * 10)+5);
     	}
     	else {
     		id = (UUID) params.get(0);
     		auto = (double) params.get(1);
     		dist=(double) params.get(2);
     		decAuto=(double) params.get(3);
+    		position=(int)params.get(4);
+ 	        speed=position=(int)params.get(5);
     	}
-        sut.addVehicle(id,auto, dist, decAuto);
+        sut.addVehicle(id,auto, dist, decAuto, position,speed);
         System.out.println("AddVehicle("+id+","+auto+","+dist+","+decAuto+")");
-        return new Object[]{sut, id, auto, dist, decAuto };
+        return new Object[]{sut, id, auto, dist, decAuto, position, speed };
     }
 
     public void tickTrigger(){
@@ -268,8 +281,23 @@ public class VanetFSM implements FsmModel {
         	sCurrentLine = br.readLine();
         }
         sCurrentLine = br.readLine();
-        while ((sCurrentLine = br.readLine()) != null){
+        while(!sCurrentLine.contains("Position")){ 
         	iDPl.add(UUID.fromString(sCurrentLine));
+        	sCurrentLine = br.readLine();
+        }
+        sCurrentLine = br.readLine();
+        while(!sCurrentLine.contains("Speed")){ 
+        	position.add(Double.parseDouble(sCurrentLine));
+        	sCurrentLine = br.readLine();
+        }
+        sCurrentLine = br.readLine();
+        while(!sCurrentLine.contains("StationPositions")){ 
+        	speed.add(Double.parseDouble(sCurrentLine));
+        	sCurrentLine = br.readLine();
+        } 
+        sCurrentLine = br.readLine();
+        while((sCurrentLine = br.readLine()) != null){
+        	roadStations.add(Double.parseDouble(sCurrentLine));
         	sCurrentLine = br.readLine();
         }
         System.out.println("sizes "+ iD.size() + " "+ battery.size()+" "+ decBattery.size()+ " " + distance.size());
@@ -295,14 +323,14 @@ public class VanetFSM implements FsmModel {
 		//        	return new Object[]{ sut, j, k };
 		//        }
 		        
-		      if ((sut.getVehicle(j).getPlatoon() == null) && (sut.getVehicle(j).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) {
+		      if ((sut.getVehicle(j).getPlatoon() == null) && (!sut.getVehicle(j).isTakingNextStation())) {// getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION) )) {
 		    	int k = 0;
 		        do {
 		            k = (int) (Math.random() * sut.nbVehiclesOnRoad());
 		        }while (k == j);
 		        
 		    	//k= indexjoined.remove(0);
-		        if(sut.getVehicle(k).getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)){
+		        if(!sut.getVehicle(k).isTakingNextStation()) {// getMinValue() > (sut.distanceStation[0] + sut.distanceStation[1]+sut.FREQUENCYSTATION)){
 		        	System.out.println("Join(" + sut.getVehicle(j).id + ", " + sut.getVehicle(k).id + ") -> " + sut.join(j, k) +" -> true");
 		        	//indexjoined.add(k);
 		        	return new Object[]{ sut, j, k };

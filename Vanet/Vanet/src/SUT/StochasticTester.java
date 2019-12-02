@@ -242,13 +242,15 @@ public class StochasticTester implements Serializable{
         for(int cptwriter=0 ; cptwriter<1; cptwriter++) {
 	        //for(int iii=0; iii<10; iii++) {
 				ArrayList<Double> coeffList = new ArrayList<Double>();
-				for(int iCoeff=0; iCoeff<8;iCoeff++){
-					Random rand = new Random();
+				ArrayList<Integer> indList = new ArrayList<Integer>();
+				for(int iCoeff=1; iCoeff<5; iCoeff++){
+					int ind = (nb/iCoeff)%3;
+					/*Random rand = new Random();
 					double val =rand.nextDouble();
-					val=0;// val*6.0 -3.0;
-					coeffList.add(val);
-			}
-    		((VanetFSM) fsm).getSUT().setCoeffRules(coeffList);
+					val=0;// val*6.0 -3.0;*/
+					indList.add(ind);
+				}
+				((VanetFSM) fsm).getSUT().setCoeffRules(indList);
         	//for(Double coeff : coeffList) {
 	        	//conso+= "k="+coeff+";";
 	        	//time+= "k="+coeff+";";

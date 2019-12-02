@@ -9,12 +9,16 @@ import java.util.UUID;
 
 import javax.sql.PooledConnection;
 
+import sun.tools.tree.IncDecExpression;
+
 import static sun.tools.java.Constants.DEC;
 
 
 public class Vehicle extends Entity implements Serializable {
 	double autonomie;
 	double distance;
+	double position;
+	double speed;
 	UUID id;
 	UUID idPlatoon = null;
 	ArrayList<Entity> vehiclePlatoonList= new ArrayList<Entity>();
@@ -43,12 +47,14 @@ public class Vehicle extends Entity implements Serializable {
 //	final static double VLOW_BATTERY = 5;
 	
 
-	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r, double decAuto) {
+	public Vehicle (double autonomie, double distance, UUID id, ArrayList<Entity> vehiclePlatoonList, Road r, double decAuto, double position, double speed) {
 		this.autonomie = autonomie;
 		this.distance = distance;
 		this.id = id;
 		this.road=r;
 		this.DEC_ENERGY=decAuto/10.0; //no /10 normally
+		this.position= position;
+		this.speed=speed;
 		double dc = decAuto/10.0;
 		DEC_LEADER= decAuto;//DEC_ENERGY * 1.2; //1.2 normally
 		//System.out.println("is " + decAuto + " and " + DEC_LEADER+" would have " + dc + " and " + dc*10.0);
@@ -255,7 +261,7 @@ public class Vehicle extends Entity implements Serializable {
 		myPlatoon=null;
 		idPlatoon=null;
 	}*/
-
+	
 	public void updateVehicleDistance(){ //put this method inside tick to have mutant
 											// the vehicles may compare their battery with the leader but his the leader did not ticked, the value may change with the monitor
 		String x ="";
@@ -279,10 +285,16 @@ public class Vehicle extends Entity implements Serializable {
 		}
 		return conso -this.autonomie;
 	}
+	
+	public void updateVehiclePosition() {
+		this.position+=this.speed;
+	}
 	public void tick() {
 		String x ="";
 		// TODO
 		//Add each tick only new policies will be added
+		int indNextStation = road.getNextStation(this.position);		
+		double distance=road.stationPositions.get(indNextStation) + road.stationPositions.get(indNextStation+1);
 		if(myPlatoon!=null) {
 			// distance < seuil --> quitte le peloton
 			if(distance < VLOW_DIST) {
@@ -327,35 +339,35 @@ public class Vehicle extends Entity implements Serializable {
 				x = "Event : vehicle " + this.getId() + " is taking next station stop [NEXT_STATION]"+"\n";
 				//System.out.print(x);
 				road.addStringWriter(x);
-				if(road.distanceStation[0] < 70) { //verifying adding priority does nto causes bugs
+				if(road.stationPositions.get(indNextStation) < 70) { //verifying adding priority does nto causes bugs
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [HIGH]";
 					//System.out.println(x);
 					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, HIGHPRIO+road.k[4], this);
 					myPlatoon.policies.addElement(elt,road.mutant);
-					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
+					road.addStringWriter(this.getAutonomieDistance() + " " + road.stationPositions.get(indNextStation)+ " "+ road.stationPositions.get(indNextStation+1)+"\n");
 					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
-				else if(road.distanceStation[0] <= 85) { //road.distanceStation[0] >= 8 && 
+				else if(road.stationPositions.get(indNextStation) <= 85) { //road.distanceStation[0] >= 8 && 
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]"+"\n";
 					//System.out.print(x);
 					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, MEDIUMPRIO+road.k[5]+1.0, this);
 					myPlatoon.policies.addElement(elt,road.mutant);
-					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
+					road.addStringWriter(this.getAutonomieDistance() + " " + road.stationPositions.get(indNextStation)+ " "+ road.stationPositions.get(indNextStation+1)+"\n");
 					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
-				else if(road.distanceStation[0] <= 100) {
+				else if(road.stationPositions.get(indNextStation) <= 100) {
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [LOW]"+"\n";
 					//System.out.print(x);
 					road.addStringWriter(x);
 					Element elt = new Element(PolicyName.QUITFORSTATION, LOWPRIO+road.k[6], this);
 					myPlatoon.policies.addElement(elt,road.mutant);
-					road.addStringWriter(this.getAutonomieDistance() + " " + this.road.distanceStation[0]+ " "+ this.road.distanceStation[1]+"\n");
+					road.addStringWriter(this.getAutonomieDistance() + " " + road.stationPositions.get(indNextStation)+ " "+ road.stationPositions.get(indNextStation+1)+"\n");
 					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
 				else {
-					x = "Error : Should not happen QuitToStation policy problem " + road.distanceStation[0]+"\n";
+					x = "Error : Should not happen QuitToStation policy problem " + road.stationPositions.get(indNextStation)+"\n";
 					//System.out.print(x);
 					road.addStringWriter(x);
 				}
@@ -369,7 +381,7 @@ public class Vehicle extends Entity implements Serializable {
 			}
 		}
 		else {
-			if ((getAutonomieDistance() -10.0)< (road.distanceStation[0] +road.distanceStation[1]) && road.distanceStation[0] < 11) {
+			if ((getAutonomieDistance() -10.0)< (distance) && road.stationPositions.get(indNextStation)-position < 11) {
 				x = "Event : vehicle " + this.getId() + " is refilling [REFILL] and getAutonomyvalue gives : " + getAutonomieDistance()+"\n";
 				road.addStringWriter(x);
 				refill();	
@@ -404,16 +416,23 @@ public class Vehicle extends Entity implements Serializable {
 //			event = (arraySplit[arraySplit.length-1] == "true") ? true : false; 
 //		}
 //	}
+
+	/**
+	 * Says if a vehicle is taking the next station on road
+	 * @return boolean true if quitting false if not
+	 */
 	public boolean isTakingNextStation() {
-		double t=road.distanceStation[0] +road.distanceStation[1];;
-		return ((this.getAutonomieDistance() -10.0)< (road.distanceStation[0] +road.distanceStation[1])) ? true :false;
+		int indNextStation = road.getNextStation(this.position);		
+		double distance=road.stationPositions.get(indNextStation) + road.stationPositions.get(indNextStation+1);
+		return ((this.position+ this.getMinValue() -10.0)< (distance)) ? true :false;
 	}
 	public double getDistanceTick() {
 		return distance/DEC_DISTANCE;
 	}
 	
 	public double getTwoNextStationsTicks() {
-		return (road.distanceStation[0] + road.distanceStation[1])/DEC_DISTANCE;
+		int indNextStation = road.getNextStation(this.position);	
+		return (road.stationPositions.get(indNextStation) + road.stationPositions.get(indNextStation+1))/DEC_DISTANCE;
 	}
 	public double getAutonomieTick() {
 		if(isLeader()) return autonomie/DEC_LEADER; 
@@ -443,7 +462,7 @@ public class Vehicle extends Entity implements Serializable {
 	}
 	public String getDisplayString() {
 		String l = (myPlatoon != null && myPlatoon.leader == this) ? "*" : "";
-		return "id: " + id.toString().split("-")[0] + l + ", auto: " + autonomie + ", distance: " + distance + " platoon: " + myPlatoon + "next station " + this.road.distanceStation[0];
+		return "id: " + id.toString().split("-")[0] + l + ", auto: " + autonomie + ", distance: " + distance + " platoon: " + myPlatoon + "next station ";
 	}
 	public String toString() {
 		String s = id + " "+ autonomie + " "+ DEC_ENERGY + " "+ distance;

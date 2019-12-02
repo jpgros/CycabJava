@@ -30,7 +30,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
 	int stepNb=0;
     final static int MAX_CAPACITY = 15;
 	final static double FREQUENCYSTATION = 100;
-    double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
+    //double distanceStation[] = {FREQUENCYSTATION, FREQUENCYSTATION}; 
+	ArrayList<Double> stationPositions = new ArrayList<Double>();
     ArrayList<Vehicle> allVehicles = new ArrayList<Vehicle>();
     ArrayList<StepElt> steps = new ArrayList<StepElt>();
     
@@ -65,8 +66,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	
     }
     public void reinit() { //reinit variables in case of a new test 
-        this.distanceStation[0] = FREQUENCYSTATION;
-        this.distanceStation[1] = FREQUENCYSTATION; 
+//        this.distanceStation[0] = FREQUENCYSTATION;
+//        this.distanceStation[1] = FREQUENCYSTATION; 
         this.allVehicles = new ArrayList<Vehicle>();
         this.numberPlatoon=0;
         this.globalConso=0;
@@ -74,8 +75,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
         this.numberQuitPlatoon=0;
     }
     public void cleanRoad() {
-        this.distanceStation[0] = FREQUENCYSTATION;
-        this.distanceStation[1] = FREQUENCYSTATION; 
+//        this.distanceStation[0] = FREQUENCYSTATION;
+//        this.distanceStation[1] = FREQUENCYSTATION; 
     	for(Vehicle v :allVehicles) {
     		v.cleanVl();
     	}
@@ -113,9 +114,10 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public void initCoeffRules(int nbRules) {
     	k= new double [nbRules];
     }
-    public void setCoeffRules(ArrayList<Double> list) {
+    public void setCoeffRules(ArrayList<Integer> list) {
+    	double[] tab= {3,5,7};
     	for(int i =0; i<list.size(); i++) {
-    		k[i]= list.get(i);
+    		k[i]= 0;//list.get(i);
     	}
     }
     public String getLineReconfChoosenRead() throws IOException {
@@ -172,8 +174,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public int getGlobalNumberPlatoonQuit(){
     	return numberQuitPlatoon;
     }
-    public int addVehicle(UUID _id, double _auto, double _distance, double decAuto) {
-    	allVehicles.add(new Vehicle(_auto, _distance, _id, null,this, decAuto));
+    public int addVehicle(UUID _id, double _auto, double _distance, double decAuto, double position, double speed) {
+    	allVehicles.add(new Vehicle(_auto, _distance, _id, null,this, decAuto,position,speed));
     	//System.out.println("Vehicle created at index " + (allVehicles.size() - 1));
 		writer+="Vehicle created at index " + (allVehicles.size() - 1);
         return allVehicles.size() - 1;
@@ -193,10 +195,11 @@ public class Road implements Serializable, Iterable<Vehicle> {
 //    }
     
     public boolean join(int i, int j) {
+    	double number = Math.random();
 //    	System.out.println("i = "+ i + "j= " + j);
 //    	System.out.println(" vl i " + allVehicles.get(i).myPlatoon);
 //    	System.out.println(" vl i auto" + allVehicles.get(i).autonomie);
-        if (i != j) { // && allVehicles.get(i).getPlatoon() == null) {  removed condition to make possible platoon merging
+        if (i != j && number >0.8) { // && allVehicles.get(i).getPlatoon() == null) {  removed condition to make possible platoon merging
             return allVehicles.get(i).join(allVehicles.get(j))&& allVehicles.get(i).getPlatoon() != null;
         }
         return false;
@@ -235,6 +238,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
         for (int i=0; i < allVehicles.size(); i++) {
             Vehicle v = allVehicles.get(i);
             v.updateVehicleDistance();
+            v.updateVehiclePosition();
             globalConso+=v.updatevehicleAutonomie();
             if(logLevel==LogLevel.VERBOSE) {
 	            component +="Vehicle:"+v.getId();
@@ -328,7 +332,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
             }
         }
     	if(tick) { 
-    		updateDistStas(); 	
+    		//updateDistStas(); 	
     		tick =false;
     	}
     }
@@ -384,14 +388,14 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	return index;
     }
 
-    public void updateDistStas(){
-		distanceStation[0] = mutant==Mutant.M3 ? distanceStation[0]-1 : distanceStation[0]-10;
-		if(distanceStation[0]<=0) {
-			if(distanceStation[0]<0) System.out.println("distance station negative, should not happen");
-			distanceStation[0]=distanceStation[1];
-			distanceStation[1] = FREQUENCYSTATION;
-		}
-	}
+//    public void updateDistStas(){
+//		distanceStation[0] = mutant==Mutant.M3 ? distanceStation[0]-1 : distanceStation[0]-10;
+//		if(distanceStation[0]<=0) {
+//			if(distanceStation[0]<0) System.out.println("distance station negative, should not happen");
+//			distanceStation[0]=distanceStation[1];
+//			distanceStation[1] = FREQUENCYSTATION;
+//		}
+//	}
     public Iterator<Vehicle> iterator() {
         return allVehicles.iterator();
     }
@@ -403,16 +407,27 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public int nbVehiclesOnRoad() {
         return allVehicles.size();
     }
-
+    
+    /**Get the next station based on a vehicle's position
+     * @param int pos : position of the vehicle
+     * @return double : the index of the next station in list of stations
+     */
+    public int getNextStation(double position) {
+    	int i=0;
+    	while(position >stationPositions.get(i)) {
+    		i++;
+    	}
+    	return i;
+    }
     public Vehicle getVehicle(int j) {
         return allVehicles.get(j);
     }
-	public double[] getDistanceStation() {
-		return distanceStation;
-	}
-	public void setDistanceStation(double[] distanceStas) {
-		distanceStation = distanceStas;
-	}
+//	public double[] getDistanceStation() {
+//		return distanceStation;
+//	}
+//	public void setDistanceStation(double[] distanceStas) {
+//		distanceStation = distanceStas;
+//	}
 	public void consolePrint() {
 		for (Vehicle v : allVehicles) {
 			v.getDisplayString();
