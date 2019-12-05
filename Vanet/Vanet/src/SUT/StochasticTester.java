@@ -233,6 +233,7 @@ public class StochasticTester implements Serializable{
     	String x="";
         PrintWriter propertiesWriterFile = new PrintWriter("./propertiesErr.txt", "UTF-8");
         PrintWriter writerConso = new PrintWriter("./conso.csv", "UTF-8");
+        PrintWriter tmpWriterFile = new PrintWriter("./tmpErr.txt", "UTF-8");
         LogPrinter propertiesWriter = new LogPrinter(propertiesWriterFile, LogLevel.ERROR, LogLevel.ERROR);
         ArrayList<MyTest> ret = new ArrayList<MyTest>();
         // for each of the resulting test cases
@@ -263,6 +264,12 @@ public class StochasticTester implements Serializable{
 		            ((VanetFSM) fsm).getSUT().cleanRoad();
 		            ((VanetFSM) fsm).initSystem();
 		        	x="== Generating test #" + i + " == rule cov ";
+		        	String x2="";
+		        	for(Vehicle vl : ((VanetFSM) fsm).getSUT().allVehicles) {
+		        		x2+=" id " + vl.id + "\n";
+		        	}
+		        	tmpWriterFile.write(x2);
+		        	tmpWriterFile.close();
 		        	((VanetFSM) fsm).getSUT().addStringWriter(x);
 		            System.out.println(x);
 		            x="";

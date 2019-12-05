@@ -11,7 +11,12 @@ public class AdaptationPolicy implements Serializable{
 	ArrayList<Element> tmpListPolicy = new ArrayList<Element>();
 	final static double COEFF_WAITING_RULE=0.3;
 	
-	// add element according to the given priority and the time rule has already waited
+	/**
+	 *  add element according to the given priority and the time rule has already waited
+	 *  low priority are classed in low indexes and high priorities in high indexes
+	 * @param elt element to add in the list
+	 * @param mutant is evaluated to true indicates we want a mutational approach or a normal one either
+	 */
 	public void addElement(Element elt, Mutant mutant) {
 		if(mutant==Mutant.M18) {
 			Integer val =elt.vehicle.myPlatoon.hashPoints.get(elt.toStringShort());
@@ -22,18 +27,20 @@ public class AdaptationPolicy implements Serializable{
 //		for(Element e : listPolicy) {
 //			System.out.println(e.toString());
 //		}
-		if (listPolicy.size() == 0 || mutant== Mutant.M14) {
-			listPolicy.add(elt);
-        } else if ((listPolicy.get(0).priority+ COEFF_WAITING_RULE*listPolicy.get(0).timeWaiting) > (elt.priority+ COEFF_WAITING_RULE*elt.timeWaiting)) {
-        	listPolicy.add(0, elt);
-        } else if ((listPolicy.get(listPolicy.size() - 1).priority + COEFF_WAITING_RULE*listPolicy.get(listPolicy.size()-1).timeWaiting)< (elt.priority + COEFF_WAITING_RULE*elt.timeWaiting)) {
-        	listPolicy.add(listPolicy.size(), elt);
-        } else {
-            int i = 0;
-            while ((listPolicy.get(i).priority + listPolicy.get(i).timeWaiting) < (elt.priority +COEFF_WAITING_RULE*elt.timeWaiting) ) {
-                i++;
-            }
-            listPolicy.add(i, elt);
+		if(!containsBetterElement(elt)) {
+			if (listPolicy.size() == 0 || mutant== Mutant.M14) {
+				listPolicy.add(elt);
+	        } else if ((listPolicy.get(0).priority+ COEFF_WAITING_RULE*listPolicy.get(0).timeWaiting) > (elt.priority+ COEFF_WAITING_RULE*elt.timeWaiting)) {
+	        	listPolicy.add(0, elt);
+	        } else if ((listPolicy.get(listPolicy.size() - 1).priority + COEFF_WAITING_RULE*listPolicy.get(listPolicy.size()-1).timeWaiting)< (elt.priority + COEFF_WAITING_RULE*elt.timeWaiting)) {
+	        	listPolicy.add(listPolicy.size(), elt);
+	        } else {
+	            int i = 0;
+	            while ((listPolicy.get(i).priority + listPolicy.get(i).timeWaiting) < (elt.priority +COEFF_WAITING_RULE*elt.timeWaiting) ) {
+	                i++;
+	            }
+	            listPolicy.add(i, elt);
+			}
 		}
 	}
 	
@@ -49,6 +56,11 @@ public class AdaptationPolicy implements Serializable{
 						if(elt.equals(eltLast) && mutant != Mutant.M17) {
 							newElt.timeWaiting=++eltLast.timeWaiting;
 						}
+						else {
+//							System.out.println("test equals elt name " + elt.name + "prio "+ elt.priority +" id vl "+ elt.vehicle.id );
+//
+//							System.out.println("elt name " + eltLast.name + "prio "+ eltLast.priority +" id vl "+ eltLast.vehicle.id );
+						}
 						listTmp.add(newElt);
 						itr.remove();
 					}
@@ -59,9 +71,6 @@ public class AdaptationPolicy implements Serializable{
 				listTmp.clear();
 			}
 			tmpListPolicy.clear();
-			for(Element elt : this.listPolicy) {
-				tmpListPolicy.add(elt);
-			}
 		}
 	}
 	
@@ -79,6 +88,19 @@ public class AdaptationPolicy implements Serializable{
 			if(listPolicy.get(i).name==n) return i;
 		}
 		return -1;
+	}
+	/**
+	 * Says if an element is already contained a list or with a higher priority (not taking waiting time into account)
+	 * @param elt to be compared
+	 * @return boolean
+	 */
+	public boolean containsBetterElement(Element elt) {
+		for(Element listElt:listPolicy) {
+			if(elt.name.equals(listElt.name)&& elt.vehicle.id== listElt.vehicle.id && elt.priority<= listElt.priority) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void removeForVehicle(Vehicle v) {

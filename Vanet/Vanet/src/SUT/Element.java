@@ -37,7 +37,7 @@ public class Element implements Serializable {
       if (getClass() != obj.getClass())
          return false;
       Element elt = (Element) obj;
-      if (this.name == elt.name && this.priority == elt.priority && this.vehicle == elt.vehicle) { //
+      if (this.name == elt.name && this.priority == elt.priority && this.vehicle.id == elt.vehicle.id) { //
     	  return true;
       }
       else {

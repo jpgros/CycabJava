@@ -228,7 +228,8 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	return -1;
     }
 
-    public void tick() {
+    public void tick() throws BehaviorException{
+    	System.out.println("TICK ");
     	stepNb++;
     	tick=true;
     	component="Components(";
@@ -256,8 +257,10 @@ public class Road implements Serializable, Iterable<Vehicle> {
             	state +="\n"+"Platoon:"+v.myPlatoon+ "->number vehicles:" + v.myPlatoon.vehiclesList.size();
             }
             if(v.distance <=10) {
-                if(v.myPlatoon!=null) { 
-                    removeVehicle(v, "Error : vehicle: "+ v.id+ " reached distance but is inside platoon, removed anyway ");
+                if(v.myPlatoon!=null) { //not sure if this case should be taken care of or raise an eception
+                    throw new BehaviorException("Vehicle " + v.id + " reached distance but is inside platoon");
+                	//v.myPlatoon.deleteVehicle(v);
+                    //removeVehicle(v, "Error : vehicle: "+ v.id+ " reached distance but is inside platoon, removed anyway ");
                 }
                 else{
                 	action +="Vehicle:"+v.getId() +"quitRoad";
@@ -272,13 +275,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
         } 	
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
-            	if(stepNb%50==0) {
-            		System.out.println("size of pl "+v.myPlatoon.vehiclesList.size()+ " "+ v.myPlatoon.id );
-            		for(Vehicle eltVl:v.myPlatoon.vehiclesList) {
-            			System.out.print(" vl " + eltVl.id);
-            		}
-            		System.out.println("");
-            	}
+            	System.out.println("im leader with id " + v.id);
         		v.getPlatoon().tick();
         		if(v.myPlatoon.lastReconf!=null) action += v.myPlatoon.lastReconf;
             }
@@ -354,10 +351,17 @@ public class Road implements Serializable, Iterable<Vehicle> {
         //System.out.println();
 		writer+="\n \n";
     }
-
+    /**
+     * Remove vehicle from road and suppress it from lsit of all vehicle
+     * @param v the vehicle to remove
+     * @param x
+     * @return the new size of vehicle list
+     */
     public int removeVehicle(Vehicle v, String x) {
         allVehicles.remove(allVehicles.indexOf(v));
         //System.out.println(x);
+        System.out.println("removing vl " + v.id + " " + x + "distance " + v.distance);
+
 		writer+=x;
         return allVehicles.size() -1;
     }

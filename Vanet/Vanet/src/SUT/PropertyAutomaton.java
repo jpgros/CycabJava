@@ -101,6 +101,11 @@ class PropertyFailedException extends Exception {
 
 }
 
+class BehaviorException extends Exception {
+	public BehaviorException(String msg) {
+		super(msg);
+	}
+}
 class PropertyCoveredException extends Exception {
     public PropertyCoveredException( String msg) {
         super(msg);
@@ -333,7 +338,23 @@ class Property3 extends VanetProperty {
                     else if(v.myPlatoon!=null) {
                     	transitionsMade[1][0]=true;
                         if (v.autonomie < MIN_LEVEL_BATTERY || v.distance == 0) {
-                            throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination. \n vehicle's platoon reconf list " +v.myPlatoon.policies.listPolicy);
+                        	System.out.println("begin exception");
+                            for (Vehicle vl : v.road.allVehicles) {
+                            		if(vl.getPlatoon() != null) {
+                            			System.out.print ("my platoon is " + vl.getPlatoon().id); 
+                            			System.out.print(vl.getPlatoon() != null);
+                            			System.out.print(" the leader of pl is me "+ vl.getPlatoon().leader.id.equals(vl.id));
+                            			System.out.println("i am vl " + vl.id);
+                            		}
+                            		else {
+                            			System.out.println("i dont have a pl and im vl  " +vl.id);
+                            		}
+                            }
+                            throw new PropertyFailedException(this, "Vehicle " + v.id + " has low autonomy or has reached destination. \n vehicle's platoon reconf list " 
+                        +v.myPlatoon.policies.listPolicy + "size "+ v.myPlatoon.policies.listPolicy.size()
+                        + " platoon size "+ v.myPlatoon.vehiclesList.size() +" platoon id " + v.myPlatoon.id
+                        + " \n leader vl " + v.myPlatoon.leader.id  + " platoon compo "+ v.myPlatoon.vehiclesList
+                        + "\n road list " + v.road.allVehicles);                        
                         }
                     }
                     break;

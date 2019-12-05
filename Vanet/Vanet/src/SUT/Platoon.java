@@ -122,7 +122,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 //	}
 	
 	public void tick(){
-
+		
+		System.out.println("pl ticking list policy size "+ policies.listPolicy.size() +" platoon id " + id);
+		System.out.println("leader's platoon " + this.leader.myPlatoon.id);
 		//vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
 		//System.out.println("tick policy: " + tickCounter);
 		//writer.println("tick policy: " + tickCounter);
@@ -133,14 +135,15 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		}
 		policies.mergeLists(road.mutant);
 		if(policies.listPolicy.size()>0) {
-			if(policies.listPolicy.size()>1 && !review) {
-				road.addReconfigurationChoosen("Tick " +road.stepNb);
-				road.addReconfChoosenWrite("Tick " +road.stepNb );
-			}
+			System.out.println("pl cond ok");
+
 			switch(road.mutant) {
 			case M5: // does not do a reconf with 10%
 				if(new Random().nextDouble() <=0.) {
 					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
+					for(Element elt : policies.listPolicy) {
+						policies.tmpListPolicy.add(elt);
+					}
 					fillStep();
 					policies.clearPolicy(road.mutant);	
 				}
@@ -162,11 +165,17 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 //						road.addReconfigurationChoosen("\n");
 //					}
 				lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
+				for(Element elt : policies.listPolicy) {
+					policies.tmpListPolicy.add(elt);
+				}
 				fillStep();
 				policies.clearPolicy(road.mutant);
 			break;
 			case M10:// chooses randomly a reconf
 				lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
+				for(Element elt : policies.listPolicy) {
+					policies.tmpListPolicy.add(elt);
+				}
 				//System.out.println(lastReconf.name);
 				fillStep();
 				policies.clearPolicy(road.mutant);
@@ -200,6 +209,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 								looping=false;
 								//System.out.println("ok ko " +splits[splits.length-1]);
 								lastReconf = policies.listPolicy.get(i);
+								for(Element elt : policies.listPolicy) {
+									policies.tmpListPolicy.add(elt);
+								}
 								reconf[i+1] =reconf[i+1].replaceAll("OK", "KO");
 								line="";
 								policies.clearPolicy(road.mutant);
@@ -219,6 +231,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 					else {
 						lastReconf = policies.listPolicy.get(0);
 						for(Element elt : policies.listPolicy) {
+							policies.tmpListPolicy.add(elt);
+						}
+						for(Element elt : policies.listPolicy) {
 							road.addReconfChoosenWrite("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
 							road.addReconfigurationChoosen("/" +elt.getName()+";"+elt.getPriority()+ ";OK");
 						}
@@ -231,31 +246,49 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 				}
 				else {
 					lastReconf = policies.listPolicy.get(0);
+					for(Element elt : policies.listPolicy) {
+						policies.tmpListPolicy.add(elt);
+					}
 					fillStep();
 					policies.clearPolicy(road.mutant);
 				}
 				break;
 			case M14: // takes reconf in FIFO order
 				lastReconf=policies.listPolicy.get(0);   //M1 replaces tickTriggerM1
+				for(Element elt : policies.listPolicy) {
+					policies.tmpListPolicy.add(elt);
+				}
 				fillStep();
 				policies.clearPolicy(road.mutant);
 			break;
 			case M15: // sometimes chooses in inverted order
 				if(new Random().nextDouble() <=0.8) {
 					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
+					for(Element elt : policies.listPolicy) {
+						policies.tmpListPolicy.add(elt);
+					}
 				}
 				else {
 					lastReconf = policies.listPolicy.get(0);
+					for(Element elt : policies.listPolicy) {
+						policies.tmpListPolicy.add(elt);
+					}
 				}
 				fillStep();
 				policies.clearPolicy(road.mutant);	
 			break;
 			case M16: // sometimes chooses randomly
 				if(new Random().nextDouble() <=0.8) {
-					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);	
+					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
+					for(Element elt : policies.listPolicy) {
+						policies.tmpListPolicy.add(elt);
+					}
 				}
 				else {
 					lastReconf = policies.listPolicy.get(new Random().nextInt(policies.listPolicy.size()));
+					for(Element elt : policies.listPolicy) {
+						policies.tmpListPolicy.add(elt);
+					}
 				}
 				fillStep();
 				policies.clearPolicy(road.mutant);
@@ -263,6 +296,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			case M18:
 				int index = getReconf(policies.listPolicy.size()-1);
 				lastReconf = policies.listPolicy.get(index);
+				for(Element elt : policies.listPolicy) {
+					policies.tmpListPolicy.add(elt);
+				}
 				fillStep();
 				//System.out.println(lastReconf.name);
 				policies.clearPolicy(road.mutant);
@@ -270,8 +306,12 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 			break;
 			default: //if selected rule corresponds to threshold criterion we select it and clear the list policy
 				//if(policies.averageValuePolicies()*policies.listPolicy.size() + policies.listPolicy.get(0).priority + policies.COEFF_WAITING_RULE*policies.listPolicy.get(0).timeWaiting > THRESHOLDRULESVALUE ) {
-
+					//System.out.println("reconf before taking "+  this.policies + "size " );
 					lastReconf = policies.listPolicy.get(policies.listPolicy.size()-1);
+					//System.out.println("last reconf "+ lastReconf.name);
+					for(Element elt : policies.listPolicy) {
+						policies.tmpListPolicy.add(elt);
+					}
 //					if(lastReconf.toStringShort().equals("QUITFORSTATION 6.0")) System.out.println("quit 6" +lastReconf.toString());
 //					else if(lastReconf.toStringShort().equals("QUITFORSTATION 7.0")) {
 //						System.out.println("quit 7" +lastReconf.toString());

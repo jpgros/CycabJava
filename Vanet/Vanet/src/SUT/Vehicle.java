@@ -31,8 +31,8 @@ public class Vehicle extends Entity implements Serializable {
 	final double DEC_LEADER;// = DEC_ENERGY * 1.2;
 	final double DEC_DISTANCE = 10;
 	final static double LOW_LEADER_DIST = 200;
-	final static double LOW_DIST = 100;
-	final static double VLOW_DIST = 50;
+	final static double LOW_DIST = 100.0;
+	final static double VLOW_DIST = 50.0;
 	final static double LOW_LEADER_BATTERY = 20;
 	final static double LOW_BATTERY = 14; // should be > property3
 	final static double HIGHPRIO = 7;
@@ -54,7 +54,7 @@ public class Vehicle extends Entity implements Serializable {
 		this.road=r;
 		this.DEC_ENERGY=decAuto/10.0; //no /10 normally
 		this.position= position;
-		this.speed=speed;
+		this.speed=10;
 		double dc = decAuto/10.0;
 		DEC_LEADER= decAuto;//DEC_ENERGY * 1.2; //1.2 normally
 		//System.out.println("is " + decAuto + " and " + DEC_LEADER+" would have " + dc + " and " + dc*10.0);
@@ -265,7 +265,7 @@ public class Vehicle extends Entity implements Serializable {
 	public void updateVehicleDistance(){ //put this method inside tick to have mutant
 											// the vehicles may compare their battery with the leader but his the leader did not ticked, the value may change with the monitor
 		String x ="";
-		this.distance -= 10;
+		this.distance -= speed;
 		if(this.distance < 0 ) {
 			x = "Error : Distance left negative !" +"\n";
 			System.out.print(x);
@@ -281,6 +281,7 @@ public class Vehicle extends Entity implements Serializable {
 		if( this.autonomie < 0){
 			x = "Error : new Battery left negative !"+"\n";
 			System.out.print(x);
+			System.out.println("id " +this.id + " position" + this.position + " next station " + road.stationPositions.get(road.getNextStation(position))+ " previous station " + road.stationPositions.get(road.getNextStation(position)-1));
 			road.addStringWriter(x);
 		}
 		return conso -this.autonomie;
@@ -291,16 +292,23 @@ public class Vehicle extends Entity implements Serializable {
 	}
 	public void tick() {
 		String x ="";
-		// TODO
+		if(distance < 10) {
+			System.out.print("Event before cond: vehicle " + this.getId() + "is lower than 20 distance \n");
+			System.out.println("my pltoon "+ this.myPlatoon);
+		}
 		//Add each tick only new policies will be added
 		int indNextStation = road.getNextStation(this.position);		
-		double distance=road.stationPositions.get(indNextStation) + road.stationPositions.get(indNextStation+1);
+		double distanceStations= road.stationPositions.get(indNextStation+1) - position;
 		if(myPlatoon!=null) {
+			if(distance < 10) {
+				System.out.print("Event after cond: vehicle " + this.getId() + "is lower than 20 distance \n");
+				System.out.println("my pltoon "+ this.myPlatoon);
+			}
 			// distance < seuil --> quitte le peloton
 			if(distance < VLOW_DIST) {
 				Element elt = new Element(PolicyName.QUITDISTANCE, HIGHPRIO+road.k[0], this);
 				x = "Event : vehicle " + this.getId() + " is very close from destination [VLOW_DIST]"+"\n";
-				//System.out.print(x);
+				System.out.print(x);
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt,road.mutant);
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
@@ -309,7 +317,7 @@ public class Vehicle extends Entity implements Serializable {
 			if(distance < LOW_DIST) {
 				Element elt = new Element(PolicyName.QUITDISTANCE, LOWPRIO+road.k[1], this);
 				x = "Event : vehicle " + this.getId() + " is close from destination [LOW_DIST]"+"\n";
-				//System.out.print(x);
+				System.out.print(x);
 				road.addStringWriter(x);
 				myPlatoon.policies.addElement(elt,road.mutant);
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
@@ -317,11 +325,17 @@ public class Vehicle extends Entity implements Serializable {
 			if(autonomie< LOW_BATTERY) {
 				Element elt = new Element(PolicyName.QUITENERGY, HIGHPRIO+road.k[2], this);
 				road.addStringWriter(x);
+				System.out.println(" nb policies before :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
+				
 				myPlatoon.policies.addElement(elt,road.mutant);
 				//System.out.println("elt to be added " + elt);
-				x = "Event : vehicle " + this.getId() + " is low on energy [LOW]"+"\n" + "platoon reconfs "+ myPlatoon + " "+ this.myPlatoon.policies+ "\n";
+				x = "Event : vehicle " + this.getId() + " is low on energy [LOW]"+"\n" + "platoon reconfs "+ myPlatoon + " "+ this.myPlatoon.policies + "size " + "\n";
 				System.out.print(x);
-				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
+				System.out.println("my platoon list vl ");
+				for(Vehicle vl: myPlatoon.vehiclesList) {
+					if(this.id==vl.id) System.out.println("vehicle is inside pl " + this.id);
+				}
+				System.out.println(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+"\n");
 
 			}
@@ -381,7 +395,7 @@ public class Vehicle extends Entity implements Serializable {
 			}
 		}
 		else {
-			if ((getAutonomieDistance() -10.0)< (distance) && road.stationPositions.get(indNextStation)-position < 11) {
+			if ((getAutonomieDistance() -10.0)< (distanceStations) && road.stationPositions.get(indNextStation)-position < 11) {
 				x = "Event : vehicle " + this.getId() + " is refilling [REFILL] and getAutonomyvalue gives : " + getAutonomieDistance()+"\n";
 				road.addStringWriter(x);
 				refill();	
@@ -424,7 +438,9 @@ public class Vehicle extends Entity implements Serializable {
 	public boolean isTakingNextStation() {
 		int indNextStation = road.getNextStation(this.position);		
 		double distance=road.stationPositions.get(indNextStation) + road.stationPositions.get(indNextStation+1);
-		return ((this.position+ this.getMinValue() -10.0)< (distance)) ? true :false;
+		//if(this.position + this.getMinValue()-10 <road.stationPositions.get(indNextStation+1))
+		return this.position + this.getMinValue()-10 <road.stationPositions.get(indNextStation+1) ?true : false;
+		//return ((this.position+ this.getMinValue() -10.0)< (distance)) ? true :false;
 	}
 	public double getDistanceTick() {
 		return distance/DEC_DISTANCE;

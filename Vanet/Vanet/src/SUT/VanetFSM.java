@@ -182,15 +182,27 @@ public class VanetFSM implements FsmModel {
 		    		sut.tick=false;
 		        	return new Object[]{ sut};//, index, k };
 		        }
-		        sut.tick();
+		        try {
+		        	sut.tick();
+		        }catch (BehaviorException e) {
+		        	System.out.println("FAIL");
+				}
 		        return new Object[]{ sut };
         		
     		}
-    		sut.tick();
+    		try {
+	        	sut.tick();
+	        }catch (BehaviorException e) {
+	        	System.out.println("FAIL");
+			}
     		//requestJoin(paramList); //TODO maybe specify the two vehicles to join ie best bat of solo vl and a random pl
     	}
     	else {
-    		sut.tick();
+    		try {
+	        	sut.tick();
+	        }catch (BehaviorException e) {
+	        	System.out.println("FAIL");
+			}
     	}
     	//sut.tick();
         return new Object[]{ sut };
