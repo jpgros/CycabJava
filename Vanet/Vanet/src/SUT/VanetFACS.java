@@ -248,8 +248,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(5,100000,apm);
-			
+			testsList=st.generate(15,100000,apm);
 	        for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);
@@ -674,7 +673,7 @@ class r8p2 extends VanetProperty {
 	 @Override
 	    public double match(Road sut) throws PropertyFailedException {
 		 	int indNextStation = sut.getNextStation(currentVehicle.position);
-	        if ( currentVehicle.road.stationPositions.get(indNextStation) > 85) {
+	        if ( currentVehicle.road.stationPositions.get(indNextStation) - currentVehicle.position > 85) {
 	        	writer.println("TP KO for quitStas MEDIUM");
 	        	throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
 	        }
@@ -721,7 +720,7 @@ class r9p2 extends VanetProperty {
 	 @Override
     public double match(Road sut) throws PropertyFailedException {
 	 	int indNextStation = sut.getNextStation(currentVehicle.position);
-        if ( currentVehicle.road.stationPositions.get(indNextStation) > 100) { //>= to have mutant
+        if ( currentVehicle.road.stationPositions.get(indNextStation) -currentVehicle.position > 100) { //>= to have mutant
         	writer.println("TP KO for quitStas LOW"+ " " +currentVehicle.getAutonomieDistance() + " 2 next stations ticks: "+currentVehicle.getTwoNextStationsTicks());
             throw new PropertyFailedException(this, "Vehicle not ready to quit platoon");
         }

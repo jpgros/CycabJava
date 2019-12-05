@@ -122,9 +122,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 //	}
 	
 	public void tick(){
-		
-		System.out.println("pl ticking list policy size "+ policies.listPolicy.size() +" platoon id " + id);
-		System.out.println("leader's platoon " + this.leader.myPlatoon.id);
 		//vehiclesList.get(findLeader()).setAutonomie(vehiclesList.get(findLeader()).getAutonomie()-2); //reduces leader energy
 		//System.out.println("tick policy: " + tickCounter);
 		//writer.println("tick policy: " + tickCounter);
@@ -135,8 +132,6 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		}
 		policies.mergeLists(road.mutant);
 		if(policies.listPolicy.size()>0) {
-			System.out.println("pl cond ok");
-
 			switch(road.mutant) {
 			case M5: // does not do a reconf with 10%
 				if(new Random().nextDouble() <=0.) {
@@ -468,6 +463,9 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	}
 	
 	public void deleteVehicle(Vehicle v){
+		//System.out.println("vehicle " + v.id + " leaved his autonomie is "+ v.autonomie + " nextstation is " + 
+				//v.road.stationPositions.get(v.road.getNextStation(v.position)) + " position is " + v.position + " calculated autonomie distance " + 
+				//v.getAutonomieDistance() +" v speed " +v.speed +" v dec energy " + v.DEC_ENERGY);
 		if(this.vehiclesList!=null) {
 			road.numberQuitPlatoon++;
 			v.idPlatoon = null;

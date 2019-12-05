@@ -52,11 +52,11 @@ public class Vehicle extends Entity implements Serializable {
 		this.distance = distance;
 		this.id = id;
 		this.road=r;
-		this.DEC_ENERGY=decAuto/10.0; //no /10 normally
+		this.DEC_ENERGY=decAuto; //no /10 normally
 		this.position= position;
 		this.speed=10;
 		double dc = decAuto/10.0;
-		DEC_LEADER= decAuto;//DEC_ENERGY * 1.2; //1.2 normally
+		DEC_LEADER= DEC_ENERGY * 1.2; //1.2 normally
 		//System.out.println("is " + decAuto + " and " + DEC_LEADER+" would have " + dc + " and " + dc*10.0);
 //		this.reader= new BufferedReader(this.read);
 	}
@@ -292,18 +292,10 @@ public class Vehicle extends Entity implements Serializable {
 	}
 	public void tick() {
 		String x ="";
-		if(distance < 10) {
-			System.out.print("Event before cond: vehicle " + this.getId() + "is lower than 20 distance \n");
-			System.out.println("my pltoon "+ this.myPlatoon);
-		}
 		//Add each tick only new policies will be added
 		int indNextStation = road.getNextStation(this.position);		
 		double distanceStations= road.stationPositions.get(indNextStation+1) - position;
 		if(myPlatoon!=null) {
-			if(distance < 10) {
-				System.out.print("Event after cond: vehicle " + this.getId() + "is lower than 20 distance \n");
-				System.out.println("my pltoon "+ this.myPlatoon);
-			}
 			// distance < seuil --> quitte le peloton
 			if(distance < VLOW_DIST) {
 				Element elt = new Element(PolicyName.QUITDISTANCE, HIGHPRIO+road.k[0], this);
@@ -353,7 +345,7 @@ public class Vehicle extends Entity implements Serializable {
 				x = "Event : vehicle " + this.getId() + " is taking next station stop [NEXT_STATION]"+"\n";
 				//System.out.print(x);
 				road.addStringWriter(x);
-				if(road.stationPositions.get(indNextStation) < 70) { //verifying adding priority does nto causes bugs
+				if(road.stationPositions.get(indNextStation) -position < 70) { //verifying adding priority does not causes bugs
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [HIGH]";
 					//System.out.println(x);
 					road.addStringWriter(x);
@@ -362,7 +354,7 @@ public class Vehicle extends Entity implements Serializable {
 					road.addStringWriter(this.getAutonomieDistance() + " " + road.stationPositions.get(indNextStation)+ " "+ road.stationPositions.get(indNextStation+1)+"\n");
 					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
-				else if(road.stationPositions.get(indNextStation) <= 85) { //road.distanceStation[0] >= 8 && 
+				else if(road.stationPositions.get(indNextStation)-position <= 85) { //road.distanceStation[0] >= 8 && 
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [MEDIUM]"+"\n";
 					//System.out.print(x);
 					road.addStringWriter(x);
@@ -371,7 +363,7 @@ public class Vehicle extends Entity implements Serializable {
 					road.addStringWriter(this.getAutonomieDistance() + " " + road.stationPositions.get(indNextStation)+ " "+ road.stationPositions.get(indNextStation+1)+"\n");
 					road.addStringWriter(" nb policies :" + myPlatoon.policies.listPolicy.size()+ "pl id" + myPlatoon.id+ "\n");
 				}
-				else if(road.stationPositions.get(indNextStation) <= 100) {
+				else if(road.stationPositions.get(indNextStation)-position <= 100) {
 					x = "Event : vehicle " + this.getId() + " QUITFORSTATION [LOW]"+"\n";
 					//System.out.print(x);
 					road.addStringWriter(x);
@@ -395,7 +387,7 @@ public class Vehicle extends Entity implements Serializable {
 			}
 		}
 		else {
-			if ((getAutonomieDistance() -10.0)< (distanceStations) && road.stationPositions.get(indNextStation)-position < 11) {
+			if ((getAutonomieDistance() -3*speed)< (distanceStations) && road.stationPositions.get(indNextStation)-position < 11) {   //3*speed to keep a margin (gives [rarely] battery left negative either)
 				x = "Event : vehicle " + this.getId() + " is refilling [REFILL] and getAutonomyvalue gives : " + getAutonomieDistance()+"\n";
 				road.addStringWriter(x);
 				refill();	
@@ -437,13 +429,13 @@ public class Vehicle extends Entity implements Serializable {
 	 */
 	public boolean isTakingNextStation() {
 		int indNextStation = road.getNextStation(this.position);		
-		double distance=road.stationPositions.get(indNextStation) + road.stationPositions.get(indNextStation+1);
+		//double distance=road.stationPositions.get(indNextStation) + road.stationPositions.get(indNextStation+1);
 		//if(this.position + this.getMinValue()-10 <road.stationPositions.get(indNextStation+1))
 		return this.position + this.getMinValue()-10 <road.stationPositions.get(indNextStation+1) ?true : false;
 		//return ((this.position+ this.getMinValue() -10.0)< (distance)) ? true :false;
 	}
 	public double getDistanceTick() {
-		return distance/DEC_DISTANCE;
+		return distance/speed;
 	}
 	
 	public double getTwoNextStationsTicks() {
@@ -456,10 +448,10 @@ public class Vehicle extends Entity implements Serializable {
 	}
 	public double getAutonomieDistance() {
 		if(isLeader()|| this.myPlatoon==null) {
-			return autonomie*(DEC_DISTANCE/DEC_LEADER);
+			return autonomie*(speed/DEC_LEADER);
 		}
 		else {
-			return autonomie*(DEC_DISTANCE/DEC_ENERGY);
+			return autonomie*(speed/DEC_ENERGY);
 		}
 	}
 	public String getStatus() {

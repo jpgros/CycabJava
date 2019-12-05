@@ -229,7 +229,6 @@ public class Road implements Serializable, Iterable<Vehicle> {
     }
 
     public void tick() throws BehaviorException{
-    	System.out.println("TICK ");
     	stepNb++;
     	tick=true;
     	component="Components(";
@@ -275,7 +274,6 @@ public class Road implements Serializable, Iterable<Vehicle> {
         } 	
         for (Vehicle v : allVehicles) {
             if (v.getPlatoon() != null && v.getPlatoon().leader == v) {
-            	System.out.println("im leader with id " + v.id);
         		v.getPlatoon().tick();
         		if(v.myPlatoon.lastReconf!=null) action += v.myPlatoon.lastReconf;
             }
@@ -360,7 +358,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
     public int removeVehicle(Vehicle v, String x) {
         allVehicles.remove(allVehicles.indexOf(v));
         //System.out.println(x);
-        System.out.println("removing vl " + v.id + " " + x + "distance " + v.distance);
+        //System.out.println("removing vl " + v.id + " " + x + "distance " + v.distance);
 
 		writer+=x;
         return allVehicles.size() -1;
