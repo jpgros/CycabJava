@@ -194,7 +194,10 @@ public class Vehicle extends Entity implements Serializable {
 	}
 
 	public boolean join(Vehicle v) {
-		if (this.isTakingNextStation() || v.isTakingNextStation()) return false;
+		if (this.isTakingNextStation() || v.isTakingNextStation()) {
+			System.out.println("taking");
+			return false;
+		}
 		else if((this.myPlatoon != null && v.myPlatoon!=null)) { // if two vehicle are inside a platoon, we ask to merge platoons if possible
 			//TODO add condition to see which vehicle add
 			System.out.println("merging occuring");
@@ -434,6 +437,10 @@ public class Vehicle extends Entity implements Serializable {
 		return this.position + this.getMinValue()-10 <road.stationPositions.get(indNextStation+1) ?true : false;
 		//return ((this.position+ this.getMinValue() -10.0)< (distance)) ? true :false;
 	}
+	/**
+	 * gives the number of ticks associated to a distance
+	 * @return the number of ticks
+	 */
 	public double getDistanceTick() {
 		return distance/speed;
 	}

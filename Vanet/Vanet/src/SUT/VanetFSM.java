@@ -47,6 +47,10 @@ public class VanetFSM implements FsmModel {
     ArrayList<Double> distance = new ArrayList<Double>();
     ArrayList<Integer> indexjoined = new ArrayList<Integer>();
     ArrayList<Integer> indexKicked = new ArrayList<Integer>();
+    int nbVehicleOnRoad;
+    int nbPlatoonOnRoad;
+    ArrayList<Integer> nbVehiclesInPlatoonsList = new ArrayList<Integer>();
+    
     public VanetFSM(String w, String wl, String rc,String rcr ,Mutant m, LogLevel logL) {
         writer = w;
         writerLog=wl;
@@ -138,22 +142,35 @@ public class VanetFSM implements FsmModel {
 //    }
     
     public void initSystem(){
-    	int nbVehicleOnRoad=100; //1600 vl on a 50k step test
-    	int nbPlatoonOnRoad=8;
+    	//int =100; //1600 vl on a 50k step test
+    	//int =8;
     	int nbVehicleInPlatoon=4;
-    	
+    	//System.out.println("nbvl "+ nbVl + "nbpl  " + nbPl + " nbvlinpl " + nbVehiclesInPlatoonsList);
 		for(double posStas:roadStations) {
 			sut.stationPositions.add(posStas);
 		}
     	for(int i=0; i<nbVehicleOnRoad;i++) {
     		sut.addVehicle(iD.remove(0),this.battery.remove(0), this.distance.remove(0), this.decBattery.remove(0),this.position.remove(0),this.speed.remove(0));
     	}
-		for(int i=0;i<(nbPlatoonOnRoad*nbVehicleInPlatoon);i=i+nbVehicleInPlatoon) { //forming 3 plts
-    		for(int j=i+1; j<(i+nbVehicleInPlatoon); j++) {	//platoon of 3 vls
-    			if(i==j)j++;
-    	       	System.out.println("Join(" + sut.allVehicles.get(i).id + ", " + sut.allVehicles.get(j).id + ") -> " + sut.join(j, i));
+    	int cpt=0;
+    	int i=0;
+    	while(cpt<nbPlatoonOnRoad) {
+    		for(int j=i+1; j<(i+nbVehiclesInPlatoonsList.get(cpt)); j++) {	//platoon of 3 vls
+	    		if(i==j) {
+	    			j++;
+	    		}
+	    		System.out.println("Join(" + sut.allVehicles.get(i).id + ", " + sut.allVehicles.get(j).id + ") -> " + sut.join(j, i));
     		}
+    		i=i+nbVehiclesInPlatoonsList.get(cpt);
+    		cpt++;
+    		//if(cpt>=nbVehiclesInPlatoonsList.size()) break; //sale
     	}
+//		for(int i=0;i<(nbPlatoonOnRoad*nbVehicleInPlatoon);i=i+nbVehicleInPlatoon) { //forming 3 plts
+//    		for(int j=i+1; j<(i+nbVehicleInPlatoon); j++) {	//platoon of 3 vls
+//    			if(i==j)j++;
+//    	       	System.out.println("Join(" + sut.allVehicles.get(i).id + ", " + sut.allVehicles.get(j).id + ") -> " + sut.join(j, i));
+//    		}
+//    	}
     }
     
     public boolean tickGuard() {
@@ -271,6 +288,16 @@ public class VanetFSM implements FsmModel {
     	FileReader vehicleReader = new FileReader("./outputVals.txt");
         BufferedReader br = new BufferedReader(vehicleReader);
         String sCurrentLine;
+        
+        sCurrentLine = br.readLine();
+        nbVehicleOnRoad=Integer.parseInt(sCurrentLine);
+        sCurrentLine = br.readLine();
+        nbPlatoonOnRoad=Integer.parseInt(sCurrentLine);
+        sCurrentLine = br.readLine();
+        for(int i=0;i<nbPlatoonOnRoad;i++) {
+        	sCurrentLine = br.readLine();
+            nbVehiclesInPlatoonsList.add(Integer.parseInt(sCurrentLine));
+        }
         sCurrentLine = br.readLine();
         sCurrentLine = br.readLine();
         while(!sCurrentLine.contains("Battery")) {

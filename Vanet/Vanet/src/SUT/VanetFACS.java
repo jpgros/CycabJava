@@ -248,7 +248,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(15,100000,apm);
+			testsList=st.generate(3,100000,apm);
 	        for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);

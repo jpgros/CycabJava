@@ -199,7 +199,7 @@ public class Road implements Serializable, Iterable<Vehicle> {
 //    	System.out.println("i = "+ i + "j= " + j);
 //    	System.out.println(" vl i " + allVehicles.get(i).myPlatoon);
 //    	System.out.println(" vl i auto" + allVehicles.get(i).autonomie);
-        if (i != j && number >0.8) { // && allVehicles.get(i).getPlatoon() == null) {  removed condition to make possible platoon merging
+        if (i != j ) {//&& number >0.8) { // && allVehicles.get(i).getPlatoon() == null) {  removed condition to make possible platoon merging
             return allVehicles.get(i).join(allVehicles.get(j))&& allVehicles.get(i).getPlatoon() != null;
         }
         return false;
