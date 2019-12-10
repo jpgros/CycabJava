@@ -431,10 +431,14 @@ public class Vehicle extends Entity implements Serializable {
 	 * @return boolean true if quitting false if not
 	 */
 	public boolean isTakingNextStation() {
-		int indNextStation = road.getNextStation(this.position);		
+		int indNextStation = road.getNextStation(this.position);
+//		if(this.id.equals(UUID.fromString("05f5a6c3-4781-4ffd-b623-bb115e72f01d"))) {
+//			System.out.println("tick vl " + id + " energy " +autonomie);
+//			System.out.println("position " + position+ "nextStation "+ road.stationPositions.get(indNextStation) + " nextnext station " + road.stationPositions.get(indNextStation+1));
+//		}
 		//double distance=road.stationPositions.get(indNextStation) + road.stationPositions.get(indNextStation+1);
 		//if(this.position + this.getMinValue()-10 <road.stationPositions.get(indNextStation+1))
-		return this.position + this.getMinValue()-10 <road.stationPositions.get(indNextStation+1) ?true : false;
+		return this.position + this.getMinValue()-25 <road.stationPositions.get(indNextStation+1) ?true : false; //25 to keep a margin
 		//return ((this.position+ this.getMinValue() -10.0)< (distance)) ? true :false;
 	}
 	/**

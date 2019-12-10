@@ -162,7 +162,7 @@ public class VanetFSM implements FsmModel {
 	    		System.out.println("Join(" + sut.allVehicles.get(i).id + ", " + sut.allVehicles.get(j).id + ") -> " + sut.join(j, i));
     		}
     		i=i+nbVehiclesInPlatoonsList.get(cpt);
-    		cpt++;
+    		cpt++; 
     		//if(cpt>=nbVehiclesInPlatoonsList.size()) break; //sale
     	}
 //		for(int i=0;i<(nbPlatoonOnRoad*nbVehicleInPlatoon);i=i+nbVehicleInPlatoon) { //forming 3 plts
@@ -337,7 +337,7 @@ public class VanetFSM implements FsmModel {
         sCurrentLine = br.readLine();
         while((sCurrentLine = br.readLine()) != null){
         	roadStations.add(Double.parseDouble(sCurrentLine));
-        	sCurrentLine = br.readLine();
+        	//sCurrentLine = br.readLine();
         }
         System.out.println("sizes "+ iD.size() + " "+ battery.size()+" "+ decBattery.size()+ " " + distance.size());
         br.close();
