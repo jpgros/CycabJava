@@ -240,18 +240,29 @@ public class StochasticTester implements Serializable{
         long startTime=System.currentTimeMillis();
         long estimTime=0;
         long estimTimeOld=0;
-        for(int cptwriter=0 ; cptwriter<1; cptwriter++) {
+        //QUITDISTANCE, HIGHPRIO 0; QUITDISTANCE, LOWPRIO 1; QUITENERGY, HIGHPRIO 2; RELAY, HIGHPRIO 3; 
+        //QUITFORSTATION, HIGHPRIO 4; QUITFORSTATION, MEDIUMPRIO 5; QUITFORSTATION, LOWPRIO 6; UPGRADERELAY, MEDIUMPRIO 7
+        
+        double[][] rulesPrioArray =
+        	{
+        			{7, 3, 7, 7, 7, 5, 3, 5},
+        			{7, 3, 7, 7, 7, 6, 3, 5.4},
+        			{7, 3, 7, 5, 7, 6, 3, 5.4},
+        	};
+        for(int cptwriter=0 ; cptwriter<2; cptwriter++) {
+        	System.out.println("set of prio number "+ cptwriter + rulesPrioArray[cptwriter]);
+        	writerConso.println("set of prio number "+ cptwriter);
 	        //for(int iii=0; iii<10; iii++) {
 				ArrayList<Double> coeffList = new ArrayList<Double>();
-				ArrayList<Integer> indList = new ArrayList<Integer>();
-				for(int iCoeff=1; iCoeff<5; iCoeff++){
-					int ind = (nb/iCoeff)%3;
+				//ArrayList<Integer> indList = new ArrayList<Integer>();
+				//for(int iCoeff=1; iCoeff<5; iCoeff++){
+					//int ind = (nb/iCoeff)%3;
 					/*Random rand = new Random();
 					double val =rand.nextDouble();
 					val=0;// val*6.0 -3.0;*/
-					indList.add(ind);
-				}
-				((VanetFSM) fsm).getSUT().setCoeffRules(indList);
+					//indList.add(ind);
+				//}
+				((VanetFSM) fsm).getSUT().setCoeffRules(cptwriter,rulesPrioArray);
         	//for(Double coeff : coeffList) {
 	        	//conso+= "k="+coeff+";";
 	        	//time+= "k="+coeff+";";
@@ -261,8 +272,8 @@ public class StochasticTester implements Serializable{
 		        	propCov=false;
 		            // reset FSM exploration
 		            fsm.reset(true);
-		            ((VanetFSM) fsm).getSUT().cleanRoad();
-		            ((VanetFSM) fsm).initSystem();
+		            ((VanetFSM) fsm).cleanFSM();
+		            ((VanetFSM) fsm).initSystem(i);
 		        	x="== Generating test #" + i + " == rule cov ";
 		        	String x2="";
 		        	for(Vehicle vl : ((VanetFSM) fsm).getSUT().allVehicles) {
@@ -359,7 +370,7 @@ public class StochasticTester implements Serializable{
 		                	System.exit(1);
 							// TODO: handle exception
 						}*/
-		            	vcm.populateGraph(j);
+		            	//vcm.populateGraph(j);
 		                //checkRules(propertiesWriter,((VanetFSM) fsm).addedVehicles, j,apm);
 		            }while(((VanetFSM) fsm).getSUT().allVehicles.size()>10); //(j < length && b);
 		        	System.out.println("size of test " + j);
@@ -394,34 +405,37 @@ public class StochasticTester implements Serializable{
 		            currentTest.steps.clear();
 		            currentTest.score=0;
 		            System.out.println("added vehicles " + ((VanetFSM) fsm).addedVehicles);
+		            //conso and quit begin
+			        conso += "\n";
+			        time =time.substring(0,time.length()-1);
+					String[] splits = time.split(";");
+			        Double averageTime=0.0;
+					for(String valTime : splits) {
+						System.out.println("valtime "+ valTime);
+						averageTime+= Double.parseDouble(valTime);
+					}
+					averageTime/=splits.length;
+			        writerConso.print("time platooned" +time + " ; average " + averageTime + "conso " + conso +"\n");
+			        time="";
+			        
+			        occQuitted =occQuitted.substring(0,occQuitted.length()-1);
+					String[] splits2 = occQuitted.split(";");
+			        Double averageNb=0.0;
+					for(String valNb : splits2) {
+						System.out.println("number occurences "+ valNb);
+						averageNb+= Double.parseDouble(valNb);
+					}
+					averageNb/=splits2.length;
+			        writerConso.print("number occurences quitted" + occQuitted+ " ; average " + averageNb +"\n");
+			        occQuitted="";
+			        
+					writerConso.print("coeffs: ");
+					for(Double coeff : coeffList) {
+						writerConso.print(coeff + " ");
+					}
+		            //end
 		        }
-		        conso += "\n";
-		        time =time.substring(0,time.length()-1);
-				String[] splits = time.split(";");
-		        Double averageTime=0.0;
-				for(String valTime : splits) {
-					System.out.println("valtime "+ valTime);
-					averageTime+= Double.parseDouble(valTime);
-				}
-				averageTime/=splits.length;
-		        writerConso.print("time platooned" +time + " ; average " + averageTime + "conso " + conso +"\n");
-		        time="";
-		        
-		        occQuitted =occQuitted.substring(0,occQuitted.length()-1);
-				String[] splits2 = occQuitted.split(";");
-		        Double averageNb=0.0;
-				for(String valNb : splits2) {
-					System.out.println("number occurences "+ valNb);
-					averageNb+= Double.parseDouble(valNb);
-				}
-				averageNb/=splits2.length;
-		        writerConso.print("number occurences quitted" + occQuitted+ " ; average " + averageNb +"\n");
-		        occQuitted="";
-		        
-				writerConso.print("coeffs: ");
-				for(Double coeff : coeffList) {
-					writerConso.print(coeff + " ");
-				}
+		        //here before
 				coeffList.clear();
 	        //}
 	       

@@ -129,7 +129,7 @@ public class VanetFACS implements Serializable{
 			Random rand = new Random();
     		double val =rand.nextDouble();
 			val= val*6.0 -3.0;
-			testsList=st.generate(10,50000,apm);
+			testsList=st.generate(4,50000,apm);
 			((VanetFSM) fsm).afficheTestValues();
 			for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
@@ -248,7 +248,7 @@ public class VanetFACS implements Serializable{
 			ObjectOutputStream objectOutputStream = new ObjectOutputStream(outser);
 			ArrayList<MyTest> testsList=null;
 			st.setMonitor(vcm);
-			testsList=st.generate(3,100000,apm);
+			testsList=st.generate(2,100000,apm);
 	        for(MyTest curTest : testsList) {
 	        	for(MyStep curStep : curTest ) {
 	        		SerializableStep step = new SerializableStep(curStep.toString(), curStep.instance, curStep.params);

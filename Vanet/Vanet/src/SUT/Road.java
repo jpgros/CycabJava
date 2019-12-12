@@ -98,9 +98,26 @@ public class Road implements Serializable, Iterable<Vehicle> {
         reconfChoosenWrite="";
     	
     }/** Say if a vehicle on road answers the requirement to merge
+    * requirements : needs to have sufficient amount of energy distance and to be at similar positions
     @return index of vehicle adequate for merging
     */
-    public int containsVehicleToJoin() {
+    public ArrayList<Integer> containsVehicleToJoin() {
+    	ArrayList<Integer> indexes= new ArrayList<Integer>();
+    	double maxBat=0;
+    	for(int i=0; i<allVehicles.size();i++) {
+    		if(allVehicles.get(i).autonomie>80&& allVehicles.get(i).autonomie>maxBat && allVehicles.get(i).autonomie<99) { // if autonomy is 100 means that vl is inside station
+    			indexes.add(i);
+    			maxBat= allVehicles.get(i).autonomie;
+    		}
+    	}
+    	return indexes;
+    }
+    /**
+     * to suppress when position and join is finalised
+     * @return
+     */
+    
+    public int containsVehicleToJoinOld() {
     	int index =-1;
     	double maxBat=0;
     	for(int i=0; i<allVehicles.size();i++) {
@@ -111,13 +128,18 @@ public class Road implements Serializable, Iterable<Vehicle> {
     	}
     	return index;
     }
+    
     public void initCoeffRules(int nbRules) {
     	k= new double [nbRules];
     }
-    public void setCoeffRules(ArrayList<Integer> list) {
-    	double[] tab= {3,5,7};
-    	for(int i =0; i<list.size(); i++) {
-    		k[i]= 0;//list.get(i);
+    /**
+     * Set priority level for each (reconfiguration) rule
+     * @param indSetCoeff indicates in which set of priorities we want to initialise our values
+     * @param arrayCoeffs the array containing all the priorities levels
+     */
+    public void setCoeffRules(int indSetCoeff, double [][] arrayCoeffs) {
+    	for(int i =0; i<arrayCoeffs[0].length; i++) {
+    		k[i]= arrayCoeffs[indSetCoeff][i];//list.get(i);
     	}
     }
     public String getLineReconfChoosenRead() throws IOException {

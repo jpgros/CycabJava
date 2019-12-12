@@ -47,9 +47,9 @@ public class VanetFSM implements FsmModel {
     ArrayList<Double> distance = new ArrayList<Double>();
     ArrayList<Integer> indexjoined = new ArrayList<Integer>();
     ArrayList<Integer> indexKicked = new ArrayList<Integer>();
+    ArrayList<Integer> nbVehiclesInPlatoonsList = new ArrayList<Integer>();
     int nbVehicleOnRoad;
     int nbPlatoonOnRoad;
-    ArrayList<Integer> nbVehiclesInPlatoonsList = new ArrayList<Integer>();
     
     public VanetFSM(String w, String wl, String rc,String rcr ,Mutant m, LogLevel logL) {
         writer = w;
@@ -58,12 +58,6 @@ public class VanetFSM implements FsmModel {
         mutant=m;
         reconfChoosenReader=rcr;
         sut = new Road(w,wl,rc,rcr,m,logL);
-        try {
-			getTestValues();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
     }
     public String getStringWriter() {
     	return sut.getStringWriter();
@@ -141,10 +135,17 @@ public class VanetFSM implements FsmModel {
 //    	writer.close();
 //    }
     
-    public void initSystem(){
-    	//int =100; //1600 vl on a 50k step test
-    	//int =8;
-    	int nbVehicleInPlatoon=4;
+    /**
+     * Init the system configuration with vehicles, platoon and all assossiated parameters found in the configuration file
+     * @param testNb indicates the i-th test number
+     */
+    public void initSystem(int testNb){
+    	try {
+			getTestValues(testNb);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     	//System.out.println("nbvl "+ nbVl + "nbpl  " + nbPl + " nbvlinpl " + nbVehiclesInPlatoonsList);
 		for(double posStas:roadStations) {
 			sut.stationPositions.add(posStas);
@@ -172,33 +173,74 @@ public class VanetFSM implements FsmModel {
 //    		}
 //    	}
     }
+    /**
+     * Clear the parameter list of initial configuration and call cleanRoad method
+     */
+    public void cleanFSM() {
+    	iD.clear();
+        iDPl.clear();
+        roadStations.clear();
+        speed.clear();
+        position.clear();
+        battery.clear();
+        decBattery.clear();
+        distance.clear();
+        indexjoined.clear();
+        indexKicked.clear();
+        nbVehiclesInPlatoonsList.clear();
+        getSUT().cleanRoad();
+    }
     
     public boolean tickGuard() {
         return true;
     }
-    public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 0.995; } //0.87
+    public double tickProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 : 1.0; } //0.87
+
     @Action
     public Object[] tick(ArrayList<Object> empty) {
     	//replace tick by request join if a vehicule is available to join
-    	int index = sut.containsVehicleToJoin();
-    	if(index!=-1 && sut.stepNb%20==0) {
-
-    		ArrayList<Object> paramList = new ArrayList<Object>();
-    		paramList.add(sut.allVehicles.get(index));
-    		if ((sut.getVehicle(index).getPlatoon() == null) && !(sut.getVehicle(index).isTakingNextStation())) { //
-    			int k;
-    			do {
-		            k = (int) (Math.random() * sut.nbVehiclesOnRoad());
-		        }while (k == index);
-		        
-		    	//k= indexjoined.remove(0);
-		        if(!sut.getVehicle(k).isTakingNextStation() && sut.getVehicle(k).autonomie<99 && sut.getVehicle(index).autonomie<99){
-		        	//if autonomie equals 100 its means vl is inside pl
-		        	System.out.println("Join(" + sut.getVehicle(index).id + ", " + sut.getVehicle(k).id + ") -> " + sut.join(index, k) +" -> true");
-		        	//indexjoined.add(k);
-		    		sut.tick=false;
-		        	return new Object[]{ sut};//, index, k };
-		        }
+    	ArrayList<Integer> indexes = sut.containsVehicleToJoin();
+    	if(indexes.size()>0) {// && sut.stepNb%20==0) {
+    		//ArrayList<Object> paramList = new ArrayList<Object>();
+    		//paramList.add(sut.allVehicles.get(index));
+    		double distanceVlPosition;
+    		for(int indexVl : indexes) {
+    			for(int k=0;k<sut.allVehicles.size();k++) {
+    				if (((sut.getVehicle(indexVl)).getPlatoon() == null) && !(sut.getVehicle(indexVl).isTakingNextStation())) { // if selected vehicle has enough autonomy 
+    					distanceVlPosition = Math.abs(sut.getVehicle(indexVl).position - sut.getVehicle(k).position); //get the distance between the two vehicles
+    					if((k != indexVl && distanceVlPosition >30.0)) { // if vehicle are different and in same range
+    						if(!sut.getVehicle(k).isTakingNextStation() && sut.getVehicle(k).autonomie<99 && sut.getVehicle(indexVl).autonomie<99){ //if choosing vehicle has enough autonomy
+    				        	//if autonomie equals 100 its means vl is inside pl
+    							boolean bool= sut.join(indexVl, k);
+    				        	System.out.println("Join(" + sut.getVehicle(indexVl).id + ", " + sut.getVehicle(k).id + ") -> " + bool );
+    				        	//indexjoined.add(k);
+    				        	if(bool) {
+    				        		sut.tick=false;
+    				        		return new Object[]{ sut};//, index, k };
+    				        	}
+    				        	else {
+    						        try {
+    						        	sut.tick();
+    						        }catch (BehaviorException e) {
+    						        	System.out.println("FAIL");
+    								}
+    						        return new Object[]{ sut };
+    				        	}
+    				        }
+    					}
+    				}
+    			}
+    		}
+//	    		if (((sut.getVehicle(indexVl)).getPlatoon() == null) && !(sut.getVehicle(indexVl).isTakingNextStation())) { //
+//	    			int k;
+//	    			do {
+//			            k = (int) (Math.random() * sut.nbVehiclesOnRoad());
+//			            
+//			        }while (
+//			        
+			    	//k= indexjoined.remove(0);
+			        
+    		
 		        try {
 		        	sut.tick();
 		        }catch (BehaviorException e) {
@@ -207,13 +249,12 @@ public class VanetFSM implements FsmModel {
 		        return new Object[]{ sut };
         		
     		}
-    		try {
-	        	sut.tick();
-	        }catch (BehaviorException e) {
-	        	System.out.println("FAIL");
-			}
+//    		try {
+//	        	sut.tick();
+//	        }catch (BehaviorException e) {
+//	        	System.out.println("FAIL");
+//			}
     		//requestJoin(paramList); //TODO maybe specify the two vehicles to join ie best bat of solo vl and a random pl
-    	}
     	else {
     		try {
 	        	sut.tick();
@@ -224,7 +265,7 @@ public class VanetFSM implements FsmModel {
     	//sut.tick();
         return new Object[]{ sut };
     }
-
+    
     public boolean addVehicleGuard() { return ! sut.isFull(); }
    // public double addVehicleProba() { return sut.nbVehiclesOnRoad() == 0 ? 1 : 0.05; } //0.05
     public double addVehicleProba() { return 0;}
@@ -284,8 +325,13 @@ public class VanetFSM implements FsmModel {
         }
         return false;*/
     }
-    public void getTestValues() throws IOException {
-    	FileReader vehicleReader = new FileReader("./outputVals.txt");
+    /**
+     * Get values for initial system configuration
+     * @param testNb indicates the i-th test number
+     * @throws IOException if file problem
+     */
+    public void getTestValues(int testNb) throws IOException {
+    	FileReader vehicleReader = new FileReader("./outputVals"+testNb+".txt");
         BufferedReader br = new BufferedReader(vehicleReader);
         String sCurrentLine;
         
@@ -404,7 +450,7 @@ public class VanetFSM implements FsmModel {
         }
         return false;
     }
-    public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 :0.005;} //0.05; }
+    public double forceQuitPlatoonProba() { return sut.nbVehiclesOnRoad() == 0 ? 0 :0;} //0.05; }
     @Action
     public Object[] forceQuitPlatoon(ArrayList<Object> vl) {
     	if(vl.size()<=0) {

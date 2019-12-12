@@ -574,7 +574,6 @@ class ExecutionReport {
         	    }        
         	}
         	i++;
-        	System.out.println("elt in file "+elt.NamePrio);
         	PrintWriter writerGraphFile = new PrintWriter("./test" +ind+"/statsGraph"+i+".tex", "UTF-8");
             LogPrinter writeGraph = new LogPrinter(writerGraphFile, LogLevel.ERROR, LogLevel.ERROR);
             freqSteps.printConcernedRules();
@@ -587,9 +586,7 @@ class ExecutionReport {
             writerGraphFile.close();
             writeGraph.close();
         }
-        freqSteps.freqSet.clear();
-        
-        
+        freqSteps.freqSet.clear();  
     }
     	
     public void statsFreq() throws FileNotFoundException, UnsupportedEncodingException {

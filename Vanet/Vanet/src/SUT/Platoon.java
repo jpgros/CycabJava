@@ -444,6 +444,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 		if(!nextLeaderList.isEmpty()) {
 			//System.out.print("Leader vehicle "+ leader.getId());
 			if(nextLeaderList.get(0).autonomie >= leader.LOW_LEADER_BATTERY) {
+				road.numberQuitPlatoon++;
 				road.addStringWriter("actual leader id " +leader.getId() + "next leader " + nextLeaderList.get(0).getId());
 				this.leader = nextLeaderList.remove(0);
 			}
@@ -459,6 +460,7 @@ public class Platoon extends Entity implements Serializable{ //implements Runnab
 	}
 	
 	public void upgradeRelay(Vehicle v) {
+		road.numberQuitPlatoon++;
 		this.leader=v;
 	}
 	
