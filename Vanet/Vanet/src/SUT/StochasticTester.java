@@ -242,14 +242,21 @@ public class StochasticTester implements Serializable{
         long estimTimeOld=0;
         //QUITDISTANCE, HIGHPRIO 0; QUITDISTANCE, LOWPRIO 1; QUITENERGY, HIGHPRIO 2; RELAY, HIGHPRIO 3; 
         //QUITFORSTATION, HIGHPRIO 4; QUITFORSTATION, MEDIUMPRIO 5; QUITFORSTATION, LOWPRIO 6; UPGRADERELAY, MEDIUMPRIO 7
-        
-        double[][] rulesPrioArray =
-        	{
-        			{7, 3, 7, 7, 7, 5, 3, 5},
-        			{7, 3, 7, 7, 7, 6, 3, 5.4},
-        			{7, 3, 7, 5, 7, 6, 3, 5.4},
-        	};
-        for(int cptwriter=0 ; cptwriter<2; cptwriter++) {
+        PriorityMaking prioM= new PriorityMaking();
+        prioM.arrayFilling();
+        for(int pi=0;pi<prioM.tabPrio.length;pi++) {
+			for(int pj=0;pj<prioM.tabPrio[pi].length;pj++) {
+				System.out.print(prioM.tabPrio[pi][pj]+ ",");
+			}
+			System.out.println("");
+		}
+        double[][] rulesPrioArray = prioM.tabPrio;
+//        	{
+//        			{7, 3, 7, 7, 7, 5, 3, 5},
+//        			{7, 3, 7, 7, 7, 6, 3, 5.4},
+//        			{7, 3, 7, 5, 7, 6, 3, 5.4},
+//        	};
+        for(int cptwriter=0 ; cptwriter<rulesPrioArray.length; cptwriter++) {
         	System.out.println("set of prio number "+ cptwriter + rulesPrioArray[cptwriter]);
         	writerConso.println("set of prio number "+ cptwriter);
 	        //for(int iii=0; iii<10; iii++) {
